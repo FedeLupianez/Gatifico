@@ -13,7 +13,7 @@ Ejecutar los siguientes comandos en la terminal de vscode :
    - Tocás `ctrl + shift + p` y buscas `Python: Select interpreter` y seleccionar la opción `Python 3.11.0 (venv)`
  - Después de tener el entorno listo, debemos instalar Arcade, la librería de python en la que desarrollamos el juego, se puede hacer con `pip install -r requirements.txt`
 
-## Trama : Plataformas
+## Tipo : Aventura 2D
 
 ## Personajes :
 - **Protagonista**
