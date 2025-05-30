@@ -1,35 +1,24 @@
 import arcade
-import Constants
-import scenes.SpriteNames as SpriteNames
+import Constants.Game
+import Constants.SpriteNames
 
 
 class View(arcade.View):
-    Window = arcade.Window(
-        Constants.SCREEN_WIDTH,
-        Constants.SCREEN_HEIGHT,
-        title="Prueba",
-        update_rate=Constants.FPS,
-        center_window=True,
-    )
-
-    def __init__(self, backgroundUrl: str, tileMapUrl: str | None) -> None:
-        super().__init__(window=self.Window)
-        # Camara para dibujar los elementos
-        self.cameraGui = arcade.Camera2D(window=self.Window)
+    def __init__(self, backgroundUrl: str | None, tileMapUrl: str | None) -> None:
+        super().__init__()
 
         self.scene = self.CreateScene(
             backgroundUrl=backgroundUrl, tileMapUrl=tileMapUrl
         )
 
     def CreateScene(
-        self, backgroundUrl: str, tileMapUrl: str | None = None
+        self, backgroundUrl: str | None, tileMapUrl: str | None = None
     ) -> arcade.Scene:
         """Función para crear una nueva escena
         Args :
             tile_map_url (string) : Url del tile map de la escena, este mapa sirve para las colisiones
             background_url (string) : Url del fondo para cargar la imagen
         """
-
         scene = arcade.Scene()
         # Si se le pasa un tilemap
         if tileMapUrl:
@@ -37,8 +26,16 @@ class View(arcade.View):
             scene.from_tilemap(tempTileMap)
             del tileMapUrl
             return scene
-        # En cambio sino solo se pone el fondo:
-        backgroundImage = arcade.Sprite(backgroundUrl, scale=1)
-        scene.add_sprite_list(SpriteNames.BACKGROUND)
-        scene[SpriteNames.BACKGROUND].append(backgroundImage)
-        return scene
+
+        if backgroundUrl:
+            # En cambio sino solo se pone el fondo:
+            backgroundImage = arcade.Sprite(backgroundUrl, scale=1)
+            # Centro la imagen
+            backgroundImage.center_x = Constants.Game.SCREEN_WIDTH / 2
+            backgroundImage.center_y = Constants.Game.SCREEN_HEIGHT / 2
+            # Creo una lista de sprites dentro de la scene donde se van
+            # a almacenar todos los sprites que vayan en el fondo
+            scene.add_sprite_list(Constants.SpriteNames.BACKGROUND)
+            scene[Constants.SpriteNames.BACKGROUND].append(backgroundImage)
+            return scene
+        raise FileNotFoundError("Faltan argumentos")
