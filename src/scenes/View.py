@@ -1,6 +1,5 @@
 import arcade
-import Constants.Game
-import Constants.SpriteNames
+import Constants
 
 
 class View(arcade.View):

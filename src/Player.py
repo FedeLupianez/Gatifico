@@ -1,5 +1,5 @@
 import arcade
-import Constants.Game
+import Constants
 
 
 class Player:

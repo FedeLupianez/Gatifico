@@ -1,6 +1,5 @@
 import arcade
-import Constants.Game
-import Constants.SignalCodes
+import Constants
 import scenes.Menu as MenuScene
 import scenes.School as SchoolScene
 

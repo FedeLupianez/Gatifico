@@ -1,7 +1,6 @@
 import arcade
 import scenes.View as ViewScene
-import Constants.SignalCodes
-import Constants.Game
+import Constants
 
 
 class School(ViewScene.View):

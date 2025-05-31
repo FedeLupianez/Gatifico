@@ -1,6 +1,5 @@
 import arcade
-import Constants.SignalCodes
-import Constants.Game
+import Constants
 import scenes.View
 
 

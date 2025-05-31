@@ -1,1 +1,0 @@
-CHANGE_VIEW = 0
