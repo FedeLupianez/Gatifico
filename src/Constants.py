@@ -11,6 +11,9 @@ class Game:
     # Personajes :
     CHARACTER_SCALE = 1
 
+    PLAYER_WIDTH = 10
+    PLAYER_HEIGHT = 10
+
     # Valores del personaje principal :
     PLAYER_SPEED = 10
 
@@ -22,3 +25,7 @@ class SignalCodes:
 class SpriteNames:
     BACKGROUND = "Background"
     PLAYER = "Player"
+
+class AssetsUrls:
+    MENU_BACKGROUND = 'src/assets/2D Pixel Dungeon Asset Pack/interface/arrow_1.png'
+    SCHOOL_BACKGROUND = 'src/assets/2D Pixel Dungeon Asset Pack/Dungeon_Tileset_at.png'

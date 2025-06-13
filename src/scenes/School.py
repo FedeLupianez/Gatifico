@@ -5,7 +5,7 @@ import Constants
 
 class School(ViewScene.View):
     def __init__(self, callback) -> None:
-        backgroundUrl = "C:/Users/MAIN/Pictures/FotosViejas/f14548008.jpg"
+        backgroundUrl = Constants.AssetsUrls.SCHOOL_BACKGROUND
         tileMapUrl = None
         super().__init__(backgroundUrl=backgroundUrl, tileMapUrl=tileMapUrl)
         self.window.set_mouse_visible(False)

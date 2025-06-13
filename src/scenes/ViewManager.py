@@ -2,7 +2,7 @@ import arcade
 import Constants
 import scenes.Menu as MenuScene
 import scenes.School as SchoolScene
-
+from characters.Player import Player
 
 # Esta clase va a manejar la vista que se muestra en la pantalla
 class ViewManager:
