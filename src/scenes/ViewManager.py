@@ -1,8 +1,8 @@
 import arcade
 import Constants
 import scenes.Menu as MenuScene
-import scenes.School as SchoolScene
-from characters.Player import Player
+import scenes.House as HouseScene
+
 
 # Esta clase va a manejar la vista que se muestra en la pantalla
 class ViewManager:
@@ -20,7 +20,7 @@ class ViewManager:
         self.current_scene = MenuScene.Menu(self.callback)
 
         # Diccionario con los objetos de las escenas pero sin instanciar para ahorrar recursos
-        self.scenes = {"MENU": MenuScene.Menu, "SCHOOL": SchoolScene.School}
+        self.scenes = {"MENU": MenuScene.Menu, "HOUSE": HouseScene.House}
         self.window.show_view(
             self.current_scene
         )  # Pongo que se vea la view por default apenas se crea el manager, o sea el menu
@@ -33,8 +33,8 @@ class ViewManager:
         """
         print("Mensaje recibido : ", data)
         if signal == Constants.SignalCodes.CHANGE_VIEW:
-            del self.current_scene  # Libero el espacio de la escena anterior
             self.current_scene_id = data
+            del self.current_scene  # Libero los recursos ocupados anteriormente
             self.current_scene = self.scenes[data](
                 self.callback
             )  # Cambio la variable anterior por la nueva escena
