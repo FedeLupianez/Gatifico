@@ -3,6 +3,7 @@ import Constants
 import scenes.View
 from characters.Player import Player
 
+
 class Menu(scenes.View.View):
     def __init__(self, callback):
         backgroundUrl = Constants.AssetsUrls.MENU_BACKGROUND
@@ -11,7 +12,11 @@ class Menu(scenes.View.View):
 
         self.window.set_mouse_visible(False)
         self.callback = callback
+        self.playerList = arcade.SpriteList()
         self.player = Player()
+        self.player.center_x = Constants.Game.SCREEN_WIDTH // 2
+        self.player.center_y = Constants.Game.SCREEN_HEIGHT // 2
+        self.playerList.append(self.player)
 
     def on_show_view(self) -> None:
         return super().on_show_view()
@@ -20,17 +25,16 @@ class Menu(scenes.View.View):
         self.clear()
         self.scene.draw()
         text = arcade.Text(
-            "A coloquio",
+            "Alquimica",
             Constants.Game.SCREEN_WIDTH / 2,
             Constants.Game.SCREEN_HEIGHT / 2,
         )
         text.draw()
-        self.player.draw()
+        self.playerList.draw(pixelated=True)
 
     def on_key_press(self, symbol: int, modifiers: int) -> bool | None:
         if symbol == arcade.key.SPACE:
-            print("Espacio detectado")
-            self.callback(Constants.SignalCodes.CHANGE_VIEW, "SCHOOL")
+            self.callback(Constants.SignalCodes.CHANGE_VIEW, "HOUSE")
 
-    def on_update(self):
-        self.player.update_animation()
+    def on_update(self, delta_time: float) -> bool | None:
+        self.player.update_animation(delta_time)

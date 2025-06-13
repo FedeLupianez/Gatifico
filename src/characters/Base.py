@@ -1,61 +1,57 @@
 import arcade
-from enum import Enum
+
 
 # Clase base para los estados
-class State():
-    # Va a tener un campo para el path de la sheet y otro para 
+class State:
+    # Va a tener un campo para el path de la sheet y otro para
     # la cantidad de frames que tiene esta
-    def __init__(self, sheetUrl: str, frameCount: int):
-        self.sheetUrl = sheetUrl
-        self.frameCount = frameCount
-        
-     
+    def __init__(self, sheetUrl: str, frameCount: int, scale: int):
+        self.texturePath: str = sheetUrl
+        self.frameCount: int = frameCount
+        self.scale = scale
+
+
 class Character(arcade.Sprite):
-    def __init__(self, validStates, textureDict: dict[int, State]):
-        self.textureDict = textureDict
-        self.frames = None
-        self.textureIndex = 0
+    def __init__(self, validStates, initialState, statesDict: dict):
+        super().__init__()
         self.validStates = validStates
         self.actualState = None
-        self.speed = 0
+        self.statesInfo = statesDict
+        self.frames = []
+        self.textureIndex = 1
         self.animationTimer = 0
-        
-        if ('IDLE' in self.validStates.__members__):
-            self.changeState(validStates.IDLE)
+        self.changeState(initialState)
 
-    def updateSprites(self):
-        self.frames = arcade.load_spritesheet(
-            file_name=self.textureDict[self.actualState].sheetUrl,
-            count=self.textureDict[self.actualState].frameCount
-        )
-        
-    
-    def setup(self, width: int, height: int, speed: float):
-        if (self.actualState not in self.textureDict):
-            raise ValueError("estado no encontrado en el diccionario")
+    def updateSpriteList(self):
+        for i in range(1, self.statesInfo[self.actualState].frameCount + 1):
+            route = self.statesInfo[self.actualState].texturePath.replace("{}", str(i))
+            self.frames.append(arcade.load_texture(route))
+        self.textureIndex = 1
 
-        self.speed = speed
+    def updateFrame(self):
+        self.texture = self.frames[self.textureIndex]
 
-
-    def changeState(self, newState: str):
-        if (newState not in self.validStates):
+    def changeState(self, newState):
+        print(f"cambiando a {newState}...")
+        if newState not in self.validStates:
             raise ValueError(f"El estado {newState} no existe en el personaje")
+
         # Veo si el estado actual es diferente al nuevo
-        if (self.actualState != newState):
-            self.actualState = newState
-            if (newState in self.textureDict):
-                # Cambio el sprite actual al primero del nuevo estado
-                self.updateSprites()
-        
+        if self.actualState == newState:
+            return
+
+        self.actualState = newState
+        self.scale = self.statesInfo[newState].scale
+
+        self.updateSpriteList()
+        self.updateFrame()
+        # Cambio el sprite actual al primero del nuevo estado
+
     def update_animation(self, deltaTime: float):
-        if not(self.state in self.textureDict):
-            return (False)
-        self.animationTimer += deltaTime 
-        if (self.animationTimer > 0.1):
+        if not self.frames:
+            return
+        self.animationTimer += deltaTime
+        if self.animationTimer > 0.1:
             self.animationTimer = 0
-            # Obtengo el listado de sprites del estado actual
-            frames = self.textureDict[self.actualState]
-            self.textureIndex = (self.textureIndex + 1) % len(frames)
-            self.set_texture(frames[self.textureIndex])
-            self.draw()
-            
+            self.textureIndex = (self.textureIndex + 1) % len(self.frames)
+            self.texture = self.frames[self.textureIndex]
