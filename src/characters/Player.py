@@ -18,6 +18,8 @@ class Player(StateMachine):
         self.frames: list[arcade.Texture] = []
         self.textureIndex = 0
         self.animationTimer: float = 0.0
+        self.sprite.scale = 5
+        self.spriteCache: dict[str, arcade.Texture] = {}
 
     def handleEvent(self, event: int):
         if event < 0:
@@ -92,7 +94,12 @@ class Player(StateMachine):
     def updateSpriteList(self):
         for i in range(1, self.actualAnimationFrames + 1):
             route = self.actualAnimationPath.replace("{}", str(i))
-            self.frames.append(arcade.load_texture(route))
+            if route in self.spriteCache.keys():
+                print("esta textura ya esta cargada")
+                self.frames.append(self.spriteCache[route])
+                pass
+            else:
+                self.spriteCache[route] = arcade.load_texture(route)
         self.textureIndex = 1
 
     def updateFrame(self):
