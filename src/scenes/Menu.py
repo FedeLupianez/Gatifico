@@ -14,9 +14,10 @@ class Menu(scenes.View.View):
         self.callback = callback
         self.playerList = arcade.SpriteList()
         self.player = Player()
-        self.player.center_x = Constants.Game.SCREEN_WIDTH // 2
-        self.player.center_y = Constants.Game.SCREEN_HEIGHT // 2
-        self.playerList.append(self.player)
+        self.player.sprite.center_x = Constants.Game.SCREEN_WIDTH // 2
+        self.player.sprite.center_y = Constants.Game.SCREEN_HEIGHT // 2
+        self.player.setup()
+        self.playerList.append(self.player.sprite)
 
     def on_show_view(self) -> None:
         return super().on_show_view()

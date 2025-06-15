@@ -13,9 +13,11 @@ class House(ViewScene.View):
         self.callback = callback
         self.playerList = arcade.SpriteList()
         self.player = Player()
-        self.player.center_x = Constants.Game.SCREEN_WIDTH // 2
-        self.player.center_y = Constants.Game.SCREEN_HEIGHT // 2
-        self.playerList.append(self.player)
+        self.player.sprite.center_x = Constants.Game.SCREEN_WIDTH // 2
+        self.player.sprite.center_y = Constants.Game.SCREEN_HEIGHT // 2
+        self.player.setup()
+        print(self.player.actualAnimationPath)
+        self.playerList.append(self.player.sprite)
 
     def on_show_view(self) -> None:
         return super().on_show_view()
@@ -31,15 +33,15 @@ class House(ViewScene.View):
 
     def on_update(self, delta_time: float) -> bool | None:
         self.player.update_animation(delta_time)
-        self.player.update()
+        self.player.updatePosition()
 
     def on_key_press(self, symbol: int, modifiers: int) -> bool | None:
         if symbol == arcade.key.SPACE:
             self.callback(Constants.SignalCodes.CHANGE_VIEW, "MENU")
 
         if symbol in self.player.motions:
-            self.player.movement(symbol)
+            self.player.updateState(symbol)
 
     def on_key_release(self, symbol: int, modifiers: int) -> bool | None:
         if symbol in self.player.motions:
-            self.player.cancelMovement(symbol)
+            self.player.updateState(-symbol)
