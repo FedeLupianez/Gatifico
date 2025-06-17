@@ -1,7 +1,7 @@
 import arcade
 import Constants
-import scenes.Menu as MenuScene
-import scenes.House as HouseScene
+from scenes.Menu import Menu
+from scenes.House import House
 
 
 # Esta clase va a manejar la vista que se muestra en la pantalla
@@ -9,7 +9,7 @@ class ViewManager:
     window = arcade.Window(
         Constants.Game.SCREEN_WIDTH,
         Constants.Game.SCREEN_HEIGHT,
-        title="A coloquio",
+        title="Gatifico",
         update_rate=Constants.Game.FPS,
         draw_rate=Constants.Game.FPS,
     )
@@ -17,10 +17,10 @@ class ViewManager:
 
     def __init__(self) -> None:
         # Tiene su propia ventana
-        self.current_scene = MenuScene.Menu(self.callback)
+        self.current_scene = Menu(self.callback)
 
         # Diccionario con los objetos de las escenas pero sin instanciar para ahorrar recursos
-        self.scenes = {"MENU": MenuScene.Menu, "HOUSE": HouseScene.House}
+        self.scenes = {"MENU": Menu, "HOUSE": House}
         self.window.show_view(
             self.current_scene
         )  # Pongo que se vea la view por default apenas se crea el manager, o sea el menu

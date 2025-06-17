@@ -1,10 +1,10 @@
 import arcade
 import Constants
-import scenes.View
+from scenes.View import View
 from characters.Player import Player
 
 
-class Menu(scenes.View.View):
+class Menu(View):
     def __init__(self, callback):
         backgroundUrl = Constants.AssetsUrls.MENU_BACKGROUND
         tileMapUrl = None
@@ -26,7 +26,7 @@ class Menu(scenes.View.View):
         self.clear()
         self.scene.draw()
         text = arcade.Text(
-            "Alquimica",
+            "Menu",
             Constants.Game.SCREEN_WIDTH / 2,
             Constants.Game.SCREEN_HEIGHT / 2,
         )
