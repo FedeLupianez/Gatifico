@@ -1,26 +1,45 @@
 from typing import Callable
 
 
+# Clase de maquina de estados reutilizable
 class StateMachine:
-    def __init__(self):
-        self.states: dict[str, Callable[..., str]] = {}
-        self.actualState: str = "IDLE"
+    # Mejora de manejo de memoria para tener varias instancias
+    __slots__ = ["states", "actualStateId", "lastStateId"]
 
-    def addState(self, name: str, state: Callable):
-        self.states[name] = state
+    def __init__(self):
+        # Diccionario con los estados
+        # Estos son funciones
+        self.states: dict[str, Callable[..., str]] = {}
+        self.actualStateId: str = "IDLE"  # Id del estado actual
+        self.lastStateId: str = ""
+
+    def addState(self, id: str, state: Callable):
+        """Agrega un estado a la maquina
+        Args :
+            id (str) : Id del estado
+            state (Callable) : Funcion que representa el estado
+        """
+        self.states[id] = state
 
     def setState(self, newState: str):
+        """Cambia el estado actual de la maquina
+        Args :
+            newState (str) : Id del nuevo estado
+        """
         if newState not in self.states:
             raise ValueError("Estado no encontrado en la maquina")
-
-        self.actualState = newState
+        self.lastStateId = self.actualStateId
+        self.actualStateId = newState
         # Aplico los cambios del estado con 0 como neutro
-        self.states[self.actualState](0)
+        self.states[self.actualStateId](0)
 
     def processState(self, event):
-        newState: str = self.states[self.actualState](event)
-        if newState == self.actualState:
-            print("Permanece en el estado : ", self.actualState)
+        # Ejecuto el estado actual
+        # este debe retornar el estado al que debe cambiar o el mismo
+        newState: str = self.states[self.actualStateId](event)
+        # Si el estado es el mismo no hace ningún cambio
+        if newState == self.actualStateId:
             return
+        # Cambia al nuevo estado
         print(f"cambiando al estado {newState}")
         self.setState(newState)
