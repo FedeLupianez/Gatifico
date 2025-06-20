@@ -142,6 +142,7 @@ class Player(StateMachine):
         self.sprite.texture = self.frames[self.textureIndex]
 
     def update_animation(self, deltaTime: float):
+        """Función para actualizar la animación del personaje"""
         if not self.frames:
             return
         self.animationTimer += deltaTime

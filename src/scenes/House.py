@@ -12,14 +12,30 @@ class House(View):
         super().__init__(backgroundUrl=backgroundUrl, tileMapUrl=tileMapUrl)
         self.window.set_mouse_visible(False)
         self.callback = callback
-        self.playerList: arcade.SpriteList = (
-            arcade.SpriteList()
-        )  # Lista de sprites del jugador
+
+        # Listas de Sprites
+        self.playerSpritesList: arcade.SpriteList = arcade.SpriteList()
+        self.backgroundSpriteList: arcade.SpriteList = arcade.SpriteList()
+
         self.player = Player()  # Defino el personaje
         self.player.sprite.center_x = Constants.Game.SCREEN_WIDTH // 2
         self.player.sprite.center_y = Constants.Game.SCREEN_HEIGHT // 2
         self.player.setup()
-        self.playerList.append(self.player.sprite)
+
+        self.obstacle: arcade.Sprite = arcade.Sprite(
+            "src/assets/2D Pixel Dungeon Asset Pack/interface/square_left_4.png"
+        )
+        self.door: arcade.Sprite = arcade.Sprite(
+            "src/assets/2D Pixel Dungeon Asset Pack/interface/square_left_4.png"
+        )
+        self.obstacle.center_x = 100
+        self.obstacle.center_y = 100
+
+        self.door.center_x = Constants.Game.SCREEN_WIDTH - 100
+        self.door.center_y = Constants.Game.SCREEN_HEIGHT // 2
+        self.playerSpritesList.append(self.player.sprite)
+        self.backgroundSpriteList.append(self.obstacle)
+        self.backgroundSpriteList.append(self.door)
         self.keysPressed: set = set()
 
     def on_show_view(self) -> None:
@@ -33,7 +49,8 @@ class House(View):
             "Casa", Constants.Game.SCREEN_WIDTH / 2, Constants.Game.SCREEN_HEIGHT / 2
         )
         text.draw()
-        self.playerList.draw(pixelated=True)  # dibuja el personaje
+        self.playerSpritesList.draw(pixelated=True)  # dibuja el personaje
+        self.backgroundSpriteList.draw(pixelated=True)
 
     def on_key_press(self, symbol: int, modifiers: int) -> bool | None:
         if symbol == arcade.key.SPACE:
@@ -45,14 +62,18 @@ class House(View):
 
     def on_update(self, delta_time: float) -> bool | None:
         self.player.update_animation(delta_time)
+        lastPosition = self.player.sprite.center_x, self.player.sprite.center_y
         self.player.updatePosition()
-        if arcade.key.W in self.keysPressed:
-            self.player.updateState(arcade.key.W)
-        elif arcade.key.A in self.keysPressed:
-            self.player.updateState(arcade.key.A)
-        elif arcade.key.S in self.keysPressed:
-            self.player.updateState(arcade.key.S)
-        elif arcade.key.D in self.keysPressed:
-            self.player.updateState(arcade.key.D)
-        else:
+
+        for sprite in self.backgroundSpriteList:
+            if sprite.collides_with_list(self.playerSpritesList):
+                self.player.sprite.center_x, self.player.sprite.center_y = lastPosition
+                if sprite == self.door:
+                    self.callback(Constants.SignalCodes.CHANGE_VIEW, "MENU")
+
+        if not (self.keysPressed):
             self.player.updateState(-1)
+            return
+
+        for key in self.keysPressed:
+            self.player.updateState(key)
