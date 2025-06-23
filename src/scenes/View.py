@@ -6,6 +6,7 @@ class View(arcade.View):
     def __init__(self, backgroundUrl: str | None, tileMapUrl: str | None) -> None:
         super().__init__()
 
+        self.tileMap: arcade.TileMap | None = None
         self.scene = self.CreateScene(
             backgroundUrl=backgroundUrl, tileMapUrl=tileMapUrl
         )
@@ -20,8 +21,8 @@ class View(arcade.View):
         """
         # Si se le pasa un tilemap
         if tileMapUrl:
-            tempTileMap = arcade.TileMap(map_file=tileMapUrl)
-            return arcade.Scene.from_tilemap(tempTileMap)
+            self.tileMap = arcade.load_tilemap(tileMapUrl)
+            return arcade.Scene.from_tilemap(self.tileMap)
 
         if backgroundUrl:
             # En cambio sino solo se pone el fondo:
@@ -36,3 +37,19 @@ class View(arcade.View):
             scene[Constants.SpriteNames.BACKGROUND].append(backgroundImage)
             return scene
         raise FileNotFoundError("Faltan argumentos")
+
+    def loadObjectLayers(
+        self, layerName: str, tileMap: arcade.TileMap
+    ) -> arcade.SpriteList:
+        tempList = arcade.SpriteList()
+
+        for obj in tileMap.object_lists.get(layerName, []):
+            # Crear un sprite que represente el objeto
+            # Por ejemplo, un rectángulo sólido con las dimensiones del objeto
+            sprite = arcade.SpriteSolidColor(
+                int(obj.width), int(obj.height), arcade.color.RED
+            )
+            sprite.center_x = obj.x + obj.width / 2
+            sprite.center_y = obj.y + obj.height / 2
+            tempList.append(sprite)
+        return tempList

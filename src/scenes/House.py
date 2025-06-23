@@ -22,8 +22,14 @@ class House(View):
         self.player.sprite.center_y = Constants.Game.SCREEN_HEIGHT // 2
         self.player.setup()
 
+        # Capas de vista :
         self.backgroundLayer = self.scene["Piso"]
         self.backgroundLayer2 = self.scene["Paredes"]
+        self.backgroundObjects = self.scene["Objetos"]
+
+        # Capas de colisiones :
+        self.collisionSprites = self.loadObjectLayers("Colisiones", self.tileMap)
+        self.interactSprites = self.loadObjectLayers("Interactuables", self.tileMap)
 
         self.obstacle: arcade.Sprite = arcade.Sprite(
             "src/assets/Background/Texture/TX Plant.png"
@@ -67,6 +73,16 @@ class House(View):
         self.player.update_animation(delta_time)
         lastPosition = self.player.sprite.center_x, self.player.sprite.center_y
         self.player.updatePosition()
+
+        if self.player.sprite.collides_with_list(self.backgroundObjects):
+            self.player.sprite.center_x, self.player.sprite.center_y = lastPosition
+
+        interact_collisions = arcade.check_for_collision_with_list(
+            self.player.sprite, self.interactObjects
+        )
+        for obj in interact_collisions:
+            name_obj = getattr(obj, "nombre", None)
+            print("nombre del objeto : ", name_obj)
 
         for sprite in self.backgroundSpriteList:
             if sprite.collides_with_list(self.playerSpritesList):
