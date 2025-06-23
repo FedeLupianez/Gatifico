@@ -109,14 +109,7 @@
 516,517,517,517,517,517,517,517,517,517,517,517,517,517,517,517,517,517,517,517,517,517,517,517,517,517,517,517,517,517,517,517,517,517,517,517,517,517,517,517,517,517,517,517,517,517,517,517,517,517,517,517,517,517,517,517,517,517,517,517,517,517,517,517,517,517,517,517,517,517,517,517,517,517,517,517,517,517,517,711,521
 </data>
  </layer>
- <objectgroup id="3" name="Colisiones">
-  <object id="3" name="pared" type="colition" x="-1.66667" y="5.66667" width="10.6667" height="773.667" visible="0"/>
-  <object id="4" name="pared" type="colition" x="2.66667" y="4" width="1281.33" height="57.3333" visible="0"/>
-  <object id="5" name="pared" type="colition" x="2" y="721" width="1290" height="60" visible="0"/>
-  <object id="9" name="pared" type="colition" x="1282" y="-1" width="16" height="724" visible="0"/>
-  <object id="18" name="column" type="none" x="703.333" y="201.667" width="33.6667" height="81.3333" visible="0"/>
- </objectgroup>
- <layer id="4" name="Objetos" width="81" height="49">
+ <layer id="4" name="Objetos" width="81" height="49" locked="1">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1443,1444,1445,1446,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -169,7 +162,14 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </data>
  </layer>
- <objectgroup id="5" name="Interactuables">
+ <objectgroup id="3" name="Colisiones" locked="1">
+  <object id="3" name="pared" type="colition" x="-1.66667" y="5.66667" width="10.6667" height="773.667" visible="0"/>
+  <object id="4" name="pared" type="colition" x="2.66667" y="4" width="1281.33" height="57.3333" visible="0"/>
+  <object id="5" name="pared" type="colition" x="2" y="721" width="1290" height="60" visible="0"/>
+  <object id="9" name="pared" type="colition" x="1282" y="-1" width="16" height="724" visible="0"/>
+  <object id="18" name="column" type="none" x="703.333" y="201.667" width="33.6667" height="81.3333" visible="0"/>
+ </objectgroup>
+ <objectgroup id="5" name="Interactuables" locked="1">
   <object id="13" name="door" type="interact" x="876.5" y="25.5" width="38" height="38" visible="0"/>
   <object id="15" name="chair" type="interact" x="705.5" y="113" width="30" height="63.5" visible="0"/>
   <object id="20" name="chest_1" type="interact" x="624.25" y="94.5" width="31.5" height="29.25" visible="0"/>
