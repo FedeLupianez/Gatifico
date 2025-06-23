@@ -42,14 +42,24 @@ class View(arcade.View):
         self, layerName: str, tileMap: arcade.TileMap
     ) -> arcade.SpriteList:
         tempList = arcade.SpriteList()
+        tempLayer = tileMap.object_lists[layerName]
 
-        for obj in tileMap.object_lists.get(layerName, []):
+        for obj in tempLayer:
             # Crear un sprite que represente el objeto
             # Por ejemplo, un rectángulo sólido con las dimensiones del objeto
+            # Obtengo el ancho y alto del objeto :
+            topLeft, topRight, bottomRight, bottomLeft = obj.shape
+
+            width: float = topRight[0] - topLeft[0]
+            height: float = topLeft[1] - bottomLeft[1]
+            center_x: float = topLeft[0] + (width) / 2
+            center_y: float = bottomLeft[1] + (height) / 2
+
             sprite = arcade.SpriteSolidColor(
-                int(obj.width), int(obj.height), arcade.color.RED
+                int(width), int(height), center_x=center_x, center_y=center_y
             )
-            sprite.center_x = obj.x + obj.width / 2
-            sprite.center_y = obj.y + obj.height / 2
+            sprite.name = obj.name
+            sprite.type = obj.type
+            sprite.props = obj.properties
             tempList.append(sprite)
         return tempList

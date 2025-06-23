@@ -29,7 +29,7 @@ class Menu(View):
 
     def on_key_press(self, symbol: int, modifiers: int) -> bool | None:
         if symbol == arcade.key.SPACE:
-            self.callback(Constants.SignalCodes.CHANGE_VIEW, "HOUSE")
+            self.callback(Constants.SignalCodes.CHANGE_VIEW, "TEST")
 
     def on_update(self, delta_time: float) -> bool | None:
         self.player.update_animation(delta_time)
