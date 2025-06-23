@@ -7,8 +7,8 @@ from typing import Callable
 
 class House(View):
     def __init__(self, callback: Callable) -> None:
-        backgroundUrl = Constants.AssetsUrls.HOUSE_BACKGROUND
-        tileMapUrl = None
+        backgroundUrl = None
+        tileMapUrl = "src/assets/Maps/Tests.tmx"
         super().__init__(backgroundUrl=backgroundUrl, tileMapUrl=tileMapUrl)
         self.window.set_mouse_visible(False)
         self.callback = callback
@@ -22,11 +22,14 @@ class House(View):
         self.player.sprite.center_y = Constants.Game.SCREEN_HEIGHT // 2
         self.player.setup()
 
+        self.backgroundLayer = self.scene["Piso"]
+        self.backgroundLayer2 = self.scene["Paredes"]
+
         self.obstacle: arcade.Sprite = arcade.Sprite(
-            "src/assets/2D Pixel Dungeon Asset Pack/interface/square_left_4.png"
+            "src/assets/Background/Texture/TX Plant.png"
         )
         self.door: arcade.Sprite = arcade.Sprite(
-            "src/assets/2D Pixel Dungeon Asset Pack/interface/square_left_4.png"
+            "src/assets/Background/Texture/TX Plant.png"
         )
         self.obstacle.center_x = 100
         self.obstacle.center_y = 100

@@ -18,13 +18,10 @@ class View(arcade.View):
             tile_map_url (string) : Url del tile map de la escena, este mapa sirve para las colisiones
             background_url (string) : Url del fondo para cargar la imagen
         """
-        scene = arcade.Scene()
         # Si se le pasa un tilemap
         if tileMapUrl:
             tempTileMap = arcade.TileMap(map_file=tileMapUrl)
-            scene.from_tilemap(tempTileMap)
-            del tileMapUrl
-            return scene
+            return arcade.Scene.from_tilemap(tempTileMap)
 
         if backgroundUrl:
             # En cambio sino solo se pone el fondo:
@@ -34,6 +31,7 @@ class View(arcade.View):
             backgroundImage.center_y = Constants.Game.SCREEN_HEIGHT / 2
             # Creo una lista de sprites dentro de la scene donde se van
             # a almacenar todos los sprites que vayan en el fondo
+            scene = arcade.Scene()
             scene.add_sprite_list(Constants.SpriteNames.BACKGROUND)
             scene[Constants.SpriteNames.BACKGROUND].append(backgroundImage)
             return scene

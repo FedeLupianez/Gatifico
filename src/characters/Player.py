@@ -1,13 +1,22 @@
 import arcade
 from Constants import Game, AssetsUrls
+import Constants
 from StateMachine import StateMachine
 
 
-IdlePath = "src/assets/2D Pixel Dungeon Asset Pack/Character_animation/monsters_idle/skeleton2/v2/skeleton2_v2_{}.png"
-MovementPath = "src/assets/Enemy_Animations_Set/enemies-vampire_movement.png"
+IdleFrontPath = "src/assets/Player/Idle/Front/Front_Idle_{}.png"
+IdleBackPath = "src/assets/Player/Idle/Back/Back_Idle_{}.png"
+IdleSidePath = "src/assets/Player/Idle/Side/Side_Idle_{}.png"
+
+RunFrontPath = "src/assets/Player/Run/Front/Front_Run_{}.png"
+RunBackPath = "src/assets/Player/Run/Back/Back_Run_{}.png"
+RunSidePath = "src/assets/Player/Run/Side/Side_Run_{}.png"
+
 
 # Defino los id de los estados para no repetir magic strings
-IDLE = "IDLE"
+IDLE_SIDE = "IDLE_SIDE"
+IDLE_FRONT = "IDLE_FRONT"
+IDLE_BACK = "IDLE_BACk"
 LEFT = "LEFT"
 RIGHT = "RIGHT"
 UP = "UP"
@@ -16,10 +25,10 @@ DOWN = "DOWN"
 
 class Player(StateMachine):
     def __init__(self):
-        super().__init__()
+        super().__init__(IDLE_FRONT)
         self.motions = [arcade.key.W, arcade.key.A, arcade.key.S, arcade.key.D]
         # Todos los path tienen llaves {} donde iría el numero de sprite
-        self.actualAnimationPath: str = IdlePath.replace(
+        self.actualAnimationPath: str = IdleFrontPath.replace(
             "{}",
             str(
                 AssetsUrls.INITIAL_INDEX
@@ -33,7 +42,7 @@ class Player(StateMachine):
         self.frames: list[arcade.Texture] = []  # lista de texturas
         self.textureIndex = 0  # indice actual de la textura
         self.animationTimer: float = 0.0  # timer de la animacion
-        self.sprite.scale = 5
+        self.sprite.scale = Constants.Game.CHARACTER_SCALE
         self.spriteCache: dict[
             str, arcade.Texture
         ] = {}  # Diccionario con las texturas cargadas para ahorrar llamdas a memoria
@@ -46,7 +55,7 @@ class Player(StateMachine):
         # Si la key es negativa significa que se soltó una tecla,
         # por lo que regresa al estado IDLE
         if key < 0:
-            return IDLE
+            return IDLE_FRONT
         # Si es que presionó una tecla, se cambia al estado correspondiente
         match key:
             case arcade.key.W:
@@ -62,45 +71,61 @@ class Player(StateMachine):
                 return self.actualStateId
 
     # Definición de los estados como funciones
-    def IdleState(self, event):
+    def IdleFront(self, event):
         self.sprite.change_x = 0
         self.sprite.change_y = 0
-        self.actualAnimationPath = IdlePath
-        self.actualAnimationFrames = 4
+        self.actualAnimationPath = IdleFrontPath
+        self.actualAnimationFrames = 1
+        return self.handleMovementEvent(event)
+
+    def IdleBack(self, event):
+        self.sprite.change_x = 0
+        self.sprite.change_y = 0
+        self.actualAnimationPath = IdleBackPath
+        self.actualAnimationFrames = 1
+        return self.handleMovementEvent(event)
+
+    def IdleSide(self, event):
+        self.sprite.change_x = 0
+        self.sprite.change_y = 0
+        self.actualAnimationPath = IdleSidePath
+        self.actualAnimationFrames = 1
         return self.handleMovementEvent(event)
 
     def LeftState(self, event):
         self.sprite.change_x = -Game.PLAYER_SPEED
         self.sprite.change_y = 0
-        self.actualAnimationPath = IdlePath
-        self.actualAnimationFrames = 4
+        self.actualAnimationPath = RunSidePath
+        self.actualAnimationFrames = 1
         self.sprite.scale_x = -abs(self.sprite.scale_x)
         return self.handleMovementEvent(event)
 
     def RightState(self, event):
         self.sprite.change_x = Game.PLAYER_SPEED
         self.sprite.change_y = 0
-        self.actualAnimationPath = IdlePath
-        self.actualAnimationFrames = 4
+        self.actualAnimationPath = RunSidePath
+        self.actualAnimationFrames = 1
         self.sprite.scale_x = abs(self.sprite.scale_x)
         return self.handleMovementEvent(event)
 
     def DownState(self, event):
         self.sprite.change_y = -Game.PLAYER_SPEED
         self.sprite.change_x = 0
-        self.actualAnimationPath = IdlePath
-        self.actualAnimationFrames = 4
+        self.actualAnimationPath = RunFrontPath
+        self.actualAnimationFrames = 1
         return self.handleMovementEvent(event)
 
     def UpState(self, event):
         self.sprite.change_y = Game.PLAYER_SPEED
         self.sprite.change_x = 0
-        self.actualAnimationPath = IdlePath
+        self.actualAnimationPath = RunBackPath
         return self.handleMovementEvent(event)
 
     def setup(self):
         """Función para configurar la maquina de estados del personaje"""
-        self.addState(IDLE, self.IdleState)
+        self.addState(IDLE_FRONT, self.IdleFront)
+        self.addState(IDLE_BACK, self.IdleBack)
+        self.addState(IDLE_SIDE, self.IdleSide)
         self.addState(LEFT, self.LeftState)
         self.addState(RIGHT, self.RightState)
         self.addState(DOWN, self.DownState)

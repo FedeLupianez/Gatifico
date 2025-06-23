@@ -6,11 +6,11 @@ class StateMachine:
     # Mejora de manejo de memoria para tener varias instancias
     __slots__ = ["states", "actualStateId", "lastStateId"]
 
-    def __init__(self):
+    def __init__(self, initialId: str):
         # Diccionario con los estados
         # Estos son funciones
         self.states: dict[str, Callable[..., str]] = {}
-        self.actualStateId: str = "IDLE"  # Id del estado actual
+        self.actualStateId: str = initialId  # Id del estado actual
         self.lastStateId: str = ""
 
     def addState(self, id: str, state: Callable):

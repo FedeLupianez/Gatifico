@@ -6,7 +6,7 @@ from characters.Player import Player
 
 class Menu(View):
     def __init__(self, callback):
-        backgroundUrl = Constants.AssetsUrls.MENU_BACKGROUND
+        backgroundUrl = "src/assets/Background/Texture/TX Plant.png"
         tileMapUrl = None
         super().__init__(backgroundUrl=backgroundUrl, tileMapUrl=tileMapUrl)
 
@@ -25,12 +25,6 @@ class Menu(View):
     def on_draw(self):
         self.clear()
         self.scene.draw()
-        text = arcade.Text(
-            "Menu",
-            Constants.Game.SCREEN_WIDTH / 2,
-            Constants.Game.SCREEN_HEIGHT / 2,
-        )
-        text.draw()
         self.playerList.draw(pixelated=True)
 
     def on_key_press(self, symbol: int, modifiers: int) -> bool | None:
