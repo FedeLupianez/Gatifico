@@ -12,6 +12,9 @@ RunFrontPath = "src/assets/Player/Run/Front/Front_Run_{}.png"
 RunBackPath = "src/assets/Player/Run/Back/Back_Run_{}.png"
 RunSidePath = "src/assets/Player/Run/Side/Side_Run_{}.png"
 
+WalkFrontPath = "src/assets/Player/Walk/Front/Front_Walk_{}.png"
+WalkBackPath = "src/assets/Player/Walk/Back/Back_Walk_{}.png"
+WalkSidePath = "src/assets/Player/Walk/Side/Side_Walk_{}.png"
 
 # Defino los id de los estados para no repetir magic strings
 IDLE_SIDE = "IDLE_SIDE"
@@ -38,7 +41,7 @@ class Player(StateMachine):
             self.actualAnimationPath
         )  # objeto sprite del personaje
         self.speed = Game.PLAYER_SPEED
-        self.actualAnimationFrames: int = 0  # cantidad de frames de la animacion
+        self.actualAnimationFrames: int = 5  # cantidad de frames de la animacion
         self.frames: list[arcade.Texture] = []  # lista de texturas
         self.textureIndex = 0  # indice actual de la textura
         self.animationTimer: float = 0.0  # timer de la animacion
@@ -75,28 +78,28 @@ class Player(StateMachine):
         self.sprite.change_x = 0
         self.sprite.change_y = 0
         self.actualAnimationPath = IdleFrontPath
-        self.actualAnimationFrames = 1
+        self.actualAnimationFrames = 5
         return self.handleMovementEvent(event)
 
     def IdleBack(self, event):
         self.sprite.change_x = 0
         self.sprite.change_y = 0
         self.actualAnimationPath = IdleBackPath
-        self.actualAnimationFrames = 1
+        self.actualAnimationFrames = 5
         return self.handleMovementEvent(event)
 
     def IdleSide(self, event):
         self.sprite.change_x = 0
         self.sprite.change_y = 0
         self.actualAnimationPath = IdleSidePath
-        self.actualAnimationFrames = 1
+        self.actualAnimationFrames = 5
         return self.handleMovementEvent(event)
 
     def LeftState(self, event):
         self.sprite.change_x = -Game.PLAYER_SPEED
         self.sprite.change_y = 0
         self.actualAnimationPath = RunSidePath
-        self.actualAnimationFrames = 1
+        self.actualAnimationFrames = 6
         self.sprite.scale_x = -abs(self.sprite.scale_x)
         return self.handleMovementEvent(event)
 
@@ -104,7 +107,7 @@ class Player(StateMachine):
         self.sprite.change_x = Game.PLAYER_SPEED
         self.sprite.change_y = 0
         self.actualAnimationPath = RunSidePath
-        self.actualAnimationFrames = 1
+        self.actualAnimationFrames = 6
         self.sprite.scale_x = abs(self.sprite.scale_x)
         return self.handleMovementEvent(event)
 
@@ -112,12 +115,13 @@ class Player(StateMachine):
         self.sprite.change_y = -Game.PLAYER_SPEED
         self.sprite.change_x = 0
         self.actualAnimationPath = RunFrontPath
-        self.actualAnimationFrames = 1
+        self.actualAnimationFrames = 6
         return self.handleMovementEvent(event)
 
     def UpState(self, event):
         self.sprite.change_y = Game.PLAYER_SPEED
         self.sprite.change_x = 0
+        self.actualAnimationFrames = 6
         self.actualAnimationPath = RunBackPath
         return self.handleMovementEvent(event)
 
