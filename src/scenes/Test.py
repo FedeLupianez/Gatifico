@@ -3,6 +3,8 @@ from scenes.View import View
 import Constants
 from characters.Player import Player
 from typing import Callable
+from arcade.camera import Camera2D
+from arcade.math import lerp_2d
 
 
 class Test(View):
@@ -21,10 +23,12 @@ class Test(View):
         self.player.sprite.center_x = Constants.Game.SCREEN_WIDTH // 2
         self.player.sprite.center_y = Constants.Game.SCREEN_HEIGHT // 2
         self.player.setup()
+        # Camara para seguir al jugador :
+        self.camera = Camera2D(zoom=2.5)
 
         # Capas de vista :
-        self.backgroundLayer = self.scene["Piso"]
-        self.backgroundLayer2 = self.scene["Paredes"]
+        self.floorLayer = self.scene["Piso"]
+        self.wallsLayer = self.scene["Paredes"]
         self.backgroundObjects = self.scene["Objetos"]
 
         # Capas de colisiones :
@@ -53,6 +57,7 @@ class Test(View):
     def on_draw(self) -> bool | None:
         # Función que se llama cada vez que se dibuja la escena
         self.clear()  # limpia la pantalla
+        self.camera.use()
         self.scene.draw()  # dibuja la escena
         text = arcade.Text(
             "Casa", Constants.Game.SCREEN_WIDTH / 2, Constants.Game.SCREEN_HEIGHT / 2
@@ -81,19 +86,14 @@ class Test(View):
         background_colisions = self.player.sprite.collides_with_list(
             self.backgroundObjects
         )
+        walls_collisions = self.player.sprite.collides_with_list(self.wallsLayer)
 
-        if interact_collisions or background_colisions:
+        if interact_collisions or background_colisions or walls_collisions:
             self.player.sprite.center_x, self.player.sprite.center_y = lastPosition
 
         for obj in interact_collisions:
             name_obj = obj.name
             print("nombre del objeto : ", name_obj)
-
-        # for sprite in self.backgroundSpriteList:
-        #     if sprite.collides_with_list(self.playerSpritesList):
-        #         self.player.sprite.center_x, self.player.sprite.center_y = lastPosition
-        #         if sprite == self.door:
-        #             self.callback(Constants.SignalCodes.CHANGE_VIEW, "MENU")
 
         if not (self.keysPressed):
             self.player.updateState(-1)
@@ -101,3 +101,6 @@ class Test(View):
 
         for key in self.keysPressed:
             self.player.updateState(key)
+        self.camera.position = arcade.math.lerp_2d(
+            self.camera.position, self.player.sprite.position, 0.50
+        )
