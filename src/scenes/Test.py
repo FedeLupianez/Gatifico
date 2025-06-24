@@ -88,12 +88,16 @@ class Test(View):
         )
         walls_collisions = self.player.sprite.collides_with_list(self.wallsLayer)
 
-        if interact_collisions or background_colisions or walls_collisions:
+        if background_colisions or walls_collisions:
             self.player.sprite.center_x, self.player.sprite.center_y = lastPosition
 
-        for obj in interact_collisions:
-            name_obj = obj.name
-            print("nombre del objeto : ", name_obj)
+        if interact_collisions:
+            if arcade.key.E in self.keysPressed:
+                print(interact_collisions[0].name)
+
+        # for obj in interact_collisions:
+        #     name_obj = obj.name
+        #     print("nombre del objeto : ", name_obj)
 
         if not (self.keysPressed):
             self.player.updateState(-1)
