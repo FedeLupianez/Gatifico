@@ -23,7 +23,7 @@ class Test(View):
         self.player.sprite.center_y = Constants.Game.SCREEN_HEIGHT // 2
         self.player.setup()
         # Camara para seguir al jugador :
-        self.camera = Camera2D(zoom=2.5)
+        self.camera.zoom = 2.5
 
         # Capas de vista :
         self.floorLayer = self.scene["Piso"]
@@ -57,14 +57,9 @@ class Test(View):
         # Función que se llama cada vez que se dibuja la escena
         self.clear()  # limpia la pantalla
         self.camera.use()
-        self.scene.draw()  # dibuja la escena
-        text = arcade.Text(
-            "Casa", Constants.Game.SCREEN_WIDTH / 2, Constants.Game.SCREEN_HEIGHT / 2
-        )
-        text.draw()
+        self.scene.draw(pixelated=True)  # dibuja la escena
         self.playerSpritesList.draw(pixelated=True)  # dibuja el personaje
         self.backgroundSpriteList.draw(pixelated=True)
-        self.interactSprites.draw()
 
     def on_key_press(self, symbol: int, modifiers: int) -> bool | None:
         if symbol == arcade.key.SPACE:

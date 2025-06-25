@@ -1,35 +1,49 @@
 import arcade
-import Constants
+from Constants import Game, SignalCodes
 from scenes.View import View
-from characters.Player import Player
+
+StartButtonPath: str = "src/assets/UI/StartButton.png"
+ExitButtonPath: str = "src/assets/UI/ExitButton.png"
 
 
 class Menu(View):
     def __init__(self, callback):
         backgroundUrl = "src/assets/Background/Texture/TX Plant.png"
-        tileMapUrl = None
-        super().__init__(backgroundUrl=backgroundUrl, tileMapUrl=tileMapUrl)
+        super().__init__(backgroundUrl=backgroundUrl, tileMapUrl=None)
 
-        self.window.set_mouse_visible(False)
+        self.window.set_mouse_visible(True)
+        self.spriteList = arcade.SpriteList()
+        self.startButton = arcade.Sprite(StartButtonPath, scale=5)
+        self.startButton.center_x = Game.SCREEN_WIDTH // 2
+        self.startButton.center_y = Game.SCREEN_HEIGHT // 2
+
+        self.exitButton = arcade.Sprite(ExitButtonPath, scale=5)
+        self.exitButton.center_x = Game.SCREEN_WIDTH // 2
+        self.exitButton.center_y = (Game.SCREEN_HEIGHT // 2) - 100
+        self.spriteList.append(self.startButton)
+        self.spriteList.append(self.exitButton)
+
         self.callback = callback
-        self.playerList = arcade.SpriteList()
-        self.player = Player()
-        self.player.sprite.center_x = Constants.Game.SCREEN_WIDTH // 2
-        self.player.sprite.center_y = Constants.Game.SCREEN_HEIGHT // 2
-        self.player.setup()
-        self.playerList.append(self.player.sprite)
-
-    def on_show_view(self) -> None:
-        return super().on_show_view()
+        self.camera.zoom = 1
 
     def on_draw(self):
         self.clear()
-        self.scene.draw()
-        self.playerList.draw(pixelated=True)
+        self.camera.use()
+        self.scene.draw(pixelated=True)
+        self.spriteList.draw(pixelated=True)
 
     def on_key_press(self, symbol: int, modifiers: int) -> bool | None:
         if symbol == arcade.key.SPACE:
-            self.callback(Constants.SignalCodes.CHANGE_VIEW, "TEST")
+            self.callback(SignalCodes.CHANGE_VIEW, "TEST")
 
-    def on_update(self, delta_time: float) -> bool | None:
-        self.player.update_animation(delta_time)
+    def on_mouse_press(
+        self, x: int, y: int, button: int, modifiers: int
+    ) -> bool | None:
+        if self.startButton.collides_with_point((x, y)):
+            print("Iniciando juego")
+            self.callback(SignalCodes.CHANGE_VIEW, "TEST")
+            return
+
+        if self.exitButton.collides_with_point((x, y)):
+            print("Saliendo ...")
+            self.callback(SignalCodes.CLOSE_WINDOW, "Close window")

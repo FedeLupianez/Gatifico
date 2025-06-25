@@ -39,3 +39,6 @@ class ViewManager:
                 self.callback
             )  # Cambio la variable anterior por la nueva escena
             self.window.show_view(self.current_scene)  # Hago que la nueva escena se vea
+
+        if signal == Constants.SignalCodes.CLOSE_WINDOW:
+            self.window.close()

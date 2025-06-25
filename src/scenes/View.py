@@ -1,5 +1,6 @@
 import arcade
 import Constants
+from arcade.camera import Camera2D
 
 
 class View(arcade.View):
@@ -10,6 +11,7 @@ class View(arcade.View):
         self.scene = self.CreateScene(
             backgroundUrl=backgroundUrl, tileMapUrl=tileMapUrl
         )
+        self.camera = Camera2D()
 
     def CreateScene(
         self, backgroundUrl: str | None, tileMapUrl: str | None = None

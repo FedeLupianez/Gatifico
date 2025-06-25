@@ -2,6 +2,9 @@
 # usando el diseño singleton
 
 
+from arcade import close_window
+
+
 class Game:
     # Tamaños de la pantalla :
     SCREEN_WIDTH = 1280
@@ -19,6 +22,7 @@ class Game:
 
 class SignalCodes:
     CHANGE_VIEW = 0
+    CLOSE_WINDOW = 1
 
 
 class SpriteNames:
