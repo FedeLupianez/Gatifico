@@ -3,7 +3,6 @@ from Constants import Game, AssetsUrls
 import Constants
 from StateMachine import StateMachine
 
-
 IdleFrontPath = "src/assets/Player/Idle/Front/Front_Idle_{}.png"
 IdleBackPath = "src/assets/Player/Idle/Back/Back_Idle_{}.png"
 IdleSidePath = "src/assets/Player/Idle/Side/Side_Idle_{}.png"
@@ -49,6 +48,7 @@ class Player(StateMachine):
         self.spriteCache: dict[
             str, arcade.Texture
         ] = {}  # Diccionario con las texturas cargadas para ahorrar llamdas a memoria
+        self.lastAnimationPath: str = ""
 
     def handleMovementEvent(self, key: int):
         """Función que se llama siempre que se toca una tecla de movimiento
@@ -134,6 +134,7 @@ class Player(StateMachine):
         self.addState(RIGHT, self.RightState)
         self.addState(DOWN, self.DownState)
         self.addState(UP, self.UpState)
+        self.updateSpriteList()
 
     def updatePosition(self):
         """Actualiza la posición del personaje segun la velocidad actual"""
@@ -151,6 +152,10 @@ class Player(StateMachine):
         """
         Actualiza la lista de texturas segun el estado actual
         """
+        if self.lastAnimationPath == self.actualAnimationPath:
+            return
+
+        self.lastAnimationPath = self.actualAnimationPath
         print("cargando nuevas texturas ...\n")
         self.frames.clear()
         for i in range(
@@ -158,17 +163,19 @@ class Player(StateMachine):
             self.actualAnimationFrames + AssetsUrls.INITIAL_INDEX,
         ):
             route = self.actualAnimationPath.replace("{}", str(i))
+            texture = None
             # Si el path de la textura ya estaba cargada no hay que cargarla de nuevo
-            if route in self.spriteCache.keys():
-                # Agrega la textura de la cache a la lista de frames
-                self.frames.append(self.spriteCache[route])
-                continue
-            # Si no está en la cache, la carga y la guarda en ella
-            self.spriteCache[route] = arcade.load_texture(route)
+            if route in self.spriteCache:
+                # Dice que la texture a cargar es la que está en caché
+                texture = self.spriteCache[route]
+            else:
+                # Si no está en caché, la carga y la guarda en caché
+                texture = arcade.load_texture(route)
+                self.spriteCache[route] = texture
+            # Agrega la textura
+            self.frames.append(texture)
         self.textureIndex = 0
-
-    def updateFrame(self):
-        self.sprite.texture = self.frames[self.textureIndex]
+        print("texturas cargadas !")
 
     def update_animation(self, deltaTime: float):
         """Función para actualizar la animación del personaje"""
@@ -178,4 +185,4 @@ class Player(StateMachine):
         if self.animationTimer > 0.1:
             self.animationTimer = 0
             self.textureIndex = (self.textureIndex + 1) % self.actualAnimationFrames
-            self.updateFrame()
+            self.sprite.texture = self.frames[self.textureIndex]

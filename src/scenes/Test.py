@@ -4,7 +4,6 @@ import Constants
 from characters.Player import Player
 from typing import Callable
 from arcade.camera import Camera2D
-from arcade.math import lerp_2d
 
 
 class Test(View):
