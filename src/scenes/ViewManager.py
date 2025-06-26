@@ -1,5 +1,6 @@
 import arcade
 import Constants
+from characters.Player import Player
 from scenes.Menu import Menu
 from scenes.Test import Test
 
@@ -15,9 +16,10 @@ class ViewManager:
     )
     current_scene_id = "MENU"
 
-    def __init__(self) -> None:
+    def __init__(self, player: Player) -> None:
         # Tiene su propia ventana
         self.current_scene = Menu(self.callback)
+        self.player = player
 
         # Diccionario con los objetos de las escenas pero sin instanciar para ahorrar recursos
         self.scenes = {"MENU": Menu, "TEST": Test}
@@ -35,9 +37,12 @@ class ViewManager:
         if signal == Constants.SignalCodes.CHANGE_VIEW:
             self.current_scene_id = data
             del self.current_scene  # Libero los recursos ocupados anteriormente
-            self.current_scene = self.scenes[data](
-                self.callback
-            )  # Cambio la variable anterior por la nueva escena
+
+            # Cambio la variable anterior por la nueva escena
+            if data == "TEST":
+                self.current_scene = self.scenes[data](self.callback, self.player)
+            else:
+                self.current_scene = self.scenes[data](self.callback)
             self.window.show_view(self.current_scene)  # Hago que la nueva escena se vea
 
         if signal == Constants.SignalCodes.CLOSE_WINDOW:
