@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.8" tiledversion="1.8.2" orientation="orthogonal" renderorder="right-down" width="81" height="49" tilewidth="16" tileheight="16" infinite="0" nextlayerid="6" nextobjectid="39">
+<map version="1.8" tiledversion="1.8.2" orientation="orthogonal" renderorder="right-down" width="81" height="49" tilewidth="16" tileheight="16" infinite="0" nextlayerid="7" nextobjectid="104">
  <tileset firstgid="1" source="../Background/TIleMaps/TX Tileset Grass.tsx"/>
  <tileset firstgid="226" source="../Background/TIleMaps/TX Tileset Wall.tsx"/>
  <tileset firstgid="1250" source="../Background/TIleMaps/Objetos.tsx"/>
@@ -169,26 +169,30 @@
   <object id="9" name="pared" type="colition" x="1282" y="-1" width="16" height="724" visible="0"/>
   <object id="18" name="column" type="none" x="703.333" y="201.667" width="33.6667" height="81.3333" visible="0"/>
  </objectgroup>
- <objectgroup id="5" name="Interactuables" locked="1">
-  <object id="13" name="door" type="interact" x="876.5" y="25.5" width="38" height="38" visible="0"/>
-  <object id="15" name="chair" type="interact" x="705.5" y="113" width="30" height="63.5" visible="0"/>
-  <object id="20" name="chest_1" type="interact" x="624.25" y="94.5" width="31.5" height="29.25" visible="0"/>
-  <object id="21" name="chest_2" type="interact" x="624.25" y="159" width="31.75" height="30" visible="0"/>
-  <object id="22" name="chest_3" type="interact" x="560.25" y="94" width="32" height="31" visible="0"/>
-  <object id="23" name="chest_4" type="interact" x="560.5" y="158" width="31.75" height="31.25" visible="0"/>
-  <object id="24" name="chest_5" type="interact" x="496.25" y="94" width="31.75" height="31" visible="0"/>
-  <object id="26" name="chest_6" type="interact" x="496.5" y="157.75" width="31.5" height="31.25" visible="0"/>
-  <object id="27" name="sign_1" type="interact" x="995.25" y="65.75" width="26" height="31" visible="0"/>
-  <object id="28" name="sign_2" type="interact" x="1027.5" y="65.75" width="26.25" height="30.75" visible="0"/>
-  <object id="29" name="sign_3" type="interact" x="1059.5" y="66.25" width="25" height="29.75" visible="0"/>
-  <object id="30" name="sign_4" type="interact" x="1091.5" y="64.75" width="25.75" height="32.5" visible="0"/>
-  <object id="31" name="barrel" type="interact" x="1041.75" y="151.25" width="28.25" height="37.75" visible="0"/>
-  <object id="32" name="box" type="interact" x="1027" y="228.25" width="26.25" height="41.75" visible="0"/>
-  <object id="33" name="stone" type="meddium" x="1075.75" y="230" width="24.75" height="20" visible="0"/>
-  <object id="34" name="stone" type="meddium" x="1092.75" y="277.5" width="23.75" height="20.75" visible="0"/>
-  <object id="35" name="stone" type="little" x="1161.64" y="155.545" width="11.6364" height="11.1818" visible="0"/>
-  <object id="36" name="stone" type="little" x="1193.63" y="235.875" width="11.75" height="10.6875" visible="0"/>
-  <object id="37" name="stone" type="big" x="1138.36" y="252.727" width="58.1818" height="44.3636" visible="0"/>
-  <object id="38" name="stone" type="big" x="1106.73" y="173.273" width="57.8182" height="42.9091" visible="0"/>
+ <objectgroup id="6" name="Interactuables">
+  <object id="39" name="Door" type="background" x="873" y="23" width="45.3333" height="45">
+   <properties>
+    <property name="sprite_path" value="src/assets/Interact/Door.png"/>
+   </properties>
+  </object>
+  <object id="40" name="chair" type="background" x="702" y="112" width="37.3333" height="64.6667"/>
+  <object id="41" name="chest_3" type="chest" x="616.841" y="151.977" width="45" height="45"/>
+  <object id="42" name="chest_2" type="chest" x="553.5" y="152" width="45" height="45"/>
+  <object id="43" name="chest_1" type="chest" x="490" y="151.5" width="45" height="45"/>
+  <object id="44" name="chest_4" type="chest" x="489.75" y="86.5" width="45" height="45"/>
+  <object id="45" name="chest_5" type="chest" x="553.5" y="86.5" width="45" height="45"/>
+  <object id="46" name="chest_6" type="chest" x="617.75" y="86.5" width="45" height="45"/>
+  <object id="47" name="cartel_1" type="cartel" x="993.5" y="64.75" width="30" height="38.25"/>
+  <object id="48" name="cartel_2" type="cartel" x="1025.5" y="64.75" width="29.25" height="38.25"/>
+  <object id="49" name="cartel_3" type="cartel" x="1057.63" y="64.875" width="29.25" height="38.25"/>
+  <object id="50" name="cartel_4" type="cartel" x="1089.88" y="65.125" width="29.25" height="38.25"/>
+  <object id="51" name="barrel" type="background" x="1035.75" y="150" width="40.75" height="41.25"/>
+  <object id="52" name="box" type="background" x="1021.09" y="226.364" width="38.1818" height="46"/>
+  <object id="55" name="rock_mid" type="mineral" x="1088.7" y="275.697" width="31.8182" height="24.9091"/>
+  <object id="57" name="rock_mid" type="mineral" x="1072.42" y="227.545" width="31.8182" height="24.9091"/>
+  <object id="58" name="rock_big" type="mineral" x="1132" y="250.667" width="70.3333" height="48.3333"/>
+  <object id="59" name="rock_big" type="mineral" x="1109.83" y="168.167" width="70.3333" height="48.3333"/>
+  <object id="60" name="rock_mini" type="mineral" x="1157.67" y="153.667" width="19.6667" height="13"/>
+  <object id="61" name="rock_mini" type="mineral" x="1189.83" y="234.167" width="19.6667" height="13"/>
  </objectgroup>
 </map>

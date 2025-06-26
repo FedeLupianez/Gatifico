@@ -3,6 +3,7 @@ from Constants import Game, AssetsUrls
 import Constants
 from StateMachine import StateMachine
 
+# Paths a las texturas del personaje segun su estado
 IdleFrontPath = "src/assets/Player/Idle/Front/Front_Idle_{}.png"
 IdleBackPath = "src/assets/Player/Idle/Back/Back_Idle_{}.png"
 IdleSidePath = "src/assets/Player/Idle/Side/Side_Idle_{}.png"

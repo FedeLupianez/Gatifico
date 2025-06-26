@@ -50,6 +50,16 @@ class Test(View):
     def on_key_press(self, symbol: int, modifiers: int) -> bool | None:
         if symbol == arcade.key.SPACE:
             self.callback(Constants.SignalCodes.CHANGE_VIEW, "MENU")
+
+        if symbol == arcade.key.E:
+            interact_collisions = self.player.sprite.collides_with_list(
+                self.interactSprites
+            )
+            if interact_collisions:
+                print(interact_collisions[0].name)
+                if interact_collisions[0].name.lower() == "door":
+                    self.callback(Constants.SignalCodes.CHANGE_VIEW, "MENU")
+
         self.keysPressed.add(symbol)
 
     def on_key_release(self, symbol: int, modifiers: int) -> bool | None:
@@ -61,9 +71,6 @@ class Test(View):
         lastPosition = self.player.sprite.center_x, self.player.sprite.center_y
         self.player.updatePosition()
 
-        interact_collisions = self.player.sprite.collides_with_list(
-            self.interactSprites
-        )
         background_colisions = self.player.sprite.collides_with_list(
             self.backgroundObjects
         )
@@ -71,15 +78,6 @@ class Test(View):
 
         if background_colisions or walls_collisions:
             self.player.sprite.center_x, self.player.sprite.center_y = lastPosition
-
-        if interact_collisions:
-            if arcade.key.E in self.keysPressed:
-                if interact_collisions[0].name.lower() == "door":
-                    self.callback(Constants.SignalCodes.CHANGE_VIEW, "MENU")
-
-        # for obj in interact_collisions:
-        #     name_obj = obj.name
-        #     print("nombre del objeto : ", name_obj)
 
         for key in self.keysPressed:
             self.player.updateState(key)
