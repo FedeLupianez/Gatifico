@@ -16,7 +16,8 @@ WalkBackPath = "src/assets/Player/Walk/Back/Back_Walk_{}.png"
 WalkSidePath = "src/assets/Player/Walk/Side/Side_Walk_{}.png"
 
 # Defino los id de los estados para no repetir magic strings
-IDLE_SIDE = "IDLE_SIDE"
+IDLE_SIDE_LEFT = "IDLE_SIDE_LEFT"
+IDLE_SIDE_RIGHT = "IDLE_SIDE_RIGHT"
 IDLE_FRONT = "IDLE_FRONT"
 IDLE_BACK = "IDLE_BACk"
 LEFT = "LEFT"
@@ -48,17 +49,26 @@ class Player(StateMachine):
         self.spriteCache: dict[
             str, arcade.Texture
         ] = {}  # Diccionario con las texturas cargadas para ahorrar llamdas a memoria
-        self.lastAnimationPath: str = ""
 
     def handleMovementEvent(self, key: int):
         """Función que se llama siempre que se toca una tecla de movimiento
         Args :
             key (int) : Tecla presionada
         """
-        # Si la key es negativa significa que se soltó una tecla,
-        # por lo que regresa al estado IDLE
+        # Si la tecla es negativa significa que se soltó una tecla
         if key < 0:
-            return IDLE_FRONT
+            match abs(key):
+                case arcade.key.W:
+                    return IDLE_BACK
+                case arcade.key.S:
+                    return IDLE_FRONT
+                case arcade.key.A:
+                    return IDLE_SIDE_LEFT
+                case arcade.key.D:
+                    return IDLE_SIDE_RIGHT
+                case _:
+                    return IDLE_FRONT
+
         # Si es que presionó una tecla, se cambia al estado correspondiente
         match key:
             case arcade.key.W:
@@ -88,7 +98,15 @@ class Player(StateMachine):
         self.actualAnimationFrames = 5
         return self.handleMovementEvent(event)
 
-    def IdleSide(self, event):
+    def IdleSideLeft(self, event):
+        self.sprite.change_x = 0
+        self.sprite.change_y = 0
+        self.actualAnimationPath = IdleSidePath
+        self.actualAnimationFrames = 5
+        self.sprite.scale_x = -abs(self.sprite.scale_x)
+        return self.handleMovementEvent(event)
+
+    def IdleSideRight(self, event):
         self.sprite.change_x = 0
         self.sprite.change_y = 0
         self.actualAnimationPath = IdleSidePath
@@ -129,7 +147,8 @@ class Player(StateMachine):
         """Función para configurar la maquina de estados del personaje"""
         self.addState(IDLE_FRONT, self.IdleFront)
         self.addState(IDLE_BACK, self.IdleBack)
-        self.addState(IDLE_SIDE, self.IdleSide)
+        self.addState(IDLE_SIDE_LEFT, self.IdleSideLeft)
+        self.addState(IDLE_SIDE_RIGHT, self.IdleSideRight)
         self.addState(LEFT, self.LeftState)
         self.addState(RIGHT, self.RightState)
         self.addState(DOWN, self.DownState)
@@ -152,8 +171,6 @@ class Player(StateMachine):
         """
         Actualiza la lista de texturas segun el estado actual
         """
-        if self.lastAnimationPath == self.actualAnimationPath:
-            return
 
         self.lastAnimationPath = self.actualAnimationPath
         print("cargando nuevas texturas ...\n")

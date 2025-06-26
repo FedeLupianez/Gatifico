@@ -3,11 +3,10 @@ from scenes.View import View
 import Constants
 from characters.Player import Player
 from typing import Callable
-from arcade.camera import Camera2D
 
 
 class Test(View):
-    def __init__(self, callback: Callable) -> None:
+    def __init__(self, callback: Callable, player: Player) -> None:
         backgroundUrl = None
         tileMapUrl = "src/assets/Maps/Tests.tmx"
         super().__init__(backgroundUrl=backgroundUrl, tileMapUrl=tileMapUrl)
@@ -18,7 +17,7 @@ class Test(View):
         self.playerSpritesList: arcade.SpriteList = arcade.SpriteList()
         self.backgroundSpriteList: arcade.SpriteList = arcade.SpriteList()
 
-        self.player = Player()  # Defino el personaje
+        self.player = player  # Defino el personaje
         self.player.sprite.center_x = Constants.Game.SCREEN_WIDTH // 2
         self.player.sprite.center_y = Constants.Game.SCREEN_HEIGHT // 2
         self.player.setup()
@@ -34,20 +33,7 @@ class Test(View):
         self.collisionSprites = self.loadObjectLayers("Colisiones", self.tileMap)
         self.interactSprites = self.loadObjectLayers("Interactuables", self.tileMap)
 
-        # self.obstacle: arcade.Sprite = arcade.Sprite(
-        #     "src/assets/Background/Texture/TX Plant.png"
-        # )
-        # self.door: arcade.Sprite = arcade.Sprite(
-        #     "src/assets/Background/Texture/TX Plant.png"
-        # )
-        # self.obstacle.center_x = 100
-        # self.obstacle.center_y = 100
-
-        # self.door.center_x = Constants.Game.SCREEN_WIDTH - 100
-        # self.door.center_y = Constants.Game.SCREEN_HEIGHT // 2
         self.playerSpritesList.append(self.player.sprite)
-        # self.backgroundSpriteList.append(self.obstacle)
-        # self.backgroundSpriteList.append(self.door)
         self.keysPressed: set = set()
 
     def on_show_view(self) -> None:
@@ -68,6 +54,7 @@ class Test(View):
 
     def on_key_release(self, symbol: int, modifiers: int) -> bool | None:
         self.keysPressed.discard(symbol)
+        self.player.updateState(-symbol)
 
     def on_update(self, delta_time: float) -> bool | None:
         self.player.update_animation(delta_time)
@@ -87,15 +74,12 @@ class Test(View):
 
         if interact_collisions:
             if arcade.key.E in self.keysPressed:
-                print(interact_collisions[0].name)
+                if interact_collisions[0].name.lower() == "door":
+                    self.callback(Constants.SignalCodes.CHANGE_VIEW, "MENU")
 
         # for obj in interact_collisions:
         #     name_obj = obj.name
         #     print("nombre del objeto : ", name_obj)
-
-        if not (self.keysPressed):
-            self.player.updateState(-1)
-            return
 
         for key in self.keysPressed:
             self.player.updateState(key)
