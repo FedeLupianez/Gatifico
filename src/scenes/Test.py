@@ -8,7 +8,7 @@ from typing import Callable
 class Test(View):
     def __init__(self, callback: Callable, player: Player) -> None:
         backgroundUrl = None
-        tileMapUrl = "src/assets/Maps/Tests.tmx"
+        tileMapUrl = ":resources:Maps/Tests.tmx"
         super().__init__(backgroundUrl=backgroundUrl, tileMapUrl=tileMapUrl)
         self.window.set_mouse_visible(False)
         self.callback = callback
@@ -56,9 +56,12 @@ class Test(View):
                 self.interactSprites
             )
             if interact_collisions:
-                print(interact_collisions[0].name)
-                if interact_collisions[0].name.lower() == "door":
+                obj = interact_collisions[0]
+                print(obj.name)
+                if obj.name.lower() == "door":
                     self.callback(Constants.SignalCodes.CHANGE_VIEW, "MENU")
+                    return
+                self.player.addToInventory(obj.name, 1)
 
         self.keysPressed.add(symbol)
 

@@ -34,5 +34,5 @@ class AssetsUrls:
     # Indice inicial de los sprites (comienzan por 1)
     INITIAL_INDEX = 0
     # Paths de los fondos
-    MENU_BACKGROUND = "src/assets/2D Pixel Dungeon Asset Pack/interface/arrow_1.png"
-    HOUSE_BACKGROUND = "src/assets/2D Pixel Dungeon Asset Pack/Dungeon_Tileset_at.png"
+    MENU_BACKGROUND = "assets/2D Pixel Dungeon Asset Pack/interface/arrow_1.png"
+    HOUSE_BACKGROUND = "assets/2D Pixel Dungeon Asset Pack/Dungeon_Tileset_at.png"

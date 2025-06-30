@@ -2,13 +2,13 @@ import arcade
 from Constants import Game, SignalCodes
 from scenes.View import View
 
-StartButtonPath: str = "src/assets/UI/StartButton.png"
-ExitButtonPath: str = "src/assets/UI/ExitButton.png"
+StartButtonPath: str = ":resources:UI/StartButton.png"
+ExitButtonPath: str = ":resources:UI/ExitButton.png"
 
 
 class Menu(View):
     def __init__(self, callback):
-        backgroundUrl = "src/assets/Background/Texture/TX Plant.png"
+        backgroundUrl = ":resources:Background/Texture/TX Plant.png"
         super().__init__(backgroundUrl=backgroundUrl, tileMapUrl=None)
 
         self.window.set_mouse_visible(True)

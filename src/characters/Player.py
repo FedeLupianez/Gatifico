@@ -4,17 +4,17 @@ import Constants
 from StateMachine import StateMachine
 
 # Paths a las texturas del personaje segun su estado
-IdleFrontPath = "src/assets/Player/Idle/Front/Front_Idle_{}.png"
-IdleBackPath = "src/assets/Player/Idle/Back/Back_Idle_{}.png"
-IdleSidePath = "src/assets/Player/Idle/Side/Side_Idle_{}.png"
+IdleFrontPath = ":resources:Player/Idle/Front/Front_Idle_{}.png"
+IdleBackPath = ":resources:Player/Idle/Back/Back_Idle_{}.png"
+IdleSidePath = ":resources:Player/Idle/Side/Side_Idle_{}.png"
 
-RunFrontPath = "src/assets/Player/Run/Front/Front_Run_{}.png"
-RunBackPath = "src/assets/Player/Run/Back/Back_Run_{}.png"
-RunSidePath = "src/assets/Player/Run/Side/Side_Run_{}.png"
+RunFrontPath = ":resources:Player/Run/Front/Front_Run_{}.png"
+RunBackPath = ":resources:Player/Run/Back/Back_Run_{}.png"
+RunSidePath = ":resources:Player/Run/Side/Side_Run_{}.png"
 
-WalkFrontPath = "src/assets/Player/Walk/Front/Front_Walk_{}.png"
-WalkBackPath = "src/assets/Player/Walk/Back/Back_Walk_{}.png"
-WalkSidePath = "src/assets/Player/Walk/Side/Side_Walk_{}.png"
+WalkFrontPath = ":resources:Player/Walk/Front/Front_Walk_{}.png"
+WalkBackPath = ":resources:Player/Walk/Back/Back_Walk_{}.png"
+WalkSidePath = ":resources:Player/Walk/Side/Side_Walk_{}.png"
 
 # Defino los id de los estados para no repetir magic strings
 IDLE_SIDE_LEFT = "IDLE_SIDE_LEFT"
@@ -50,6 +50,8 @@ class Player(StateMachine):
         self.spriteCache: dict[
             str, arcade.Texture
         ] = {}  # Diccionario con las texturas cargadas para ahorrar llamdas a memoria
+        # Diccionario para el inventario
+        self.inventory: dict[str, int] = {}
 
     def handleMovementEvent(self, key: int):
         """Función que se llama siempre que se toca una tecla de movimiento
@@ -204,3 +206,10 @@ class Player(StateMachine):
             self.animationTimer = 0
             self.textureIndex = (self.textureIndex + 1) % self.actualAnimationFrames
             self.sprite.texture = self.frames[self.textureIndex]
+
+    def addToInventory(self, item: str, cant: int) -> None:
+        if item not in self.inventory:
+            self.inventory[item] = cant
+        else:
+            self.inventory[item] += cant
+        print(self.inventory)
