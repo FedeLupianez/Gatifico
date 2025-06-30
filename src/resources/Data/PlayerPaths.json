@@ -1,0 +1,19 @@
+{
+  "IDLE": {
+    "FRONT": ":resources:Player/Idle/Front/Front_Idle_{}.png",
+    "BACK": ":resources:Player/Idle/Back/Back_Idle_{}.png",
+    "SIDE": ":resources:Player/Idle/Side/Side_Idle_{}.png"
+  },
+
+  "RUN": {
+    "FRONT": ":resources:Player/Run/Front/Front_Run_{}.png",
+    "BACK": ":resources:Player/Run/Back/Back_Run_{}.png",
+    "SIDE": ":resources:Player/Run/Side/Side_Run_{}.png"
+  },
+
+  "WALK": {
+    "FRONT": ":resources:Player/Walk/Front/Front_Walk_{}.png",
+    "BACK": ":resources:Player/Walk/Back/Back_Walk_{}.png",
+    "SIDE": ":resources:Player/Walk/Side/Side_Walk_{}.png"
+  }
+}

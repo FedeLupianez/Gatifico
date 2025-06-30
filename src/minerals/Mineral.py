@@ -20,7 +20,7 @@ class Mineral(arcade.Sprite):
         center_y: float,
         mineralAttributes: dict,
     ):
-        self.attributes = mineralAttributes
+        self.attributes: dict = mineralAttributes
         super().__init__(
             path_or_texture=self.attributes[mineral][size_type]["path"],
             center_x=center_x,

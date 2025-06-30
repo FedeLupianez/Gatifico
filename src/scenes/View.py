@@ -1,3 +1,4 @@
+from typing import Optional
 import arcade
 import Constants
 from arcade.camera import Camera2D
@@ -7,7 +8,9 @@ class View(arcade.View):
     def __init__(self, backgroundUrl: str | None, tileMapUrl: str | None) -> None:
         super().__init__()
 
-        self.tileMap: arcade.TileMap | None = None
+        if tileMapUrl:
+            self.tileMap = arcade.load_tilemap(tileMapUrl)
+
         self.scene = self.CreateScene(
             backgroundUrl=backgroundUrl, tileMapUrl=tileMapUrl
         )
@@ -23,7 +26,6 @@ class View(arcade.View):
         """
         # Si se le pasa un tilemap
         if tileMapUrl:
-            self.tileMap = arcade.load_tilemap(tileMapUrl)
             return arcade.Scene.from_tilemap(self.tileMap)
 
         if backgroundUrl:

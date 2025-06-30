@@ -1,4 +1,7 @@
 import arcade
+from typing import Tuple
+
+from arcade.types import Point2List
 from scenes.View import View
 import Constants
 from characters.Player import Player
@@ -33,6 +36,7 @@ class Test(View):
         self.wallsLayer = self.scene["Paredes"]
         self.backgroundObjects = self.scene["Objetos"]
 
+        assert self.tileMap is not None
         # Capas de colisiones :
         self.collisionSprites = self.loadObjectLayers("Colisiones", self.tileMap)
         self.interactSprites = self.loadObjectLayers("Interactuables", self.tileMap)
@@ -46,12 +50,21 @@ class Test(View):
         tempList = arcade.SpriteList()
 
         for obj in tempLayer:
-            topLeft, topRight, bottomRight, bottomLeft = obj.shape
+            assert obj.name is not None
+            assert obj.properties is not None
+            shape: Tuple[
+                Tuple[float, float],
+                Tuple[float, float],
+                Tuple[float, float],
+                Tuple[float, float],
+            ] = obj.shape
+
+            topLeft, topRight, bottomRight, bottomLeft = shape
             width: float = topRight[0] - topLeft[0]
             height: float = topLeft[1] - bottomLeft[1]
             center_x: float = topLeft[0] + (width) / 2
             center_y: float = bottomLeft[1] + (height) / 2
-            size = obj.properties.get("size")
+            size = str(obj.properties.get("size"))
 
             newObj = Mineral(
                 obj.name,

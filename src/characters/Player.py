@@ -1,20 +1,9 @@
+from typing import Dict, Literal
 import arcade
 from Constants import Game, AssetsUrls
 import Constants
 from StateMachine import StateMachine
-
-# Paths a las texturas del personaje segun su estado
-IdleFrontPath = ":resources:Player/Idle/Front/Front_Idle_{}.png"
-IdleBackPath = ":resources:Player/Idle/Back/Back_Idle_{}.png"
-IdleSidePath = ":resources:Player/Idle/Side/Side_Idle_{}.png"
-
-RunFrontPath = ":resources:Player/Run/Front/Front_Run_{}.png"
-RunBackPath = ":resources:Player/Run/Back/Back_Run_{}.png"
-RunSidePath = ":resources:Player/Run/Side/Side_Run_{}.png"
-
-WalkFrontPath = ":resources:Player/Walk/Front/Front_Walk_{}.png"
-WalkBackPath = ":resources:Player/Walk/Back/Back_Walk_{}.png"
-WalkSidePath = ":resources:Player/Walk/Side/Side_Walk_{}.png"
+from DataManager import dataManager
 
 # Defino los id de los estados para no repetir magic strings
 IDLE_SIDE_LEFT = "IDLE_SIDE_LEFT"
@@ -27,12 +16,19 @@ UP = "UP"
 DOWN = "DOWN"
 
 
+actionKeys = Literal["IDLE", "RUN", "WALK"]
+directionKeys = Literal["FRONT", "SIDE", "BACK"]
+TexturePaths: Dict[actionKeys, Dict[directionKeys, str]] = dataManager.loadData(
+    "PlayerPaths.json"
+)
+
+
 class Player(StateMachine):
     def __init__(self):
         super().__init__(IDLE_FRONT)
         self.motions = [arcade.key.W, arcade.key.A, arcade.key.S, arcade.key.D]
         # Todos los path tienen llaves {} donde iría el numero de sprite
-        self.actualAnimationPath: str = IdleFrontPath.replace(
+        self.actualAnimationPath: str = TexturePaths["IDLE"]["FRONT"].replace(
             "{}",
             str(
                 AssetsUrls.INITIAL_INDEX
@@ -90,21 +86,21 @@ class Player(StateMachine):
     def IdleFront(self, event):
         self.sprite.change_x = 0
         self.sprite.change_y = 0
-        self.actualAnimationPath = IdleFrontPath
+        self.actualAnimationPath = TexturePaths["IDLE"]["FRONT"]
         self.actualAnimationFrames = 5
         return self.handleMovementEvent(event)
 
     def IdleBack(self, event):
         self.sprite.change_x = 0
         self.sprite.change_y = 0
-        self.actualAnimationPath = IdleBackPath
+        self.actualAnimationPath = TexturePaths["IDLE"]["BACK"]
         self.actualAnimationFrames = 5
         return self.handleMovementEvent(event)
 
     def IdleSideLeft(self, event):
         self.sprite.change_x = 0
         self.sprite.change_y = 0
-        self.actualAnimationPath = IdleSidePath
+        self.actualAnimationPath = TexturePaths["IDLE"]["SIDE"]
         self.actualAnimationFrames = 5
         self.sprite.scale_x = -abs(self.sprite.scale_x)
         return self.handleMovementEvent(event)
@@ -112,14 +108,14 @@ class Player(StateMachine):
     def IdleSideRight(self, event):
         self.sprite.change_x = 0
         self.sprite.change_y = 0
-        self.actualAnimationPath = IdleSidePath
+        self.actualAnimationPath = TexturePaths["IDLE"]["SIDE"]
         self.actualAnimationFrames = 5
         return self.handleMovementEvent(event)
 
     def LeftState(self, event):
         self.sprite.change_x = -Game.PLAYER_SPEED
         self.sprite.change_y = 0
-        self.actualAnimationPath = RunSidePath
+        self.actualAnimationPath = TexturePaths["RUN"]["SIDE"]
         self.actualAnimationFrames = 6
         self.sprite.scale_x = -abs(self.sprite.scale_x)
         return self.handleMovementEvent(event)
@@ -127,7 +123,7 @@ class Player(StateMachine):
     def RightState(self, event):
         self.sprite.change_x = Game.PLAYER_SPEED
         self.sprite.change_y = 0
-        self.actualAnimationPath = RunSidePath
+        self.actualAnimationPath = TexturePaths["RUN"]["SIDE"]
         self.actualAnimationFrames = 6
         self.sprite.scale_x = abs(self.sprite.scale_x)
         return self.handleMovementEvent(event)
@@ -135,7 +131,7 @@ class Player(StateMachine):
     def DownState(self, event):
         self.sprite.change_y = -Game.PLAYER_SPEED
         self.sprite.change_x = 0
-        self.actualAnimationPath = RunFrontPath
+        self.actualAnimationPath = TexturePaths["RUN"]["FRONT"]
         self.actualAnimationFrames = 6
         return self.handleMovementEvent(event)
 
@@ -143,7 +139,7 @@ class Player(StateMachine):
         self.sprite.change_y = Game.PLAYER_SPEED
         self.sprite.change_x = 0
         self.actualAnimationFrames = 6
-        self.actualAnimationPath = RunBackPath
+        self.actualAnimationPath = TexturePaths["RUN"]["BACK"]
         return self.handleMovementEvent(event)
 
     def setup(self):
@@ -176,7 +172,6 @@ class Player(StateMachine):
         """
 
         self.lastAnimationPath = self.actualAnimationPath
-        print("cargando nuevas texturas ...\n")
         self.frames.clear()
         for i in range(
             AssetsUrls.INITIAL_INDEX,
@@ -195,7 +190,6 @@ class Player(StateMachine):
             # Agrega la textura
             self.frames.append(texture)
         self.textureIndex = 0
-        print("texturas cargadas !")
 
     def update_animation(self, deltaTime: float):
         """Función para actualizar la animación del personaje"""
