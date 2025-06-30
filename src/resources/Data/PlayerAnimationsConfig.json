@@ -1,0 +1,73 @@
+{
+  "IDLE_FRONT": {
+    "action": "IDLE",
+    "direction": "FRONT",
+    "frames": 5,
+    "speed_x": 0,
+    "speed_y": 0,
+    "flip_x": false
+  },
+
+  "IDLE_BACK": {
+    "action": "IDLE",
+    "direction": "BACK",
+    "frames": 5,
+    "speed_x": 0,
+    "speed_y": 0,
+    "flip_x": false
+  },
+
+  "IDLE_SIDE_LEFT": {
+    "action": "IDLE",
+    "direction": "SIDE",
+    "frames": 5,
+    "speed_x": 0,
+    "speed_y": 0,
+    "flip_x": true
+  },
+
+  "IDLE_SIDE_RIGHT": {
+    "action": "IDLE",
+    "direction": "SIDE",
+    "frames": 5,
+    "speed_x": 0,
+    "speed_y": 0,
+    "flip_x": false
+  },
+
+  "LEFT": {
+    "action": "RUN",
+    "direction": "SIDE",
+    "frames": 6,
+    "speed_x": -5,
+    "speed_y": 0,
+    "flip_x": true
+  },
+  
+  "RIGHT": {
+    "action": "RUN",
+    "direction": "SIDE",
+    "frames": 6,
+    "speed_x": 5,
+    "speed_y": 0,
+    "flip_x": false
+  },
+
+  "UP": {
+    "action": "RUN",
+    "direction": "BACK",
+    "frames": 6,
+    "speed_x": 0,
+    "speed_y": 5,
+    "flip_x": false
+  },
+
+  "DOWN": {
+    "action": "RUN",
+    "direction": "FRONT",
+    "frames": 6,
+    "speed_x": 0,
+    "speed_y": -5,
+    "flip_x": false
+  }
+}

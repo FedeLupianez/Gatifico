@@ -22,6 +22,8 @@ TexturePaths: Dict[actionKeys, Dict[directionKeys, str]] = dataManager.loadData(
     "PlayerPaths.json"
 )
 
+ANIMATION_STATE_CONFIG: dict = dataManager.loadData("PlayerAnimationsConfig.json")
+
 
 class Player(StateMachine):
     def __init__(self):
@@ -48,6 +50,31 @@ class Player(StateMachine):
         ] = {}  # Diccionario con las texturas cargadas para ahorrar llamdas a memoria
         # Diccionario para el inventario
         self.inventory: dict[str, int] = {}
+
+    def genericStateHandler(self, event: int):
+        """Función genérica para todos los estados del personaje, ya que casi todos hacen lo mismo"""
+        # Cargo la configuración del estado actual
+        config = ANIMATION_STATE_CONFIG[self.actualStateId]
+        # Hago los cambios que tengan que ver con el sprite
+        self.sprite.change_x = config["speed_x"]
+        self.sprite.change_y = config["speed_y"]
+
+        if config["flip_x"]:
+            self.sprite.scale_x = -abs(self.sprite.scale_x)
+        else:
+            self.sprite.scale_x = abs(self.sprite.scale_x)
+
+        action = config["action"]
+        direction = config["direction"]
+        frames = config["frames"]
+
+        templatePath = TexturePaths[action][direction]
+        if templatePath != self.actualAnimationPath:
+            self.actualAnimationPath = templatePath
+            self.actualAnimationFrames = frames
+            self.updateSpriteList()
+        newState = self.handleMovementEvent(event)
+        return newState
 
     def handleMovementEvent(self, key: int):
         """Función que se llama siempre que se toca una tecla de movimiento
@@ -82,76 +109,16 @@ class Player(StateMachine):
                 # Si no es ninguna de las otras teclas retorna el estado actual
                 return self.actualStateId
 
-    # Definición de los estados como funciones
-    def IdleFront(self, event):
-        self.sprite.change_x = 0
-        self.sprite.change_y = 0
-        self.actualAnimationPath = TexturePaths["IDLE"]["FRONT"]
-        self.actualAnimationFrames = 5
-        return self.handleMovementEvent(event)
-
-    def IdleBack(self, event):
-        self.sprite.change_x = 0
-        self.sprite.change_y = 0
-        self.actualAnimationPath = TexturePaths["IDLE"]["BACK"]
-        self.actualAnimationFrames = 5
-        return self.handleMovementEvent(event)
-
-    def IdleSideLeft(self, event):
-        self.sprite.change_x = 0
-        self.sprite.change_y = 0
-        self.actualAnimationPath = TexturePaths["IDLE"]["SIDE"]
-        self.actualAnimationFrames = 5
-        self.sprite.scale_x = -abs(self.sprite.scale_x)
-        return self.handleMovementEvent(event)
-
-    def IdleSideRight(self, event):
-        self.sprite.change_x = 0
-        self.sprite.change_y = 0
-        self.actualAnimationPath = TexturePaths["IDLE"]["SIDE"]
-        self.actualAnimationFrames = 5
-        return self.handleMovementEvent(event)
-
-    def LeftState(self, event):
-        self.sprite.change_x = -Game.PLAYER_SPEED
-        self.sprite.change_y = 0
-        self.actualAnimationPath = TexturePaths["RUN"]["SIDE"]
-        self.actualAnimationFrames = 6
-        self.sprite.scale_x = -abs(self.sprite.scale_x)
-        return self.handleMovementEvent(event)
-
-    def RightState(self, event):
-        self.sprite.change_x = Game.PLAYER_SPEED
-        self.sprite.change_y = 0
-        self.actualAnimationPath = TexturePaths["RUN"]["SIDE"]
-        self.actualAnimationFrames = 6
-        self.sprite.scale_x = abs(self.sprite.scale_x)
-        return self.handleMovementEvent(event)
-
-    def DownState(self, event):
-        self.sprite.change_y = -Game.PLAYER_SPEED
-        self.sprite.change_x = 0
-        self.actualAnimationPath = TexturePaths["RUN"]["FRONT"]
-        self.actualAnimationFrames = 6
-        return self.handleMovementEvent(event)
-
-    def UpState(self, event):
-        self.sprite.change_y = Game.PLAYER_SPEED
-        self.sprite.change_x = 0
-        self.actualAnimationFrames = 6
-        self.actualAnimationPath = TexturePaths["RUN"]["BACK"]
-        return self.handleMovementEvent(event)
-
     def setup(self):
         """Función para configurar la maquina de estados del personaje"""
-        self.addState(IDLE_FRONT, self.IdleFront)
-        self.addState(IDLE_BACK, self.IdleBack)
-        self.addState(IDLE_SIDE_LEFT, self.IdleSideLeft)
-        self.addState(IDLE_SIDE_RIGHT, self.IdleSideRight)
-        self.addState(LEFT, self.LeftState)
-        self.addState(RIGHT, self.RightState)
-        self.addState(DOWN, self.DownState)
-        self.addState(UP, self.UpState)
+        self.addState(IDLE_FRONT, self.genericStateHandler)
+        self.addState(IDLE_BACK, self.genericStateHandler)
+        self.addState(IDLE_SIDE_LEFT, self.genericStateHandler)
+        self.addState(IDLE_SIDE_RIGHT, self.genericStateHandler)
+        self.addState(LEFT, self.genericStateHandler)
+        self.addState(RIGHT, self.genericStateHandler)
+        self.addState(DOWN, self.genericStateHandler)
+        self.addState(UP, self.genericStateHandler)
         self.updateSpriteList()
 
     def updatePosition(self):
