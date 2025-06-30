@@ -1,7 +1,5 @@
 import arcade
 from typing import Tuple
-
-from arcade.types import Point2List
 from scenes.View import View
 import Constants
 from characters.Player import Player
@@ -20,30 +18,37 @@ class Test(View):
         self.window.set_mouse_visible(False)
         self.callback = callback
 
+        self.player = player  # Defino el personaje
+
+        self.setupSpriteLists()
+        self.setupSceneLayers()
+        self.setupPlayer()
+
+        self.keysPressed: set = set()
+
+    def setupSpriteLists(self):
         # Listas de Sprites
         self.playerSpritesList: arcade.SpriteList = arcade.SpriteList()
         self.backgroundSpriteList: arcade.SpriteList = arcade.SpriteList()
 
-        self.player = player  # Defino el personaje
+    def setupPlayer(self) -> None:
         self.player.sprite.center_x = Constants.Game.SCREEN_WIDTH // 2
         self.player.sprite.center_y = Constants.Game.SCREEN_HEIGHT // 2
         self.player.setup()
+        self.playerSpritesList.append(self.player.sprite)
         # Camara para seguir al jugador :
         self.camera.zoom = 2.5
 
-        # Capas de vista :
-        self.floorLayer = self.scene["Piso"]
-        self.wallsLayer = self.scene["Paredes"]
-        self.backgroundObjects = self.scene["Objetos"]
-
+    def setupSceneLayers(self) -> None:
         assert self.tileMap is not None
+        # Capas de vista :
+        self.floor = self.scene["Piso"]
+        self.walls = self.scene["Paredes"]
+        self.backgroundObjects = self.scene["Objetos"]
         # Capas de colisiones :
         self.collisionSprites = self.loadObjectLayers("Colisiones", self.tileMap)
         self.interactSprites = self.loadObjectLayers("Interactuables", self.tileMap)
         self.mineralsLayer = self.loadMineralLayer()
-
-        self.playerSpritesList.append(self.player.sprite)
-        self.keysPressed: set = set()
 
     def loadMineralLayer(self) -> arcade.SpriteList:
         tempLayer = self.tileMap.object_lists["Minerales"]
@@ -91,30 +96,35 @@ class Test(View):
     def on_key_press(self, symbol: int, modifiers: int) -> bool | None:
         if symbol == arcade.key.SPACE:
             self.callback(Constants.SignalCodes.CHANGE_VIEW, "MENU")
+            return
 
         if symbol == arcade.key.E:
-            interact_collisions = self.player.sprite.collides_with_list(
-                self.interactSprites
-            )
-            if interact_collisions:
-                obj = interact_collisions[0]
-                if obj.name.lower() == "door":
-                    self.callback(Constants.SignalCodes.CHANGE_VIEW, "MENU")
-                    return
-            mineralCollisions = self.player.sprite.collides_with_list(
-                self.mineralsLayer
-            )
-            if mineralCollisions:
-                mineral = mineralCollisions[0]
-                mineral.setup()
-                mineral.stateMachine.processState(arcade.key.E)
-                self.player.addToInventory(mineral.mineral, 1)
-
-                if mineral.should_removed:
-                    mineral.remove_from_sprite_lists()
+            if self.handleInteractions():
                 return
 
         self.keysPressed.add(symbol)
+
+    def handleInteractions(self):
+        if interact_collisions := self.player.sprite.collides_with_list(
+            self.interactSprites
+        ):
+            obj = interact_collisions[0]
+            if obj.name.lower() == "door":
+                self.callback(Constants.SignalCodes.CHANGE_VIEW, "MENU")
+                return True
+
+        if mineralCollisions := self.player.sprite.collides_with_list(
+            self.mineralsLayer
+        ):
+            mineral = mineralCollisions[0]
+            mineral.setup()
+            mineral.stateMachine.processState(arcade.key.E)
+            self.player.addToInventory(mineral.mineral, 1)
+
+            if mineral.should_removed:
+                mineral.remove_from_sprite_lists()
+            return True
+        return False
 
     def on_key_release(self, symbol: int, modifiers: int) -> bool | None:
         self.keysPressed.discard(symbol)
@@ -128,13 +138,14 @@ class Test(View):
         background_colisions = self.player.sprite.collides_with_list(
             self.backgroundObjects
         )
-        walls_collisions = self.player.sprite.collides_with_list(self.wallsLayer)
+        walls_collisions = self.player.sprite.collides_with_list(self.walls)
 
         if background_colisions or walls_collisions:
             self.player.sprite.center_x, self.player.sprite.center_y = lastPosition
 
         for key in self.keysPressed:
             self.player.updateState(key)
+
         self.camera.position = arcade.math.lerp_2d(
             self.camera.position, self.player.sprite.position, 0.50
         )
