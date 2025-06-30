@@ -10,6 +10,12 @@ from DataManager import dataManager
 MineralsResources = dataManager.loadData("Minerals.json")
 
 
+def is_near_to_sprite(
+    sprite1: arcade.Sprite, sprite2: arcade.Sprite, tolerance: float = 16.0
+) -> bool:
+    return arcade.get_distance_between_sprites(sprite1, sprite2) <= tolerance
+
+
 class Test(View):
     def __init__(self, callback: Callable, player: Player) -> None:
         backgroundUrl = None
@@ -142,6 +148,16 @@ class Test(View):
 
         if background_colisions or walls_collisions:
             self.player.sprite.center_x, self.player.sprite.center_y = lastPosition
+
+        for interactObject in self.interactSprites:
+            if is_near_to_sprite(self.player.sprite, interactObject):
+                self.player.sprite.center_x, self.player.sprite.center_y = lastPosition
+                break
+
+        for mineral in self.mineralsLayer:
+            if is_near_to_sprite(self.player.sprite, mineral):
+                self.player.sprite.center_x, self.player.sprite.center_y = lastPosition
+                break
 
         for key in self.keysPressed:
             self.player.updateState(key)
