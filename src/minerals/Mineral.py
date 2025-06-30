@@ -5,14 +5,6 @@ BIG_SIZE = "big"
 MID_SIZE = "mid"
 SMALL_SIZE = "small"
 
-mineralAttributes: dict[str, dict] = {
-    "rock": {
-        SMALL_SIZE: {"path": ":resources:Minerals/Rock/Rock_Small.png", "touches": 1},
-        MID_SIZE: {"path": ":resources:Minerals/Rock/Rock_Mid.png", "touches": 2},
-        BIG_SIZE: {"path": ":resources:Minerals/Rock/Rock_Big.png", "touches": 3},
-    }
-}
-
 BIG_STATE = "BIG"
 MID_STATE = "MID"
 SMALL_STATE = "SMALL"
@@ -20,9 +12,17 @@ KILL_STATE = "KILL"
 
 
 class Mineral(arcade.Sprite):
-    def __init__(self, mineral: str, size_type: str, center_x: float, center_y: float):
+    def __init__(
+        self,
+        mineral: str,
+        size_type: str,
+        center_x: float,
+        center_y: float,
+        mineralAttributes: dict,
+    ):
+        self.attributes = mineralAttributes
         super().__init__(
-            path_or_texture=mineralAttributes[mineral][size_type]["path"],
+            path_or_texture=self.attributes[mineral][size_type]["path"],
             center_x=center_x,
             center_y=center_y,
         )
@@ -39,14 +39,14 @@ class Mineral(arcade.Sprite):
         self.mineral = mineral
         self.size_type = size_type
 
-        self.touches = mineralAttributes[mineral][size_type]["touches"]
+        self.touches = self.attributes[mineral][size_type]["touches"]
         self.actualTouches = 0
 
         self.should_removed: bool = False
 
     def bigSizeState(self, key: int):
         self.size_type = BIG_SIZE
-        data = mineralAttributes[self.mineral][BIG_SIZE]
+        data = self.attributes[self.mineral][BIG_SIZE]
         newTexturePath = data["path"]
         self.updateSprite(newTexturePath)
         if key != arcade.key.E:
@@ -61,7 +61,7 @@ class Mineral(arcade.Sprite):
 
     def midSizeState(self, key: int):
         self.size_type = MID_SIZE
-        data = mineralAttributes[self.mineral][MID_SIZE]
+        data = self.attributes[self.mineral][MID_SIZE]
         newTexturePath = data["path"]
         self.touches = data["touches"]
         self.updateSprite(newTexturePath)
@@ -78,7 +78,7 @@ class Mineral(arcade.Sprite):
 
     def smallSizeState(self, key: int):
         self.size_type = SMALL_SIZE
-        data = mineralAttributes[self.mineral][SMALL_SIZE]
+        data = self.attributes[self.mineral][SMALL_SIZE]
         newTexturePath = data["path"]
         self.touches = data["touches"]
         self.updateSprite(newTexturePath)

@@ -1,9 +1,17 @@
+import os
 import arcade
 from scenes.View import View
 import Constants
 from characters.Player import Player
 from typing import Callable
 from minerals.Mineral import Mineral
+from DataManager import dataManager
+
+currentFileDir = os.path.dirname(__file__)
+ProjectDir = os.path.abspath(os.path.join(currentFileDir, "..", ".."))
+dataPath = os.path.join(ProjectDir, "src/resources/Data/Minerals.json")
+
+MineralsResources = dataManager.loadData(dataPath)
 
 
 class Test(View):
@@ -50,7 +58,13 @@ class Test(View):
             center_y: float = bottomLeft[1] + (height) / 2
             size = obj.properties.get("size")
 
-            newObj = Mineral(obj.name, size, center_x=center_x, center_y=center_y)
+            newObj = Mineral(
+                obj.name,
+                size,
+                center_x=center_x,
+                center_y=center_y,
+                mineralAttributes=MineralsResources,
+            )
             tempList.append(newObj)
         return tempList
 
