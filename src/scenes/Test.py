@@ -3,6 +3,7 @@ from scenes.View import View
 import Constants
 from characters.Player import Player
 from typing import Callable
+from minerals.Mineral import Mineral
 
 
 class Test(View):
@@ -32,9 +33,26 @@ class Test(View):
         # Capas de colisiones :
         self.collisionSprites = self.loadObjectLayers("Colisiones", self.tileMap)
         self.interactSprites = self.loadObjectLayers("Interactuables", self.tileMap)
+        self.mineralsLayer = self.loadMineralLayer()
 
         self.playerSpritesList.append(self.player.sprite)
         self.keysPressed: set = set()
+
+    def loadMineralLayer(self) -> arcade.SpriteList:
+        tempLayer = self.tileMap.object_lists["Minerales"]
+        tempList = arcade.SpriteList()
+
+        for obj in tempLayer:
+            topLeft, topRight, bottomRight, bottomLeft = obj.shape
+            width: float = topRight[0] - topLeft[0]
+            height: float = topLeft[1] - bottomLeft[1]
+            center_x: float = topLeft[0] + (width) / 2
+            center_y: float = bottomLeft[1] + (height) / 2
+            size = obj.properties.get("size")
+
+            newObj = Mineral(obj.name, size, center_x=center_x, center_y=center_y)
+            tempList.append(newObj)
+        return tempList
 
     def on_show_view(self) -> None:
         return super().on_show_view()
@@ -46,6 +64,7 @@ class Test(View):
         self.scene.draw(pixelated=True)  # dibuja la escena
         self.playerSpritesList.draw(pixelated=True)  # dibuja el personaje
         self.backgroundSpriteList.draw(pixelated=True)
+        self.mineralsLayer.draw(pixelated=True)
 
     def on_key_press(self, symbol: int, modifiers: int) -> bool | None:
         if symbol == arcade.key.SPACE:
@@ -57,11 +76,21 @@ class Test(View):
             )
             if interact_collisions:
                 obj = interact_collisions[0]
-                print(obj.name)
                 if obj.name.lower() == "door":
                     self.callback(Constants.SignalCodes.CHANGE_VIEW, "MENU")
                     return
-                self.player.addToInventory(obj.name, 1)
+            mineralCollisions = self.player.sprite.collides_with_list(
+                self.mineralsLayer
+            )
+            if mineralCollisions:
+                mineral = mineralCollisions[0]
+                mineral.setup()
+                mineral.stateMachine.processState(arcade.key.E)
+                self.player.addToInventory(mineral.mineral, 1)
+
+                if mineral.should_removed:
+                    mineral.remove_from_sprite_lists()
+                return
 
         self.keysPressed.add(symbol)
 

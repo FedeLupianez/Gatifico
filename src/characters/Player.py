@@ -20,7 +20,7 @@ WalkSidePath = ":resources:Player/Walk/Side/Side_Walk_{}.png"
 IDLE_SIDE_LEFT = "IDLE_SIDE_LEFT"
 IDLE_SIDE_RIGHT = "IDLE_SIDE_RIGHT"
 IDLE_FRONT = "IDLE_FRONT"
-IDLE_BACK = "IDLE_BACk"
+IDLE_BACK = "IDLE_BACK"
 LEFT = "LEFT"
 RIGHT = "RIGHT"
 UP = "UP"
@@ -70,7 +70,7 @@ class Player(StateMachine):
                 case arcade.key.D:
                     return IDLE_SIDE_RIGHT
                 case _:
-                    return IDLE_FRONT
+                    return self.actualStateId
 
         # Si es que presionó una tecla, se cambia al estado correspondiente
         match key:
