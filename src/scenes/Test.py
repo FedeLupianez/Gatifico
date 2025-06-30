@@ -111,25 +111,22 @@ class Test(View):
         self.keysPressed.add(symbol)
 
     def handleInteractions(self):
-        if interact_collisions := self.player.sprite.collides_with_list(
-            self.interactSprites
-        ):
-            obj = interact_collisions[0]
-            if obj.name.lower() == "door":
-                self.callback(Constants.SignalCodes.CHANGE_VIEW, "MENU")
+        for interactObject in self.interactSprites:
+            if is_near_to_sprite(self.player.sprite, interactObject, tolerance=40):
+                print(interactObject.name)
+                if interactObject.name.lower() == "door":
+                    self.callback(Constants.SignalCodes.CHANGE_VIEW, "MENU")
+                    return True
+
+        for mineral in self.mineralsLayer:
+            if is_near_to_sprite(self.player.sprite, mineral, tolerance=35):
+                mineral.setup()
+                mineral.stateMachine.processState(arcade.key.E)
+                self.player.addToInventory(mineral.mineral, 1)
+
+                if mineral.should_removed:
+                    mineral.remove_from_sprite_lists()
                 return True
-
-        if mineralCollisions := self.player.sprite.collides_with_list(
-            self.mineralsLayer
-        ):
-            mineral = mineralCollisions[0]
-            mineral.setup()
-            mineral.stateMachine.processState(arcade.key.E)
-            self.player.addToInventory(mineral.mineral, 1)
-
-            if mineral.should_removed:
-                mineral.remove_from_sprite_lists()
-            return True
         return False
 
     def on_key_release(self, symbol: int, modifiers: int) -> bool | None:
@@ -141,23 +138,25 @@ class Test(View):
         lastPosition = self.player.sprite.center_x, self.player.sprite.center_y
         self.player.updatePosition()
 
-        background_colisions = self.player.sprite.collides_with_list(
-            self.backgroundObjects
+        # Colisiones físicas solo con capas físicas reales
+        collisions = arcade.check_for_collision_with_lists(
+            self.player.sprite,
+            [
+                self.collisionSprites,
+                self.walls,
+            ],
         )
-        walls_collisions = self.player.sprite.collides_with_list(self.walls)
 
-        if background_colisions or walls_collisions:
-            self.player.sprite.center_x, self.player.sprite.center_y = lastPosition
-
-        for interactObject in self.interactSprites:
-            if is_near_to_sprite(self.player.sprite, interactObject):
-                self.player.sprite.center_x, self.player.sprite.center_y = lastPosition
-                break
-
+        # Chequeo manual de colisión "física" con interactuables (sin bloquear interacción)
+        for obj in self.interactSprites:
+            if arcade.check_for_collision(self.player.sprite, obj):
+                collisions.append(obj)
         for mineral in self.mineralsLayer:
-            if is_near_to_sprite(self.player.sprite, mineral):
-                self.player.sprite.center_x, self.player.sprite.center_y = lastPosition
-                break
+            if arcade.check_for_collision(self.player.sprite, mineral):
+                collisions.append(mineral)
+
+        if collisions:
+            self.player.sprite.center_x, self.player.sprite.center_y = lastPosition
 
         for key in self.keysPressed:
             self.player.updateState(key)
