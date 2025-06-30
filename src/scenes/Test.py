@@ -1,4 +1,3 @@
-import os
 import arcade
 from scenes.View import View
 import Constants
@@ -7,11 +6,7 @@ from typing import Callable
 from minerals.Mineral import Mineral
 from DataManager import dataManager
 
-currentFileDir = os.path.dirname(__file__)
-ProjectDir = os.path.abspath(os.path.join(currentFileDir, "..", ".."))
-dataPath = os.path.join(ProjectDir, "src/resources/Data/Minerals.json")
-
-MineralsResources = dataManager.loadData(dataPath)
+MineralsResources = dataManager.loadData("Minerals.json")
 
 
 class Test(View):

@@ -6,15 +6,15 @@ import json
 import os
 
 BASE_DIR = os.path.dirname(__file__)
-MineralResourcesPath = os.path.join(BASE_DIR, "resources", "Data", "Minerals.json")
+DATAFILES_DIR = BASE_DIR + "/resources/Data/"
 
 
 class DataManager:
     def __init__(self):
         pass
 
-    def loadData(self, path: str) -> dict:
-        with open(path, "r") as file:
+    def loadData(self, filename: str) -> dict:
+        with open(DATAFILES_DIR + filename, "r") as file:
             return json.load(file)
 
 

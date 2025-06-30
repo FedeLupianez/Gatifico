@@ -26,7 +26,6 @@ class StateMachine:
         Args :
             newState (str) : Id del nuevo estado
         """
-        print(newState)
         if newState not in self.states:
             raise ValueError(f"Estado {newState} no encontrado en la maquina")
         self.lastStateId = self.actualStateId
@@ -42,5 +41,4 @@ class StateMachine:
         if newState == self.actualStateId:
             return
         # Cambia al nuevo estado
-        print(f"cambiando al estado {newState}")
         self.setState(newState)
