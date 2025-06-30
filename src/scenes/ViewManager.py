@@ -7,16 +7,10 @@ from scenes.Test import Test
 
 # Esta clase va a manejar la vista que se muestra en la pantalla
 class ViewManager:
-    window = arcade.Window(
-        Constants.Game.SCREEN_WIDTH,
-        Constants.Game.SCREEN_HEIGHT,
-        title="Gatifico",
-        update_rate=Constants.Game.FPS,
-        draw_rate=Constants.Game.FPS,
-    )
     current_scene_id = "MENU"
 
-    def __init__(self, player: Player) -> None:
+    def __init__(self, player: Player, window: arcade.Window) -> None:
+        self.window = window
         # Tiene su propia ventana
         self.current_scene = Menu(self.callback)
         self.player = player

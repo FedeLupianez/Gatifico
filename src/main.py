@@ -4,6 +4,7 @@ import arcade
 from scenes.ViewManager import ViewManager
 from characters.Player import Player
 import os
+import Constants
 
 BASE_DIR = os.path.dirname(
     os.path.abspath(__file__)
@@ -13,11 +14,25 @@ arcade.resources.add_resource_handle(
 )  # Agrega la carpeta resources a los recursos de arcade
 
 
-def main():
-    player = Player()
-    viewManager = ViewManager(player)
-    arcade.run()
+class Main(arcade.Window):
+    def __init__(self) -> None:
+        super().__init__(
+            Constants.Game.SCREEN_WIDTH,
+            Constants.Game.SCREEN_HEIGHT,
+            title="Gatifico",
+            update_rate=Constants.Game.FPS,
+            draw_rate=Constants.Game.FPS,
+        )
+        self.player = Player()
+        self.ViewManager = ViewManager(self.player, self)
+
+
+# def main():
+#     player = Player()
+#     viewManager = ViewManager(player)
+#     arcade.run()
 
 
 if __name__ == "__main__":
-    main()
+    window = Main()
+    arcade.run()
