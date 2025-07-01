@@ -1,6 +1,7 @@
 import arcade
 import arcade.gui
-from typing import Tuple
+import arcade.color
+from typing import Literal, Tuple, Dict
 from scenes.View import View
 import Constants
 from characters.Player import Player
@@ -107,30 +108,41 @@ class Test(View):
         self.playerSpritesList.draw(pixelated=True)  # dibuja el personaje
         self.backgroundSpriteList.draw(pixelated=True)
         self.mineralsLayer.draw(pixelated=True)
+
         self.uiManager.draw()
 
-    def closeInventory(self):
-        self.uiAnchorLayout.clear()
-        self.uiManager.remove(self.uiAnchorLayout)  # 🔥 Eliminar layout del UIManager
-        self.uiAnchorLayout = arcade.gui.UIAnchorLayout()  # 🔁 Crear uno nuevo limpio
-        self.uiManager.add(self.uiAnchorLayout)  # ➕ Agregar el nuevo layout
-        self.inventoryEnabled = False
-        self.window.set_mouse_visible(False)
-        print("inventario cerrado")
-
     def showInventory(self):
-        print("inventario abierto")
         self.window.set_mouse_visible(True)
         self.inventoryEnabled = True
         self.uiAnchorLayout.clear()
+
+        self.inventory_bg_rect: Dict[
+            Literal["left", "right", "top", "bottom"], float
+        ] = {
+            "left": self.window.width / 2 - 100,
+            "right": self.window.width / 2 + 100,
+            "top": self.window.height / 2 + 100,
+            "bottom": self.window.height / 2 - 100,
+        }
+
+        inventoryGrid = arcade.gui.UIGridLayout(
+            column_count=5, row_count=5, horizontal_spacing=5, vertical_spacing=5
+        )
+
+        col, row = 0, 4
+        for itemName, quantity in self.player.inventory.items():
+            label = arcade.gui.UILabel(text=f"{itemName} x {quantity}", font_size=11)
+            inventoryGrid.add(column=col, row=row, child=label)
+            col += 1
+            if col >= 5 and row > 0:
+                col = 0
+                row -= 1
+
         inventoryBox = arcade.gui.UIBoxLayout(vertical=True, space_between=10)
         inventoryBox.add(
             arcade.gui.UILabel(text="Inventario", font_size=20, align="center")
         )
-
-        for itemName, quantity in self.player.inventory.items():
-            label = arcade.gui.UILabel(text=f"{itemName} x {quantity}", font_size=11)
-            inventoryBox.add(label)
+        inventoryBox.add(child=inventoryGrid)
 
         closeButton = arcade.gui.UIFlatButton(text="Cerrar", width=100)
 
@@ -142,6 +154,14 @@ class Test(View):
         self.uiAnchorLayout.add(
             child=inventoryBox, anchor_x="center", anchor_y="center"
         )
+
+    def closeInventory(self):
+        self.uiAnchorLayout.clear()
+        self.uiManager.remove(self.uiAnchorLayout)  # 🔥 Eliminar layout del UIManager
+        self.uiAnchorLayout = arcade.gui.UIAnchorLayout()  # 🔁 Crear uno nuevo limpio
+        self.uiManager.add(self.uiAnchorLayout)  # ➕ Agregar el nuevo layout
+        self.inventoryEnabled = False
+        self.window.set_mouse_visible(False)
 
     def on_key_press(self, symbol: int, modifiers: int) -> bool | None:
         if symbol == arcade.key.SPACE:

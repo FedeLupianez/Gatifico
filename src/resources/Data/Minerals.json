@@ -3,5 +3,11 @@
     "big": {"path": ":resources:Minerals/Rock/Rock_Big.png", "touches": 3},
     "mid": {"path": ":resources:Minerals/Rock/Rock_Mid.png", "touches": 2},
     "small": {"path": ":resources:Minerals/Rock/Rock_Small.png", "touches": 1}
+  },
+
+  "rubi":{
+    "big": {"path": ":resources:Minerals/Rock/Rock_Big.png", "touches": 3},
+    "mid": {"path": ":resources:Minerals/Rock/Rock_Mid.png", "touches": 2},
+    "small": {"path": ":resources:Minerals/Rock/Rock_Small.png", "touches": 1}
   }
 }

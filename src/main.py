@@ -27,12 +27,6 @@ class Main(arcade.Window):
         self.ViewManager = ViewManager(self.player, self)
 
 
-# def main():
-#     player = Player()
-#     viewManager = ViewManager(player)
-#     arcade.run()
-
-
 if __name__ == "__main__":
     window = Main()
     arcade.run()

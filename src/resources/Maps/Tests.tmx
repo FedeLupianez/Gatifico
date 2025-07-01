@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.8" tiledversion="1.8.2" orientation="orthogonal" renderorder="right-down" width="81" height="49" tilewidth="16" tileheight="16" infinite="0" nextlayerid="12" nextobjectid="136">
+<map version="1.8" tiledversion="1.8.2" orientation="orthogonal" renderorder="right-down" width="81" height="49" tilewidth="16" tileheight="16" infinite="0" nextlayerid="12" nextobjectid="137">
  <tileset firstgid="1" source="../Background/TIleMaps/TX Tileset Grass.tsx"/>
  <tileset firstgid="226" source="../Background/TIleMaps/TX Tileset Wall.tsx"/>
  <tileset firstgid="1250" source="../Background/TIleMaps/Objetos.tsx"/>
@@ -186,6 +186,11 @@
   <object id="131" name="rock" type="mineral" x="1111.17" y="302" width="40.3333" height="24.3333">
    <properties>
     <property name="size" value="mid"/>
+   </properties>
+  </object>
+  <object id="136" name="rubi" type="mineral" x="1013.83" y="305" width="60.3333" height="36">
+   <properties>
+    <property name="size" value="big"/>
    </properties>
   </object>
  </objectgroup>
