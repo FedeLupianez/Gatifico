@@ -1,4 +1,5 @@
 import arcade
+import arcade.gui
 from typing import Tuple
 from scenes.View import View
 import Constants
@@ -22,6 +23,13 @@ class Test(View):
         tileMapUrl = ":resources:Maps/Tests.tmx"
         super().__init__(backgroundUrl=backgroundUrl, tileMapUrl=tileMapUrl)
         self.window.set_mouse_visible(False)
+
+        self.uiManager = arcade.gui.UIManager(self.window)
+        self.uiManager.enable()
+
+        self.uiAnchorLayout = arcade.gui.UIAnchorLayout()
+        self.uiManager.add(self.uiAnchorLayout)
+
         self.callback = callback
 
         self.player = player  # Defino el personaje
@@ -31,6 +39,7 @@ class Test(View):
         self.setupPlayer()
 
         self.keysPressed: set = set()
+        self.inventoryEnabled = False
 
     def setupSpriteLists(self):
         # Listas de Sprites
@@ -98,6 +107,41 @@ class Test(View):
         self.playerSpritesList.draw(pixelated=True)  # dibuja el personaje
         self.backgroundSpriteList.draw(pixelated=True)
         self.mineralsLayer.draw(pixelated=True)
+        self.uiManager.draw()
+
+    def closeInventory(self):
+        self.uiAnchorLayout.clear()
+        self.uiManager.remove(self.uiAnchorLayout)  # 🔥 Eliminar layout del UIManager
+        self.uiAnchorLayout = arcade.gui.UIAnchorLayout()  # 🔁 Crear uno nuevo limpio
+        self.uiManager.add(self.uiAnchorLayout)  # ➕ Agregar el nuevo layout
+        self.inventoryEnabled = False
+        self.window.set_mouse_visible(False)
+        print("inventario cerrado")
+
+    def showInventory(self):
+        print("inventario abierto")
+        self.window.set_mouse_visible(True)
+        self.inventoryEnabled = True
+        self.uiAnchorLayout.clear()
+        inventoryBox = arcade.gui.UIBoxLayout(vertical=True, space_between=10)
+        inventoryBox.add(
+            arcade.gui.UILabel(text="Inventario", font_size=20, align="center")
+        )
+
+        for itemName, quantity in self.player.inventory.items():
+            label = arcade.gui.UILabel(text=f"{itemName} x {quantity}", font_size=11)
+            inventoryBox.add(label)
+
+        closeButton = arcade.gui.UIFlatButton(text="Cerrar", width=100)
+
+        @closeButton.event("on_click")
+        def on_click(event):
+            self.closeInventory()
+
+        inventoryBox.add(child=closeButton)
+        self.uiAnchorLayout.add(
+            child=inventoryBox, anchor_x="center", anchor_y="center"
+        )
 
     def on_key_press(self, symbol: int, modifiers: int) -> bool | None:
         if symbol == arcade.key.SPACE:
@@ -107,6 +151,13 @@ class Test(View):
         if symbol == arcade.key.E:
             if self.handleInteractions():
                 return
+
+        if symbol == arcade.key.I:
+            if not self.inventoryEnabled:
+                self.showInventory()
+            else:
+                self.closeInventory()
+            return
 
         self.keysPressed.add(symbol)
 
