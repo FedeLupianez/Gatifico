@@ -174,3 +174,6 @@ class Player(StateMachine):
         else:
             self.inventory[item] += cant
         print(self.inventory)
+
+    def getInventory(self):
+        return self.inventory

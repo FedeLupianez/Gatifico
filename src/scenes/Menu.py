@@ -35,6 +35,8 @@ class Menu(View):
     def on_key_press(self, symbol: int, modifiers: int) -> bool | None:
         if symbol == arcade.key.SPACE:
             self.callback(SignalCodes.CHANGE_VIEW, "TEST")
+        if symbol == arcade.key.M:
+            self.callback(SignalCodes.CHANGE_VIEW, "MIX_TABLE")
 
     def on_mouse_press(
         self, x: int, y: int, button: int, modifiers: int

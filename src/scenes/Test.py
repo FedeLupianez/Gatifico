@@ -1,6 +1,5 @@
 import arcade
 import arcade.gui
-import arcade.gl
 from typing import Tuple
 from scenes.View import View
 import Constants
