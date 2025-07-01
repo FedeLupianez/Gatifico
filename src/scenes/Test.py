@@ -1,7 +1,7 @@
 import arcade
 import arcade.gui
-import arcade.color
-from typing import Literal, Tuple, Dict
+import arcade.gl
+from typing import Tuple
 from scenes.View import View
 import Constants
 from characters.Player import Player
@@ -109,21 +109,22 @@ class Test(View):
         self.backgroundSpriteList.draw(pixelated=True)
         self.mineralsLayer.draw(pixelated=True)
 
-        self.uiManager.draw()
+        self.uiManager.draw(pixelated=True)
 
     def showInventory(self):
         self.window.set_mouse_visible(True)
         self.inventoryEnabled = True
         self.uiAnchorLayout.clear()
 
-        self.inventory_bg_rect: Dict[
-            Literal["left", "right", "top", "bottom"], float
-        ] = {
-            "left": self.window.width / 2 - 100,
-            "right": self.window.width / 2 + 100,
-            "top": self.window.height / 2 + 100,
-            "bottom": self.window.height / 2 - 100,
-        }
+        background = arcade.load_image(":resources:UI/inventory_background.png")
+        texture = arcade.Texture(image=background)
+
+        inventoryBackground = arcade.gui.UIImage(
+            center_x=self.window.center_x,
+            center_y=self.window.center_y,
+            texture=texture,
+        )
+        self.uiAnchorLayout.add(child=inventoryBackground)
 
         inventoryGrid = arcade.gui.UIGridLayout(
             column_count=5, row_count=5, horizontal_spacing=5, vertical_spacing=5
