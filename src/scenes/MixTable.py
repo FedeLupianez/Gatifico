@@ -90,6 +90,7 @@ class MixTable(View):
             center_y=MIXING_ITEMS_POSITIONS[-1][1],
         )
         self.resultPlace.index = index
+        self.resultPlace.item_placed = ""
         self.itemPlacements.append(self.resultPlace)
         del index
 
@@ -115,10 +116,18 @@ class MixTable(View):
         place_1, place_2 = self.itemPlacements[-3:-1]
         item_1 = place_1.item_placed
         item_2 = place_2.item_placed
+
         if not (item_1 and item_2):
             return
 
-        result = str(Combinations[item_1][item_2])
+        firt_item_combinations = Combinations.get(item_1, None)
+        if not firt_item_combinations:
+            return
+
+        result = firt_item_combinations.get(item_2, None)
+        if not result:
+            return
+
         path = str(MineralsResources[result]["item"]["path"])
         tempSprite = arcade.Sprite(
             path,
@@ -127,6 +136,7 @@ class MixTable(View):
             scale=3,
         )
         tempSprite.container_index = self.resultPlace.index
+        tempSprite.name = result
         self.inventorySrites.append(tempSprite)
 
     def on_show_view(self) -> None:
@@ -187,6 +197,8 @@ class MixTable(View):
                 self.spriteToMove.center_x = isPlaced[0].center_x
                 self.spriteToMove.center_y = isPlaced[0].center_y
                 isPlaced[0].item_placed = self.spriteToMove.name
+                # Reseteo el contenido del antiguo contenedor
+                self.itemPlacements[self.spriteToMove.container_index].item_placed = ""
                 self.spriteToMove.container_index = isPlaced[0].index
                 self._load_item_result()
             else:
