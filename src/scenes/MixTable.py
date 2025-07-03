@@ -20,6 +20,7 @@ MineralsResources: Dict[
 
 # centros de los contenedores
 ITEMS_POSITIONS: list[tuple[int, int]] = [(100, 100), (175, 100), (250, 100)]
+MIXING_ITEMS_POSITIONS: list[tuple[int, int]] = [(300, 300), (400, 300)]
 CONTAINER_SIZE = 50
 
 
@@ -48,12 +49,26 @@ class MixTable(View):
         self.items: dict = player.getInventory() or {"rubi": 4, "rock": 3}
         self.inventoryItems: list[tuple[str, int]] = []
         self.containerList: list[arcade.Rect] = []
+        self.itemPlacements: list[arcade.Rect] = []
 
         # Flags
         self.is_mouse_active: bool = False
         self.spriteToMove = None
 
-    def load_inventory(self) -> None:
+    def _load_items_placements(self) -> None:
+        for x, y in MIXING_ITEMS_POSITIONS:
+            tempSprite = arcade.SpriteSolidColor(
+                width=CONTAINER_SIZE,
+                height=CONTAINER_SIZE,
+                center_x=x,
+                center_y=y,
+                color=arcade.color.GRAY,
+            )
+            tempSprite.type = "item_placement"
+            tempSprite.item_placed = ""
+            self.spriteList.append(tempSprite)
+
+    def _load_inventory(self) -> None:
         """
         Carga los items del inventario del personaje a las listas de la clase,
         con ello también genera los sprtes de los minerales y los containers
@@ -76,6 +91,7 @@ class MixTable(View):
 
             # Guardo el indice de su container para después volverlo a su lugar
             mineral_sprite.container_index = index
+            mineral_sprite.name = item
             mineral_sprite.center_x, mineral_sprite.center_y = container.center
             # Agregando lo generado a las listas
             self.inventoryItems.append((item, quantity))
@@ -83,13 +99,14 @@ class MixTable(View):
             self.inventorySrites.append(mineral_sprite)
 
     def on_show_view(self) -> None:
-        self.load_inventory()
+        self._load_items_placements()
+        self._load_inventory()
         super().on_show_view()
 
     def on_draw(self):
         self.clear()  # limpia la pantalla
         self.camera.use()
-        self.inventorySrites.draw()
+        self.spriteList.draw()
 
         for containerIndex, ((name, quantity), sprite) in enumerate(
             zip(self.inventoryItems, self.inventorySrites)
@@ -112,6 +129,7 @@ class MixTable(View):
                 anchor_y="top",
             )
             text.draw()
+
         self.inventorySrites.draw(pixelated=True)
         self.UIManager.draw(pixelated=True)
 
@@ -133,14 +151,25 @@ class MixTable(View):
     ) -> bool | None:
         if button == arcade.MOUSE_BUTTON_LEFT and self.is_mouse_active:
             self.is_mouse_active = False  # desactivo el click
-            if self.spriteToMove:  # Si hay un sprite agarrado
+            if not self.spriteToMove:
+                return
+
+            isPlaced: list[arcade.Sprite] = arcade.check_for_collision_with_list(
+                self.spriteToMove, self.spriteList
+            )
+            if isPlaced and isPlaced[0].type == "item_placement":
+                self.spriteToMove.center_x = isPlaced[0].center_x
+                self.spriteToMove.center_y = isPlaced[0].center_y
+                isPlaced[0].item_placed = self.spriteToMove.name
+                print(isPlaced[0].item_placed)
+            else:
                 index = (
                     self.spriteToMove.container_index
                 )  # obtengo el indice del contenedor al que pertenece
                 # vuelvo el sprite a su posición original
                 self.spriteToMove.center_x = self.containerList[index].center_x
                 self.spriteToMove.center_y = self.containerList[index].center_y
-                self.spriteToMove = None  # Pongo que no hay nngún sprite qe mover
+            self.spriteToMove = None  # Pongo que no hay nngún sprite qe mover
 
     def on_mouse_motion(self, x: int, y: int, dx: int, dy: int) -> bool | None:
         if self.spriteToMove:
