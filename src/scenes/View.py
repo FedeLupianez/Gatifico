@@ -37,8 +37,8 @@ class View(arcade.View):
             # Creo una lista de sprites dentro de la scene donde se van
             # a almacenar todos los sprites que vayan en el fondo
             scene = arcade.Scene()
-            scene.add_sprite_list(Constants.SpriteNames.BACKGROUND)
-            scene[Constants.SpriteNames.BACKGROUND].append(backgroundImage)
+            scene.add_sprite_list("BACKGROUND")
+            scene["BACKGROUND"].append(backgroundImage)
             return scene
         raise FileNotFoundError("Faltan argumentos")
 

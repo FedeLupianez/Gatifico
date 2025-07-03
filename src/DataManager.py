@@ -9,13 +9,6 @@ BASE_DIR = os.path.dirname(__file__)
 DATAFILES_DIR = BASE_DIR + "/resources/Data/"
 
 
-class DataManager:
-    def __init__(self):
-        pass
-
-    def loadData(self, filename: str) -> dict:
-        with open(DATAFILES_DIR + filename, "r") as file:
-            return json.load(file)
-
-
-dataManager = DataManager()
+def loadData(filename: str) -> dict:
+    with open(DATAFILES_DIR + filename, "r") as file:
+        return json.load(file)

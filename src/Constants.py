@@ -2,9 +2,6 @@
 # usando el diseño singleton
 
 
-from arcade import close_window
-
-
 class Game:
     # Tamaños de la pantalla :
     SCREEN_WIDTH = 1280
@@ -25,14 +22,6 @@ class SignalCodes:
     CLOSE_WINDOW = 1
 
 
-class SpriteNames:
-    BACKGROUND = "Background"
-    PLAYER = "Player"
-
-
-class AssetsUrls:
+class AssetsConstants:
     # Indice inicial de los sprites (comienzan por 1)
     INITIAL_INDEX = 0
-    # Paths de los fondos
-    MENU_BACKGROUND = "assets/2D Pixel Dungeon Asset Pack/interface/arrow_1.png"
-    HOUSE_BACKGROUND = "assets/2D Pixel Dungeon Asset Pack/Dungeon_Tileset_at.png"

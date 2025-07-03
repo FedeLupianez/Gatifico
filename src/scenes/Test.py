@@ -6,9 +6,9 @@ import Constants
 from characters.Player import Player
 from typing import Callable
 from minerals.Mineral import Mineral
-from DataManager import dataManager
+import DataManager
 
-MineralsResources = dataManager.loadData("Minerals.json")
+MineralsResources = DataManager.loadData("Minerals.json")
 
 
 def is_near_to_sprite(

@@ -2,7 +2,7 @@ import arcade
 import arcade.gui
 from scenes.View import View
 from characters.Player import Player
-from DataManager import dataManager
+import DataManager
 from typing import Callable, Dict, Literal
 from Constants import SignalCodes
 
@@ -13,12 +13,11 @@ MineralsResources: Dict[
         Literal["big", "mid", "small", "item"],
         Dict[Literal["path", "touches"], str | int],
     ],
-] = dataManager.loadData("Minerals.json")
+] = DataManager.loadData("Minerals.json")
 
-Combinations: Dict[str, Dict[str, str]] = dataManager.loadData("CombinationsTest.json")
+Combinations: Dict[str, Dict[str, str]] = DataManager.loadData("CombinationsTest.json")
 
 # En esta linea se cargarían las combinaciones posibles entre minerales
-# MineralsCombinations: Dict[str, str]=dataManager.loadData("Combinations.json")
 
 # centros de los contenedores
 ITEMS_POSITIONS: list[tuple[int, int]] = [(100, 100), (175, 100), (250, 100)]

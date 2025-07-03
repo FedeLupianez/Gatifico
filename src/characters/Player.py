@@ -1,9 +1,9 @@
 from typing import Dict, Literal
 import arcade
-from Constants import Game, AssetsUrls
+from Constants import Game, AssetsConstants
 import Constants
 from StateMachine import StateMachine
-from DataManager import dataManager
+import DataManager
 
 # Defino los id de los estados para no repetir magic strings
 IDLE_SIDE_LEFT = "IDLE_SIDE_LEFT"
@@ -18,11 +18,11 @@ DOWN = "DOWN"
 
 actionKeys = Literal["IDLE", "RUN", "WALK"]
 directionKeys = Literal["FRONT", "SIDE", "BACK"]
-TexturePaths: Dict[actionKeys, Dict[directionKeys, str]] = dataManager.loadData(
+TexturePaths: Dict[actionKeys, Dict[directionKeys, str]] = DataManager.loadData(
     "PlayerPaths.json"
 )
 
-ANIMATION_STATE_CONFIG: dict = dataManager.loadData("PlayerAnimationsConfig.json")
+ANIMATION_STATE_CONFIG: dict = DataManager.loadData("PlayerAnimationsConfig.json")
 
 
 class Player(StateMachine):
@@ -33,7 +33,7 @@ class Player(StateMachine):
         self.actualAnimationPath: str = TexturePaths["IDLE"]["FRONT"].replace(
             "{}",
             str(
-                AssetsUrls.INITIAL_INDEX
+                AssetsConstants.INITIAL_INDEX
             ),  # como es el sprite inicial lo intercambiamos por el indice inicial
         )
         self.sprite: arcade.Sprite = arcade.Sprite(
@@ -141,8 +141,8 @@ class Player(StateMachine):
         self.lastAnimationPath = self.actualAnimationPath
         self.frames.clear()
         for i in range(
-            AssetsUrls.INITIAL_INDEX,
-            self.actualAnimationFrames + AssetsUrls.INITIAL_INDEX,
+            AssetsConstants.INITIAL_INDEX,
+            self.actualAnimationFrames + AssetsConstants.INITIAL_INDEX,
         ):
             route = self.actualAnimationPath.replace("{}", str(i))
             texture = None
