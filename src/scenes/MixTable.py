@@ -94,6 +94,11 @@ class MixTable(View):
         self.itemPlacements.append(self.resultPlace)
         del index
 
+    def _update_items(self) -> None:
+        self.inventoryItems.clear()
+        for item, quantity in self.items.items():
+            self.inventoryItems.append((item, quantity))
+
     def _load_inventory(self) -> None:
         """
         Carga los items del inventario del personaje a las listas de la clase,
@@ -139,6 +144,10 @@ class MixTable(View):
         tempSprite.name = result
         self.inventorySrites.append(tempSprite)
 
+        # Saco un item de la cantidad del mineral :
+        self.items[item_1] -= 1
+        self.items[item_2] -= 1
+
     def on_show_view(self) -> None:
         self._load_items_placements()
         self._load_inventory()
@@ -148,6 +157,7 @@ class MixTable(View):
         self.clear()  # limpia la pantalla
         self.camera.use()
         self.spriteList.draw(pixelated=True)
+        self._update_items()
 
         for (name, quantity), sprite in zip(self.inventoryItems, self.inventorySrites):
             x = sprite.center_x
