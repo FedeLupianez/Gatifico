@@ -98,7 +98,18 @@ class MixTable(View):
         # cosas de la UI
         self.UIManager = arcade.gui.UIManager(self.window)
         self.UIManager.enable()
-        self.UIManager.add(arcade.gui.UIAnchorLayout())
+        result_x, result_y = MIXING_ITEMS_POSITIONS[-1]
+        self.mixButton = arcade.gui.UIFlatButton(
+            x=result_x + 50,
+            y=result_y - 100,
+            text="Combinar",
+        )
+
+        @self.mixButton.event("on_click")
+        def on_click(event):
+            self._load_item_result()
+
+        self.UIManager.add(self.mixButton)
 
         self.is_mouse_active: bool = False
         self.spriteToMove = None
@@ -178,8 +189,17 @@ class MixTable(View):
         self.resultPlace.setItem(result, 1)
         self.inventorySrites.append(sprite)
 
-        input_1.item_cant -= 1
-        input_2.item_cant -= 1
+        for container in (input_1, input_2):
+            container.item_cant -= 1
+            if container.item_cant == 0:
+                container.clear_item()
+                self._remove_sprite_for_container(container.container_id)
+
+    def _remove_sprite_for_container(self, container_id: int):
+        for sprite in self.inventorySrites:
+            if getattr(sprite, "container_index", None) == container_id:
+                self.inventorySrites.remove(sprite)
+                return
 
     def _reset_sprite_position(self, sprite: arcade.Sprite) -> None:
         originalContainer = self.itemContainers[sprite.container_index]
@@ -256,7 +276,6 @@ class MixTable(View):
             self._reset_sprite_position(self.spriteToMove)
 
         oldContainer.clear_item()
-        self._load_item_result()
         self.spriteToMove = None  # Pongo que no hay nngún sprite qe mover
 
     def on_mouse_motion(self, x: int, y: int, dx: int, dy: int) -> bool | None:
