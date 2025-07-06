@@ -225,6 +225,7 @@ class MixTable(View):
         self._setup_containers()
         self._load_inventory()
         self._generate_item_sprites()
+        self._update_items_texts()
         super().on_show_view()
 
     def on_draw(self):
@@ -234,7 +235,6 @@ class MixTable(View):
         self.textList.draw(pixelated=True)
         self.itemContainers.draw(pixelated=True)
         self.inventorySrites.draw(pixelated=True)
-        self._update_items_texts()
         self.UIManager.draw(pixelated=True)
 
     def on_key_press(self, symbol: int, modifiers: int) -> bool | None:
@@ -281,6 +281,7 @@ class MixTable(View):
             self._reset_sprite_position(self.spriteToMove)
 
         oldContainer.clear_item()
+        self._update_items_texts()
         self.spriteToMove = None  # Pongo que no hay nngún sprite qe mover
 
     def on_mouse_motion(self, x: int, y: int, dx: int, dy: int) -> bool | None:
