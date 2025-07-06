@@ -11,5 +11,12 @@
     "mid": {"path": ":resources:Minerals/Rubi/Rubi_Mid.png", "touches": 2},
     "small": {"path": ":resources:Minerals/Rubi/Rubi_Small.png", "touches": 1},
     "item": {"path": ":resources:/Minerals/Rubi/Rubi_Item.png"}
+  },
+
+  "water":{
+    "big": {"path": ":resources:Minerals/Rubi/Rubi_Big.png", "touches": 3},
+    "mid": {"path": ":resources:Minerals/Rubi/Rubi_Mid.png", "touches": 2},
+    "small": {"path": ":resources:Minerals/Rubi/Rubi_Small.png", "touches": 1},
+    "item": {"path": ":resources:/Minerals/Rubi/Rubi_Item.png"}
   }
 }

@@ -18,12 +18,13 @@ MineralsResources: Dict[
 
 Combinations: Dict[str, Dict[str, str]] = DataManager.loadData("CombinationsTest.json")
 
-# En esta linea se cargarían las combinaciones posibles entre minerales
 
 # centros de los contenedores
 ITEMS_POSITIONS: list[tuple[int, int]] = [(100, 100), (175, 100), (250, 100)]
 MIXING_ITEMS_POSITIONS: list[tuple[int, int]] = [(300, 300), (400, 300)]
 CONTAINER_SIZE = 50
+
+ITEMS_INIT: list[tuple[int, int]] = [(100, 100)]
 
 
 def add_containers_to_list(
@@ -83,7 +84,7 @@ class MixTable(View):
         # Init de la clase
         self.callback = callback
         self.player = player
-        self.items: dict = player.getInventory() or {"rubi": 4, "rock": 3}
+        self.items: dict = player.getInventory() or {"rubi": 4, "rock": 3, "water": 5}
 
         # Configuraciones de cámara
         self.window.set_mouse_visible(True)
@@ -116,7 +117,11 @@ class MixTable(View):
         self.resultPlace: Container
 
     def _setup_containers(self) -> None:
-        add_containers_to_list(ITEMS_POSITIONS, self.itemContainers)
+        for i in range(len(self.items) - 1):
+            x, y = ITEMS_INIT[-1]
+            ITEMS_INIT.append((x + 75, y))
+
+        add_containers_to_list(ITEMS_INIT, self.itemContainers)
         add_containers_to_list(MIXING_ITEMS_POSITIONS, self.itemContainers)
 
         # Container del resultado :
