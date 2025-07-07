@@ -60,20 +60,8 @@ class Container(arcade.SpriteSolidColor):
             color=color,
         )
         self.type: str = ""
-        self.item_placed: str = ""
-        self.item_cant: int = 0
         self.container_id: int = -1
-
-    def setItem(self, itemName: str, count: int) -> None:
-        self.item_placed = itemName
-        self.item_cant = count
-
-    def clear_item(self) -> None:
-        self.item_placed = ""
-        self.item_cant = 0
-
-    def add_quantity(self, cant: int) -> None:
-        self.item_cant += cant
+        self.item_placed: bool = False
 
 
 class MixTable(View):
@@ -92,7 +80,7 @@ class MixTable(View):
 
         # Listas de sprites
         self.spriteList = arcade.SpriteList()
-        self.inventorySrites = arcade.SpriteList()
+        self.inventorySprites = arcade.SpriteList()
         self.itemContainers: arcade.SpriteList = arcade.SpriteList()
         self.textList: arcade.SpriteList = arcade.SpriteList()
 
@@ -116,6 +104,25 @@ class MixTable(View):
         self.spriteToMove = None
         self.resultPlace: Container
 
+    def _find_item_with_containerId(self, container_id: int, sprite_index: int = 0):
+        if sprite_index == len(self.inventorySprites):
+            return None
+
+        sprite = self.inventorySprites[sprite_index]
+        if sprite.container_index == container_id:
+            return sprite
+        return self._find_item_with_containerId(container_id, sprite_index + 1)
+
+    def _find_item_with_id(
+        self, id: int, listToFind: arcade.SpriteList, sprite_index: int = 0
+    ):
+        if sprite_index == len(listToFind):
+            return None
+        sprite = listToFind[sprite_index]
+        if sprite.id == id:
+            return sprite
+        return self._find_item_with_id(id, listToFind, sprite_index + 1)
+
     def _setup_containers(self) -> None:
         for i in range(len(self.items) - 1):
             x, y = ITEMS_INIT[-1]
@@ -137,45 +144,64 @@ class MixTable(View):
         self.resultPlace.container_id = len(self.itemContainers)
         self.itemContainers.append(self.resultPlace)
 
-    def _load_inventory(self) -> None:
-        for index, (item, quantity) in enumerate(self.items.items()):
-            container = self.itemContainers[index]
-            # Guardo el indice de su container para después volverlo a su lugar
-            container.setItem(item, quantity)
-
     def _generate_item_sprites(self) -> None:
-        for container in self.itemContainers:
-            if not container.item_placed:
-                continue
-            path: str = str(MineralsResources[container.item_placed]["item"]["path"])
+        for index, (name, quantity) in enumerate(self.items.items()):
+            path: str = str(MineralsResources[name]["item"]["path"])
+            container: Container = self.itemContainers[index]
             sprite = arcade.Sprite(
                 path, scale=3, center_x=container.center_x, center_y=container.center_y
             )
+            sprite.id = index
             sprite.container_index = container.container_id
-            sprite.name = container.item_placed
-            sprite.quantity = container.item_cant
-            self.inventorySrites.append(sprite)
+            sprite.name = name
+            sprite.quantity = quantity
+            self.textList.append(self._create_item_text(sprite))
+            self.inventorySprites.append(sprite)
 
-    def _update_items_texts(self) -> None:
-        self.textList.clear()
-        for container in self.itemContainers:
-            if container.item_placed:
-                textSprite = arcade.create_text_sprite(
-                    text=f"{container.item_placed} x {container.item_cant}",
-                    font_size=11,
-                )
-                textSprite.center_x = container.center_x
-                textSprite.center_y = container.center_y - (container.height + 5)
-                self.textList.append(textSprite)
+    def _create_item_text(self, item: arcade.Sprite) -> arcade.Sprite:
+        content = f"{item.name} x {item.quantity}"
+        textSprite = arcade.create_text_sprite(
+            text=content,
+            font_size=11,
+        )
+        textSprite.center_x = item.center_x
+        textSprite.center_y = item.center_y - (item.height / 2 + 15)
+        textSprite.id = item.id
+        textSprite.content = content
+        return textSprite
+
+    def _update_texts_position(self) -> None:
+        for item in self.inventorySprites:
+            actualText: arcade.Sprite | None = self._find_item_with_id(
+                item.id, self.textList
+            )
+            if not (actualText):
+                return
+            actualText.center_x = item.center_x
+            actualText.center_y = item.center_y - (item.height / 2 + 15)
+
+    def _update_texts_sprite(self) -> None:
+        for textSprite in self.textList:
+            item = self._find_item_with_id(textSprite.id, self.inventorySprites)
+            if item is None:
+                continue
+            if textSprite.content != f"{item.name} x {item.quantity}":
+                print("\nNuevo texto : ")
+                print("item ID : ", item.id)
+                print("Contenido anterior : ", textSprite.content)
+                print("Contenido nuevo : ", f"{item.name} x {item.quantity}")
+                self.textList.remove(textSprite)
+                self.textList.append(self._create_item_text(item))
 
     def _load_item_result(self):
         input_1, input_2 = self.itemContainers[-3:-1]
-        item_1, item_2 = input_1.item_placed, input_2.item_placed
+        item_1 = self._find_item_with_containerId(input_1.container_id)
+        item_2 = self._find_item_with_containerId(input_2.container_id)
 
         if not (item_1 and item_2):
             return
 
-        result = Combinations.get(item_1, {}).get(item_2, None)
+        result = Combinations.get(item_1.name, {}).get(item_2.name, None)
         if not result:
             return
 
@@ -187,24 +213,18 @@ class MixTable(View):
             scale=3,
         )
 
+        sprite.id = max([item.id for item in self.inventorySprites]) + 1
         sprite.name = result
         sprite.container_index = self.resultPlace.container_id
         sprite.quantity = 1
+        self.textList.append(self._create_item_text(sprite))
+        self.inventorySprites.append(sprite)
 
-        self.resultPlace.setItem(result, 1)
-        self.inventorySrites.append(sprite)
-
-        for container in (input_1, input_2):
-            container.item_cant -= 1
-            if container.item_cant == 0:
-                container.clear_item()
-                self._remove_sprite_for_container(container.container_id)
-
-    def _remove_sprite_for_container(self, container_id: int):
-        for sprite in self.inventorySrites:
-            if getattr(sprite, "container_index", None) == container_id:
-                self.inventorySrites.remove(sprite)
-                return
+        for item in (item_1, item_2):
+            item.quantity -= 1
+            if item.quantity == 0:
+                self.textList.remove(self._find_item_with_id(item.id, self.textList))
+                self.inventorySprites.remove(item)
 
     def _reset_sprite_position(self, sprite: arcade.Sprite) -> None:
         originalContainer = self.itemContainers[sprite.container_index]
@@ -214,18 +234,13 @@ class MixTable(View):
     def _move_sprite_to_container(
         self, sprite: arcade.Sprite, container: Container
     ) -> None:
-        oldContainer: Container = self.itemContainers[sprite.container_index]
         sprite.center_x = container.center_x
         sprite.center_y = container.center_y
-        sprite.container_index = container.container_id
-        container.setItem(sprite.name, oldContainer.item_cant)
         sprite.container_index = container.container_id
 
     def on_show_view(self) -> None:
         self._setup_containers()
-        self._load_inventory()
         self._generate_item_sprites()
-        self._update_items_texts()
         super().on_show_view()
 
     def on_draw(self):
@@ -234,7 +249,9 @@ class MixTable(View):
         self.spriteList.draw(pixelated=True)
         self.textList.draw(pixelated=True)
         self.itemContainers.draw(pixelated=True)
-        self.inventorySrites.draw(pixelated=True)
+        self.inventorySprites.draw(pixelated=True)
+        self._update_texts_sprite()
+        self._update_texts_position()
         self.UIManager.draw(pixelated=True)
 
     def on_key_press(self, symbol: int, modifiers: int) -> bool | None:
@@ -244,7 +261,7 @@ class MixTable(View):
     def on_mouse_press(self, x: int, y: int, button: int, modifiers: int):
         if button == arcade.MOUSE_BUTTON_LEFT:
             self.is_mouse_active = True
-            sprites = arcade.get_sprites_at_point((x, y), self.inventorySrites)
+            sprites = arcade.get_sprites_at_point((x, y), self.inventorySprites)
             self.spriteToMove = sprites[-1] if sprites else None
 
     def on_mouse_release(
@@ -264,24 +281,35 @@ class MixTable(View):
 
         if not collisions:
             self._reset_sprite_position(self.spriteToMove)
-            self.spriteToMove = None  # Pongo que no hay nngún sprite qe mover
+            self.spriteToMove = None
             return
 
         newContainer: Container = collisions[0]
         lastContainerIndex: int = self.spriteToMove.container_index
-        oldContainer = self.itemContainers[lastContainerIndex]
+        oldContainer: Container = self.itemContainers[lastContainerIndex]
+
+        if newContainer.container_id == oldContainer.container_id:
+            self._reset_sprite_position(self.spriteToMove)
+            self.spriteToMove = None
+            return
 
         if not (newContainer.item_placed):
             self._move_sprite_to_container(self.spriteToMove, newContainer)
-            oldContainer.clear_item()
-        elif newContainer.item_placed == oldContainer.item_placed:
-            newContainer.add_quantity(oldContainer.item_cant)
-            self.inventorySrites.remove(self.spriteToMove)
+            oldContainer.item_placed = False
+            newContainer.item_placed = True
         else:
+            item = self._find_item_with_containerId(newContainer.container_id)
+            text: arcade.Sprite = self._find_item_with_id(item.id, self.textList)
+            if item.name == self.spriteToMove.name:
+                self._move_sprite_to_container(self.spriteToMove, newContainer)
+                oldContainer.item_placed = False
+                newContainer.item_placed = True
+                self.spriteToMove.quantity += item.quantity
+                self.inventorySprites.remove(item)
+                self.textList.remove(text)
+
             self._reset_sprite_position(self.spriteToMove)
 
-        oldContainer.clear_item()
-        self._update_items_texts()
         self.spriteToMove = None  # Pongo que no hay nngún sprite qe mover
 
     def on_mouse_motion(self, x: int, y: int, dx: int, dy: int) -> bool | None:
