@@ -205,20 +205,26 @@ class MixTable(View):
         if not result:
             return
 
-        path = str(MineralsResources[result]["item"]["path"])
-        sprite = arcade.Sprite(
-            path,
-            center_x=self.resultPlace.center_x,
-            center_y=self.resultPlace.center_y,
-            scale=3,
+        oldResult: arcade.Sprite | None = self._find_item_with_containerId(
+            self.resultPlace.container_id
         )
+        if not oldResult:
+            path = str(MineralsResources[result]["item"]["path"])
+            sprite = arcade.Sprite(
+                path,
+                center_x=self.resultPlace.center_x,
+                center_y=self.resultPlace.center_y,
+                scale=3,
+            )
 
-        sprite.id = max([item.id for item in self.inventorySprites]) + 1
-        sprite.name = result
-        sprite.container_index = self.resultPlace.container_id
-        sprite.quantity = 1
-        self.textList.append(self._create_item_text(sprite))
-        self.inventorySprites.append(sprite)
+            sprite.id = max([item.id for item in self.inventorySprites]) + 1
+            sprite.name = result
+            sprite.container_index = self.resultPlace.container_id
+            sprite.quantity = 1
+            self.textList.append(self._create_item_text(sprite))
+            self.inventorySprites.append(sprite)
+        else:
+            oldResult.quantity += 1
 
         for item in (item_1, item_2):
             item.quantity -= 1
@@ -247,8 +253,8 @@ class MixTable(View):
         self.clear()  # limpia la pantalla
         self.camera.use()
         self.spriteList.draw(pixelated=True)
-        self.textList.draw(pixelated=True)
         self.itemContainers.draw(pixelated=True)
+        self.textList.draw(pixelated=True)
         self.inventorySprites.draw(pixelated=True)
         self._update_texts_sprite()
         self._update_texts_position()
