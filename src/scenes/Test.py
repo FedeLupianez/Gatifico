@@ -5,7 +5,7 @@ from scenes.View import View
 import Constants
 from characters.Player import Player
 from typing import Callable
-from minerals.Mineral import Mineral
+from items.Mineral import Mineral
 import DataManager
 
 MineralsResources = DataManager.loadData("Minerals.json")
