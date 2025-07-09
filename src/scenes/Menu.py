@@ -33,10 +33,16 @@ class Menu(View):
         self.spriteList.draw(pixelated=True)
 
     def on_key_press(self, symbol: int, modifiers: int) -> bool | None:
-        if symbol == arcade.key.SPACE:
-            self.callback(SignalCodes.CHANGE_VIEW, "TEST")
-        if symbol == arcade.key.M:
-            self.callback(SignalCodes.CHANGE_VIEW, "MIX_TABLE")
+        match symbol:
+            case arcade.key.SPACE:
+                self.callback(SignalCodes.CHANGE_VIEW, "TEST")
+            case arcade.key.M:
+                self.callback(SignalCodes.CHANGE_VIEW, "MIX_TABLE")
+            case arcade.key.C:
+                self.callback(
+                    SignalCodes.CHANGE_VIEW,
+                    ("CHEST", "chest_1", {"rubi": 4, "rock": 2}),
+                )
 
     def on_mouse_press(
         self, x: int, y: int, button: int, modifiers: int

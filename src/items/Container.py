@@ -19,5 +19,8 @@ class Container(arcade.SpriteSolidColor):
             color=color,
         )
         self.type: str = ""
-        self.container_id: int = -1
+        self.id: int = -1
         self.item_placed: bool = False
+
+    def __str__(self):
+        return f"\nContainer ID : {self.id}\nItem Placed : {self.item_placed}"
