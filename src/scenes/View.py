@@ -1,4 +1,3 @@
-from typing import Optional
 import arcade
 import Constants
 from arcade.camera import Camera2D

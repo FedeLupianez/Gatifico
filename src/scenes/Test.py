@@ -1,5 +1,4 @@
 import arcade
-import arcade.gui
 from typing import Tuple
 from scenes.View import View
 import Constants
@@ -7,6 +6,8 @@ from characters.Player import Player
 from typing import Callable
 from items.Mineral import Mineral
 import DataManager
+from items.Item import Item
+from .utils import add_containers_to_list
 
 MineralsResources = DataManager.loadData("Minerals.json")
 
@@ -22,29 +23,35 @@ class Test(View):
         backgroundUrl = None
         tileMapUrl = ":resources:Maps/Tests.tmx"
         super().__init__(backgroundUrl=backgroundUrl, tileMapUrl=tileMapUrl)
-        self.window.set_mouse_visible(False)
-
-        self.uiManager = arcade.gui.UIManager(self.window)
-        self.uiManager.enable()
-
-        self.uiAnchorLayout = arcade.gui.UIAnchorLayout()
-        self.uiManager.add(self.uiAnchorLayout)
 
         self.callback = callback
 
         self.player = player  # Defino el personaje
+        self.guiCamera = arcade.Camera2D()
 
         self.setupSpriteLists()
         self.setupSceneLayers()
         self.setupPlayer()
+        self.updateItemSprites()
+        self.updateItemTexts()
 
         self.keysPressed: set = set()
-        self.inventoryEnabled = False
 
     def setupSpriteLists(self):
         # Listas de Sprites
         self.playerSpritesList: arcade.SpriteList = arcade.SpriteList()
         self.backgroundSpriteList: arcade.SpriteList = arcade.SpriteList()
+        self.inventorySpriteList: arcade.SpriteList = arcade.SpriteList()
+        self.itemsInventory: arcade.SpriteList = arcade.SpriteList()
+        self.inventoryTexts: arcade.SpriteList = arcade.SpriteList()
+
+        # Agrego los contenedores a la lista del inventario
+        CONTAINER_SIZE = 50
+        ITEMS_INIT = (500, 100)
+        positions = [(ITEMS_INIT[0] + 60 * i, ITEMS_INIT[1]) for i in range(5)]
+        add_containers_to_list(
+            positions, self.inventorySpriteList, containerSize=CONTAINER_SIZE
+        )
 
     def setupPlayer(self) -> None:
         self.player.sprite.center_x = Constants.Game.SCREEN_WIDTH // 2
@@ -108,60 +115,30 @@ class Test(View):
         self.backgroundSpriteList.draw(pixelated=True)
         self.mineralsLayer.draw(pixelated=True)
 
-        self.uiManager.draw(pixelated=True)
+        self.guiCamera.use()
+        self.inventorySpriteList.draw(pixelated=True)
+        self.inventoryTexts.draw(pixelated=True)
 
-    def showInventory(self):
-        self.window.set_mouse_visible(True)
-        self.inventoryEnabled = True
-        self.uiAnchorLayout.clear()
+    def updateItemSprites(self):
+        self.itemsInventory.clear()
+        for index, (item, quantity) in enumerate(self.player.inventory.items()):
+            container = self.inventorySpriteList[index]
+            newItem: Item = Item(name=item, quantity=quantity, scale=2)
+            newItem.id = index
+            newItem.change_container(container.id)
+            newItem.change_position(container.center_x, container.center_y)
+            self.inventorySpriteList.append(newItem)
 
-        background = arcade.load_image(":resources:UI/inventory_background.png")
-        texture = arcade.Texture(image=background)
-
-        inventoryBackground = arcade.gui.UIImage(
-            center_x=self.window.center_x,
-            center_y=self.window.center_y,
-            texture=texture,
-        )
-        self.uiAnchorLayout.add(child=inventoryBackground)
-
-        inventoryGrid = arcade.gui.UIGridLayout(
-            column_count=5, row_count=5, horizontal_spacing=5, vertical_spacing=5
-        )
-
-        col, row = 0, 4
-        for itemName, quantity in self.player.inventory.items():
-            label = arcade.gui.UILabel(text=f"{itemName} x {quantity}", font_size=11)
-            inventoryGrid.add(column=col, row=row, child=label)
-            col += 1
-            if col >= 5 and row > 0:
-                col = 0
-                row -= 1
-
-        inventoryBox = arcade.gui.UIBoxLayout(vertical=True, space_between=10)
-        inventoryBox.add(
-            arcade.gui.UILabel(text="Inventario", font_size=20, align="center")
-        )
-        inventoryBox.add(child=inventoryGrid)
-
-        closeButton = arcade.gui.UIFlatButton(text="Cerrar", width=100)
-
-        @closeButton.event("on_click")
-        def on_click(event):
-            self.closeInventory()
-
-        inventoryBox.add(child=closeButton)
-        self.uiAnchorLayout.add(
-            child=inventoryBox, anchor_x="center", anchor_y="center"
-        )
-
-    def closeInventory(self):
-        self.uiAnchorLayout.clear()
-        self.uiManager.remove(self.uiAnchorLayout)  # 🔥 Eliminar layout del UIManager
-        self.uiAnchorLayout = arcade.gui.UIAnchorLayout()  # 🔁 Crear uno nuevo limpio
-        self.uiManager.add(self.uiAnchorLayout)  # ➕ Agregar el nuevo layout
-        self.inventoryEnabled = False
-        self.window.set_mouse_visible(False)
+    def updateItemTexts(self):
+        self.inventoryTexts.clear()
+        for index, (item, quantity) in enumerate(self.player.inventory.items()):
+            container = self.inventorySpriteList[index]
+            newText = arcade.create_text_sprite(
+                text=f"{item} x {quantity}", font_size=9
+            )
+            newText.center_x = container.center_x
+            newText.center_y = container.center_y - (container.height / 2)
+            self.inventoryTexts.append(newText)
 
     def on_key_press(self, symbol: int, modifiers: int) -> bool | None:
         if symbol == arcade.key.SPACE:
@@ -171,13 +148,6 @@ class Test(View):
         if symbol == arcade.key.E:
             if self.handleInteractions():
                 return
-
-        if symbol == arcade.key.I:
-            if not self.inventoryEnabled:
-                self.showInventory()
-            else:
-                self.closeInventory()
-            return
 
         self.keysPressed.add(symbol)
 
@@ -194,6 +164,8 @@ class Test(View):
                 mineral.setup()
                 mineral.stateMachine.processState(arcade.key.E)
                 self.player.addToInventory(mineral.mineral, 1)
+                self.updateItemSprites()
+                self.updateItemTexts()
 
                 if mineral.should_removed:
                     mineral.remove_from_sprite_lists()
