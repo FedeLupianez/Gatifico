@@ -7,6 +7,7 @@ from typing import Callable, Dict
 from Constants import SignalCodes
 from items.Container import Container
 from items.Item import Item
+from .utils import add_containers_to_list, get_result
 
 Combinations: Dict[str, Dict[str, str]] = DataManager.loadData("CombinationsTest.json")
 
@@ -17,27 +18,6 @@ MIXING_ITEMS_POSITIONS: list[tuple[int, int]] = [(300, 300), (400, 300)]
 CONTAINER_SIZE = 50
 
 ITEMS_INIT: tuple[int, int] = (100, 100)
-
-
-def add_containers_to_list(
-    pointList: list[tuple[int, int]], listToAdd: arcade.SpriteList
-) -> None:
-    for x, y in pointList:
-        tempSprite = Container(
-            width=CONTAINER_SIZE,
-            height=CONTAINER_SIZE,
-            center_x=x,
-            center_y=y,
-            color=arcade.color.GRAY,
-        )
-        tempSprite.item_placed = False
-        tempSprite.container_id = len(listToAdd)
-        listToAdd.append(tempSprite)
-
-
-def get_result(item_1: Item, item_2: Item) -> str | None:
-    result = Combinations.get(item_1.name, {}).get(item_2.name, None)
-    return result
 
 
 class MixTable(View):
@@ -54,7 +34,6 @@ class MixTable(View):
         # Configuraciones de cámara
         self.window.set_mouse_visible(True)
         self.camera.zoom = 1
-
         # Listas de sprites
         self.backgroundSprites = arcade.SpriteList()
         self.itemSprites = arcade.SpriteList()
@@ -104,8 +83,16 @@ class MixTable(View):
             (ITEMS_INIT[0] + 75 * i, ITEMS_INIT[1]) for i in range(len(self.items))
         ]
 
-        add_containers_to_list(positions, self.containerSprites)
-        add_containers_to_list(MIXING_ITEMS_POSITIONS, self.containerSprites)
+        add_containers_to_list(
+            pointList=positions,
+            listToAdd=self.containerSprites,
+            containerSize=CONTAINER_SIZE,
+        )
+        add_containers_to_list(
+            pointList=MIXING_ITEMS_POSITIONS,
+            listToAdd=self.containerSprites,
+            containerSize=CONTAINER_SIZE,
+        )
 
         # Container del resultado :
         result_x, result_y = MIXING_ITEMS_POSITIONS[-1]
@@ -117,7 +104,7 @@ class MixTable(View):
             center_y=result_y,
             color=arcade.color.BABY_BLUE,
         )
-        self.resultPlace.container_id = len(self.containerSprites)
+        self.resultPlace.id = len(self.containerSprites)
         self.containerSprites.append(self.resultPlace)
 
     def _generate_item_sprites(self) -> None:
@@ -127,7 +114,7 @@ class MixTable(View):
             newItem = Item(name=name, quantity=quantity, scale=3)
             newItem.id = self.nextItemId
             self.nextItemId += 1
-            newItem.change_container(container.container_id)
+            newItem.change_container(container.id)
             newItem.change_position(container.center_x, container.center_y)
             self.itemTextSprites.append(self._create_item_text(newItem))
             self.itemSprites.append(newItem)
@@ -170,25 +157,25 @@ class MixTable(View):
 
     def _load_item_result(self) -> None:
         input_1, input_2 = self.containerSprites[-3:-1]
-        item_1 = self._find_item_with_containerId(input_1.container_id)
-        item_2 = self._find_item_with_containerId(input_2.container_id)
+        item_1 = self._find_item_with_containerId(input_1.id)
+        item_2 = self._find_item_with_containerId(input_2.id)
 
         if not (item_1 and item_2):
             return
 
-        result = get_result(item_1, item_2)
+        result = get_result(item_1, item_2, Combinations)
         if not result:
             return
 
         oldResult: arcade.Sprite | None = self._find_item_with_containerId(
-            self.resultPlace.container_id
+            self.resultPlace.id
         )
         if not oldResult:
             sprite: Item = Item(result, quantity=1, scale=3)
             sprite.change_position(self.resultPlace.center_x, self.resultPlace.center_y)
             sprite.id = self.nextItemId
             self.nextItemId += 1
-            sprite.change_container(self.resultPlace.container_id)
+            sprite.change_container(self.resultPlace.id)
             self.itemTextSprites.append(self._create_item_text(sprite))
             self.itemSprites.append(sprite)
         else:
@@ -209,7 +196,7 @@ class MixTable(View):
 
     def _move_sprite_to_container(self, sprite: Item, container: Container) -> None:
         sprite.change_position(container.center_x, container.center_y)
-        sprite.change_container(container.container_id)
+        sprite.change_container(container.id)
 
     def on_show_view(self) -> None:
         self._setup_containers()
@@ -261,7 +248,7 @@ class MixTable(View):
         lastContainerIndex: int = self.itemToMove.container_id
         oldContainer: Container = self.containerSprites[lastContainerIndex]
 
-        if newContainer.container_id == oldContainer.container_id:
+        if newContainer.id == oldContainer.id:
             self._reset_sprite_position(self.itemToMove)
             self.itemToMove = None
             return
@@ -271,7 +258,7 @@ class MixTable(View):
             oldContainer.item_placed = False
             newContainer.item_placed = True
         else:
-            item: Item = self._find_item_with_containerId(newContainer.container_id)
+            item: Item = self._find_item_with_containerId(newContainer.id)
             if item.name == self.itemToMove.name:
                 text: arcade.Sprite = self._find_item_with_id(
                     item.id, self.itemTextSprites
