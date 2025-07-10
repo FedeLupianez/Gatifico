@@ -1,20 +1,24 @@
 import arcade
+import Constants
 from .View import View
 
 from items.Container import Container
 from items.Item import Item
 from .utils import add_containers_to_list
 
-from Constants import SignalCodes
 
 CONTAINER_SIZE = 40
 ITEMS_INIT = (300, 300)
 
 
 class Chest(View):
-    def __init__(self, callback, chestId: str, playerInventory: dict) -> None:
+    def __init__(
+        self, chestId: str, playerInventory: dict, previusScene, backgroundImage
+    ) -> None:
         backgroundUrl = ":resources:Background/Texture/TX Plant.png"
         super().__init__(backgroundUrl=backgroundUrl, tileMapUrl=None)
+        self.backgroundImage = backgroundImage
+        self.backgroundImage
         self.chests: dict[str, dict[str, int]] = {
             "chest_1": {"rubi": 4, "rock": 3},
             "chest_2": {},
@@ -27,10 +31,10 @@ class Chest(View):
         self.itemTextSprites = arcade.SpriteList()
         self.nextItemId: int = 0
         self.actualChest: str = chestId
-        self.callback = callback
         self.playerInventory = playerInventory
         self.is_mouse_active = False
         self.itemToMove: Item | None = None
+        self.previusScene = previusScene
 
         self.playerContainerIndex = 0
 
@@ -167,16 +171,26 @@ class Chest(View):
     def on_draw(self) -> None:
         self.clear()
         self.camera.use()
+        if self.backgroundImage:
+            arcade.draw_texture_rect(
+                self.backgroundImage,
+                rect=arcade.rect.Rect(
+                    left=0,
+                    right=0,
+                    top=0,
+                    bottom=0,
+                    width=Constants.Game.SCREEN_WIDTH,
+                    height=Constants.Game.SCREEN_HEIGHT,
+                    x=Constants.Game.SCREEN_WIDTH / 2,
+                    y=Constants.Game.SCREEN_HEIGHT / 2,
+                ),
+            )
         self.containerSprites.draw(pixelated=True)
         self.containerPlayerSprites.draw(pixelated=True)
         self.itemSprites.draw(pixelated=True)
         self.itemTextSprites.draw(pixelated=True)
         self._sync_item_text()
         self._update_texts_position()
-
-    def on_key_press(self, symbol: int, modifiers: int) -> None:
-        if symbol == arcade.key.SPACE:
-            self.callback(SignalCodes.CHANGE_VIEW, "MENU")
 
     def on_show_view(self) -> None:
         self._setup()
@@ -253,3 +267,22 @@ class Chest(View):
         if self.itemToMove:
             # Cambio la posición del sprite a la del mouse
             self.itemToMove.change_position(x, y)
+
+    def cleanup(self):
+        # Limpio todas las listas de sprites
+        self.itemSprites.clear()
+        self.containerSprites.clear()
+        self.containerPlayerSprites.clear()
+        self.itemTextSprites.clear()
+
+        # Elimino la textura temporal (si querés)
+        del self.backgroundImage
+
+        # Anulá referencias fuertes si las tenés
+        self.itemToMove = None
+        self.playerInventory = None
+
+    def on_key_press(self, symbol: int, modifiers: int) -> bool | None:
+        if symbol == arcade.key.ESCAPE:
+            self.cleanup()
+            self.window.show_view(self.previusScene)

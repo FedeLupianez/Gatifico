@@ -8,6 +8,7 @@ from items.Mineral import Mineral
 import DataManager
 from items.Item import Item
 from .utils import add_containers_to_list
+from .Chest import Chest
 
 MineralsResources = DataManager.loadData("Minerals.json")
 
@@ -140,6 +141,20 @@ class Test(View):
             newText.center_y = container.center_y - (container.height / 2)
             self.inventoryTexts.append(newText)
 
+    def openChest(self, chestId: str) -> None:
+        screenshot = arcade.get_image()
+        background_texture = arcade.texture.Texture.create_empty(
+            "chest_bg", size=(screenshot.width, screenshot.height)
+        )
+        background_texture.image = screenshot
+        newChestScene = Chest(
+            chestId=chestId,
+            playerInventory=self.player.inventory,
+            previusScene=self,
+            backgroundImage=background_texture,
+        )
+        self.window.show_view(newChestScene)
+
     def on_key_press(self, symbol: int, modifiers: int) -> bool | None:
         if symbol == arcade.key.SPACE:
             self.callback(Constants.SignalCodes.CHANGE_VIEW, "MENU")
@@ -158,6 +173,8 @@ class Test(View):
                 if interactObject.name.lower() == "door":
                     self.callback(Constants.SignalCodes.CHANGE_VIEW, "MENU")
                     return True
+                if "chest" in interactObject.name.lower():
+                    self.openChest(chestId=interactObject.name.lower())
 
         for mineral in self.mineralsLayer:
             if is_near_to_sprite(self.player.sprite, mineral, tolerance=35):
