@@ -44,7 +44,7 @@ class Test(View):
         self.backgroundSpriteList: arcade.SpriteList = arcade.SpriteList()
         self.inventorySpriteList: arcade.SpriteList = arcade.SpriteList()
         self.itemsInventory: arcade.SpriteList = arcade.SpriteList()
-        self.inventoryTexts: arcade.SpriteList = arcade.SpriteList()
+        self.inventoryTexts: list[arcade.Text] = []
 
         # Agrego los contenedores a la lista del inventario
         CONTAINER_SIZE = 50
@@ -120,7 +120,8 @@ class Test(View):
         self.guiCamera.use()
         self.inventorySpriteList.draw(pixelated=True)
         self.itemsInventory.draw(pixelated=True)
-        self.inventoryTexts.draw(pixelated=True)
+        for text in self.inventoryTexts:
+            text.draw()
 
     def updateItemSprites(self):
         self.itemsInventory.clear()
@@ -136,11 +137,14 @@ class Test(View):
         self.inventoryTexts.clear()
         for index, (item, quantity) in enumerate(self.player.inventory.items()):
             container = self.inventorySpriteList[index]
-            newText = arcade.create_text_sprite(
-                text=f"{item} x {quantity}", font_size=9
+            newText = arcade.Text(
+                text=f"{item} x {quantity}",
+                font_size=9,
+                x=container.center_x,
+                y=container.center_y - (container.height / 2 + 15),
+                anchor_x="center",
+                anchor_y="baseline",
             )
-            newText.center_x = container.center_x
-            newText.center_y = container.center_y - (container.height / 2)
             self.inventoryTexts.append(newText)
 
     def openChest(self, chestId: str) -> None:
