@@ -7,9 +7,10 @@ from items.Container import Container
 from items.Item import Item
 from .utils import add_containers_to_list
 
+from DataManager import testChests
 
-CONTAINER_SIZE = 40
-ITEMS_INIT = (300, 300)
+CONTAINER_SIZE = 50
+ITEMS_INIT = (550, 300)
 
 
 class Chest(View):
@@ -20,11 +21,6 @@ class Chest(View):
         super().__init__(backgroundUrl=backgroundUrl, tileMapUrl=None)
         self.backgroundImage = backgroundImage
         self.backgroundImage
-        self.chests: dict[str, dict[str, int]] = {
-            "chest_1": {"rubi": 4, "rock": 3},
-            "chest_2": {},
-            "chest_3": {},
-        }
         self.window.set_mouse_visible(True)
         self.itemSprites: arcade.SpriteList = arcade.SpriteList()
         self.containerSprites = arcade.SpriteList()
@@ -41,9 +37,12 @@ class Chest(View):
         self._setup()
 
     def _setup_containers(self) -> None:
-        positions_1 = [(ITEMS_INIT[0] + 45 * i, ITEMS_INIT[1]) for i in range(4)]
-        positions_2 = [(ITEMS_INIT[0] + 45 * i, ITEMS_INIT[1] + 45) for i in range(4)]
-        playerItems = [(ITEMS_INIT[0] + 45 * i, ITEMS_INIT[1] - 90) for i in range(5)]
+        positions_1 = [(ITEMS_INIT[0] + 60 * i, ITEMS_INIT[1]) for i in range(4)]
+        positions_2 = [(ITEMS_INIT[0] + 60 * i, ITEMS_INIT[1] + 60) for i in range(4)]
+        playerInitPosition = Constants.Game.PLAYER_INVENTORY_POSITION
+        playerItems = [
+            (playerInitPosition[0] + 60 * i, playerInitPosition[1]) for i in range(5)
+        ]
         add_containers_to_list(
             pointList=positions_1,
             listToAdd=self.containerSprites,
@@ -89,28 +88,29 @@ class Chest(View):
 
     def _update_texts_position(self) -> None:
         for item in self.itemSprites:
-            actualText: arcade.Sprite | None = self._find_item_with_id(
+            actualText: arcade.Text | None = self._find_item_with_id(
                 item.id, self.itemTextSprites
             )
             if not (actualText):
                 continue
             actualText.center_x = item.center_x
-            actualText.center_y = item.center_y - (item.height / 2 + 15)
+            actualText.center_y = item.center_y - ((item.height / 2) + 24)
 
     def _create_item_text(self, item: Item) -> arcade.Text:
         content = f"{item.name} x {item.quantity}"
         textSprite = arcade.Text(
             text=content,
             font_size=9,
-            x=(item.center_x - item.width / 2),
-            y=item.center_y - item.height,
+            x=item.center_x,
+            y=item.center_y - ((item.height / 2) + 24),
+            anchor_x="center",
+            anchor_y="baseline",
         )
         textSprite.id = item.id
-        textSprite.content = content
         return textSprite
 
     def _generate_item_sprites(self):
-        for index, (item, quantity) in enumerate(self.chests[self.actualChest].items()):
+        for index, (item, quantity) in enumerate(testChests[self.actualChest].items()):
             container: Container = self.containerSprites[index]
             newItem = Item(name=item, quantity=quantity, scale=2)
             newItem.id = self.nextItemId
@@ -139,10 +139,9 @@ class Chest(View):
                 continue
             if textSprite.text != f"{item.name} x {item.quantity}":
                 textSprite.text = f"{item.name} x {item.quantity}"
-            textSprite.y = item.center_y - (item.height / 2 + 15)
-            textSprite.x = item.center_x
             textSprite.anchor_x = "center"
             textSprite.anchor_y = "baseline"
+        self._update_texts_position()
 
     def _reset_sprite_position(self, sprite: Item) -> None:
         if sprite.container_id < self.playerContainerIndex:
@@ -164,8 +163,6 @@ class Chest(View):
     def _setup(self) -> None:
         self._setup_containers()
         self._generate_item_sprites()
-        print("Cantidad de items : ", len(self.itemSprites))
-        print("Cantidad de textos : ", len(self.itemTextSprites))
 
     def on_update(self, delta_time: float) -> bool | None:
         self._sync_item_text()
@@ -251,7 +248,7 @@ class Chest(View):
         else:
             item: Item = self._find_item_with_containerId(newContainer.id)
             if item.name == self.itemToMove.name:
-                text: arcade.Sprite = self._find_item_with_id(
+                text: arcade.Text = self._find_item_with_id(
                     item.id, self.itemTextSprites
                 )
                 self._move_sprite_to_container(self.itemToMove, newContainer)
@@ -279,7 +276,7 @@ class Chest(View):
             if item:
                 newchestInventory[item.name] = item.quantity
 
-        self.chests[self.actualChest] = newchestInventory
+        testChests[self.actualChest] = newchestInventory
         # Ahora voy a actualizar el inventario del jugador
         newPlayerInventory = {}
         for container in self.containerPlayerSprites:
