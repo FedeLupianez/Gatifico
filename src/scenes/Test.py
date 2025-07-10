@@ -105,7 +105,8 @@ class Test(View):
         return tempList
 
     def on_show_view(self) -> None:
-        return super().on_show_view()
+        self.updateItemSprites()
+        self.updateItemTexts()
 
     def on_draw(self) -> bool | None:
         # Función que se llama cada vez que se dibuja la escena
@@ -118,6 +119,7 @@ class Test(View):
 
         self.guiCamera.use()
         self.inventorySpriteList.draw(pixelated=True)
+        self.itemsInventory.draw(pixelated=True)
         self.inventoryTexts.draw(pixelated=True)
 
     def updateItemSprites(self):
@@ -128,7 +130,7 @@ class Test(View):
             newItem.id = index
             newItem.change_container(container.id)
             newItem.change_position(container.center_x, container.center_y)
-            self.inventorySpriteList.append(newItem)
+            self.itemsInventory.append(newItem)
 
     def updateItemTexts(self):
         self.inventoryTexts.clear()
@@ -142,6 +144,9 @@ class Test(View):
             self.inventoryTexts.append(newText)
 
     def openChest(self, chestId: str) -> None:
+        # Borro la lista de keys activas para que no se siga moviendo al volver a la escena
+        self.keysPressed.clear()
+        self.player.updateState(-arcade.key.W)
         screenshot = arcade.get_image()
         background_texture = arcade.texture.Texture.create_empty(
             "chest_bg", size=(screenshot.width, screenshot.height)
@@ -149,7 +154,7 @@ class Test(View):
         background_texture.image = screenshot
         newChestScene = Chest(
             chestId=chestId,
-            playerInventory=self.player.inventory,
+            player=self.player,
             previusScene=self,
             backgroundImage=background_texture,
         )

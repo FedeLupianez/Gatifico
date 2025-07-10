@@ -1,5 +1,6 @@
 import arcade
 import Constants
+from characters.Player import Player
 from .View import View
 
 from items.Container import Container
@@ -13,7 +14,7 @@ ITEMS_INIT = (300, 300)
 
 class Chest(View):
     def __init__(
-        self, chestId: str, playerInventory: dict, previusScene, backgroundImage
+        self, chestId: str, player: Player, previusScene, backgroundImage
     ) -> None:
         backgroundUrl = ":resources:Background/Texture/TX Plant.png"
         super().__init__(backgroundUrl=backgroundUrl, tileMapUrl=None)
@@ -28,29 +29,21 @@ class Chest(View):
         self.itemSprites: arcade.SpriteList = arcade.SpriteList()
         self.containerSprites = arcade.SpriteList()
         self.containerPlayerSprites = arcade.SpriteList()
-        self.itemTextSprites = arcade.SpriteList()
+        self.itemTextSprites: list[arcade.Text] = []
         self.nextItemId: int = 0
         self.actualChest: str = chestId
-        self.playerInventory = playerInventory
+        self.player = player
         self.is_mouse_active = False
         self.itemToMove: Item | None = None
         self.previusScene = previusScene
 
         self.playerContainerIndex = 0
-
-    def addItem(self, newItem: str, amount: int):
-        if self.chests[self.actualChest].get(newItem, None):
-            self.chests[self.actualChest][newItem] += amount
-        else:
-            self.chests[self.actualChest][newItem] = amount
+        self._setup()
 
     def _setup_containers(self) -> None:
         positions_1 = [(ITEMS_INIT[0] + 45 * i, ITEMS_INIT[1]) for i in range(4)]
         positions_2 = [(ITEMS_INIT[0] + 45 * i, ITEMS_INIT[1] + 45) for i in range(4)]
-        playerItems = [
-            (ITEMS_INIT[0] + 45 * i, ITEMS_INIT[1] - 90)
-            for i in range(len(self.playerInventory.items()))
-        ]
+        playerItems = [(ITEMS_INIT[0] + 45 * i, ITEMS_INIT[1] - 90) for i in range(5)]
         add_containers_to_list(
             pointList=positions_1,
             listToAdd=self.containerSprites,
@@ -84,7 +77,9 @@ class Chest(View):
             return sprite
         return self._find_item_with_id(id, listToFind, sprite_index + 1)
 
-    def _find_item_with_containerId(self, container_id: int, sprite_index: int = 0):
+    def _find_item_with_containerId(
+        self, container_id: int, sprite_index: int = 0
+    ) -> Item | None:
         if sprite_index == len(self.itemSprites):
             return None
         sprite: Item = self.itemSprites[sprite_index]
@@ -98,15 +93,18 @@ class Chest(View):
                 item.id, self.itemTextSprites
             )
             if not (actualText):
-                return
+                continue
             actualText.center_x = item.center_x
             actualText.center_y = item.center_y - (item.height / 2 + 15)
 
-    def _create_item_text(self, item: Item) -> arcade.Sprite:
+    def _create_item_text(self, item: Item) -> arcade.Text:
         content = f"{item.name} x {item.quantity}"
-        textSprite = arcade.create_text_sprite(text=content, font_size=9)
-        textSprite.center_x = item.center_x
-        textSprite.center_y = item.center_y - (item.height / 2 + 15)
+        textSprite = arcade.Text(
+            text=content,
+            font_size=9,
+            x=(item.center_x - item.width / 2),
+            y=item.center_y - item.height,
+        )
         textSprite.id = item.id
         textSprite.content = content
         return textSprite
@@ -123,7 +121,7 @@ class Chest(View):
             self.itemTextSprites.append(self._create_item_text(newItem))
             self.itemSprites.append(newItem)
 
-        for index, (item, quantity) in enumerate(self.playerInventory.items()):
+        for index, (item, quantity) in enumerate(self.player.getInventory().items()):
             container: Container = self.containerPlayerSprites[index]
             newItem = Item(name=item, quantity=quantity, scale=2)
             newItem.id = self.nextItemId
@@ -139,13 +137,12 @@ class Chest(View):
             item = self._find_item_with_id(textSprite.id, self.itemSprites)
             if item is None:
                 continue
-            if textSprite.content != f"{item.name} x {item.quantity}":
-                print("\nNuevo texto : ")
-                print("item ID : ", item.id)
-                print("Contenido anterior : ", textSprite.content)
-                print("Contenido nuevo : ", f"{item.name} x {item.quantity}")
-                self.itemTextSprites.remove(textSprite)
-                self.itemTextSprites.append(self._create_item_text(item))
+            if textSprite.text != f"{item.name} x {item.quantity}":
+                textSprite.text = f"{item.name} x {item.quantity}"
+            textSprite.y = item.center_y - (item.height / 2 + 15)
+            textSprite.x = item.center_x
+            textSprite.anchor_x = "center"
+            textSprite.anchor_y = "baseline"
 
     def _reset_sprite_position(self, sprite: Item) -> None:
         if sprite.container_id < self.playerContainerIndex:
@@ -167,6 +164,12 @@ class Chest(View):
     def _setup(self) -> None:
         self._setup_containers()
         self._generate_item_sprites()
+        print("Cantidad de items : ", len(self.itemSprites))
+        print("Cantidad de textos : ", len(self.itemTextSprites))
+
+    def on_update(self, delta_time: float) -> bool | None:
+        self._sync_item_text()
+        self._update_texts_position()
 
     def on_draw(self) -> None:
         self.clear()
@@ -184,17 +187,16 @@ class Chest(View):
                     x=Constants.Game.SCREEN_WIDTH / 2,
                     y=Constants.Game.SCREEN_HEIGHT / 2,
                 ),
+                pixelated=True,
             )
         self.containerSprites.draw(pixelated=True)
         self.containerPlayerSprites.draw(pixelated=True)
         self.itemSprites.draw(pixelated=True)
-        self.itemTextSprites.draw(pixelated=True)
-        self._sync_item_text()
-        self._update_texts_position()
+        for text in self.itemTextSprites:
+            text.draw()
 
     def on_show_view(self) -> None:
-        self._setup()
-        super().on_show_view()
+        pass
 
     def on_mouse_press(self, x: int, y: int, button: int, modifiers: int):
         if button == arcade.MOUSE_BUTTON_LEFT:
@@ -268,21 +270,38 @@ class Chest(View):
             # Cambio la posición del sprite a la del mouse
             self.itemToMove.change_position(x, y)
 
+    def updateInventories(self):
+        # Acá voy a actualizar los inventarios tanto del cofre como del personaje
+        # Esta parte es del cofre
+        newchestInventory = {}
+        for container in self.containerSprites:
+            item: Item | None = self._find_item_with_containerId(container.id)
+            if item:
+                newchestInventory[item.name] = item.quantity
+
+        self.chests[self.actualChest] = newchestInventory
+        # Ahora voy a actualizar el inventario del jugador
+        newPlayerInventory = {}
+        for container in self.containerPlayerSprites:
+            item: Item | None = self._find_item_with_containerId(container.id)
+            if item:
+                newPlayerInventory[item.name] = item.quantity
+        self.player.inventory = newPlayerInventory
+
     def cleanup(self):
         # Limpio todas las listas de sprites
-        self.itemSprites.clear()
-        self.containerSprites.clear()
-        self.containerPlayerSprites.clear()
-        self.itemTextSprites.clear()
-
-        # Elimino la textura temporal (si querés)
+        self.itemSprites = arcade.SpriteList()
+        self.containerSprites = arcade.SpriteList()
+        self.containerPlayerSprites = arcade.SpriteList()
+        self.itemTextSprites = []
+        # Elimino la textura del fondo
         del self.backgroundImage
-
-        # Anulá referencias fuertes si las tenés
+        # Elimno las referencias directas
         self.itemToMove = None
         self.playerInventory = None
 
     def on_key_press(self, symbol: int, modifiers: int) -> bool | None:
         if symbol == arcade.key.ESCAPE:
+            self.updateInventories()
             self.cleanup()
             self.window.show_view(self.previusScene)
