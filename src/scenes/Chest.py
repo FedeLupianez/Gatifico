@@ -93,8 +93,8 @@ class Chest(View):
             )
             if not (actualText):
                 continue
-            actualText.center_x = item.center_x
-            actualText.center_y = item.center_y - ((item.height / 2) + 24)
+            actualText.x = item.center_x
+            actualText.y = item.center_y - ((item.height / 2) + 24)
 
     def _create_item_text(self, item: Item) -> arcade.Text:
         content = f"{item.name} x {item.quantity}"

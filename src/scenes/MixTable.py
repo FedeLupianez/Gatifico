@@ -38,7 +38,7 @@ class MixTable(View):
         self.backgroundSprites = arcade.SpriteList()
         self.itemSprites = arcade.SpriteList()
         self.containerSprites: arcade.SpriteList = arcade.SpriteList()
-        self.itemTextSprites: arcade.SpriteList = arcade.SpriteList()
+        self.itemTextSprites: list[arcade.Text] = []
 
         # cosas de la UI
         self.UIManager = arcade.gui.UIManager(self.window)
@@ -68,9 +68,7 @@ class MixTable(View):
             return sprite
         return self._find_item_with_containerId(container_id, sprite_index + 1)
 
-    def _find_item_with_id(
-        self, id: int, listToFind: arcade.SpriteList, sprite_index: int = 0
-    ):
+    def _find_item_with_id(self, id: int, listToFind: list, sprite_index: int = 0):
         if sprite_index == len(listToFind):
             return None
         sprite = listToFind[sprite_index]
@@ -109,7 +107,6 @@ class MixTable(View):
 
     def _generate_item_sprites(self) -> None:
         for index, (name, quantity) in enumerate(self.items.items()):
-            actualIds = [item.id for item in self.itemSprites]
             container: Container = self.containerSprites[index]
             newItem = Item(name=name, quantity=quantity, scale=3)
             newItem.id = self.nextItemId
@@ -118,18 +115,18 @@ class MixTable(View):
             newItem.change_position(container.center_x, container.center_y)
             self.itemTextSprites.append(self._create_item_text(newItem))
             self.itemSprites.append(newItem)
-            del actualIds
 
-    def _create_item_text(self, item: Item) -> arcade.Sprite:
+    def _create_item_text(self, item: Item) -> arcade.Text:
         content = f"{item.name} x {item.quantity}"
-        textSprite = arcade.create_text_sprite(
+        textSprite = arcade.Text(
             text=content,
             font_size=11,
+            x=item.center_x,
+            y=item.center_y - ((item.height / 2) + 15),
+            anchor_x="center",
+            anchor_y="baseline",
         )
-        textSprite.center_x = item.center_x
-        textSprite.center_y = item.center_y - (item.height / 2 + 15)
         textSprite.id = item.id
-        textSprite.content = content
         return textSprite
 
     def _update_texts_position(self) -> None:
@@ -139,21 +136,18 @@ class MixTable(View):
             )
             if not (actualText):
                 return
-            actualText.center_x = item.center_x
-            actualText.center_y = item.center_y - (item.height / 2 + 15)
+            actualText.x = item.center_x
+            actualText.y = item.center_y - (item.height / 2 + 15)
 
     def _sync_item_text(self) -> None:
         for textSprite in self.itemTextSprites:
             item = self._find_item_with_id(textSprite.id, self.itemSprites)
             if item is None:
+                print("item no encontrado")
                 continue
-            if textSprite.content != f"{item.name} x {item.quantity}":
-                print("\nNuevo texto : ")
-                print("item ID : ", item.id)
-                print("Contenido anterior : ", textSprite.content)
-                print("Contenido nuevo : ", f"{item.name} x {item.quantity}")
-                self.itemTextSprites.remove(textSprite)
-                self.itemTextSprites.append(self._create_item_text(item))
+            expected = f"{item.name} x {item.quantity}"
+            if textSprite.text != expected:
+                textSprite.text = expected
 
     def _load_item_result(self) -> None:
         input_1, input_2 = self.containerSprites[-3:-1]
@@ -208,10 +202,11 @@ class MixTable(View):
         self.camera.use()
         self.backgroundSprites.draw(pixelated=True)
         self.containerSprites.draw(pixelated=True)
-        self.itemTextSprites.draw(pixelated=True)
         self.itemSprites.draw(pixelated=True)
         self._sync_item_text()
         self._update_texts_position()
+        for text in self.itemTextSprites:
+            text.draw()
         self.UIManager.draw(pixelated=True)
 
     def on_key_press(self, symbol: int, modifiers: int) -> bool | None:
