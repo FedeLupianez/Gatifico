@@ -15,6 +15,8 @@ class Game:
     PLAYER_SPEED = 5
     PLAYER_WIDTH = 10
     PLAYER_HEIGHT = 10
+    PLAYER_INVENTORY_POSITION = (550, 100)
+    FOREST_ZOOM_CAMERA = 3.5
 
 
 class SignalCodes:
