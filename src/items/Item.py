@@ -16,7 +16,6 @@ class Item(arcade.Sprite):
     def __init__(self, name: str, quantity: int, scale: int = 1) -> None:
         path: str = str(MineralsResources[name]["item"]["path"])
         super().__init__(path, scale=scale)
-        print(self.texture)
         self.id: int = -1
         self.name = name
         self.quantity = quantity

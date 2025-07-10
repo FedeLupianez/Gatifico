@@ -1,5 +1,7 @@
 import arcade
 from typing import Tuple
+
+from arcade.cache import crate_str_from_values
 from scenes.View import View
 import Constants
 from characters.Player import Player
@@ -48,7 +50,7 @@ class Test(View):
 
         # Agrego los contenedores a la lista del inventario
         CONTAINER_SIZE = 50
-        ITEMS_INIT = (500, 100)
+        ITEMS_INIT = Constants.Game.PLAYER_INVENTORY_POSITION
         positions = [(ITEMS_INIT[0] + 60 * i, ITEMS_INIT[1]) for i in range(5)]
         add_containers_to_list(
             positions, self.inventorySpriteList, containerSize=CONTAINER_SIZE
@@ -60,7 +62,7 @@ class Test(View):
         self.player.setup()
         self.playerSpritesList.append(self.player.sprite)
         # Camara para seguir al jugador :
-        self.camera.zoom = 2.5
+        self.camera.zoom = Constants.Game.FOREST_ZOOM_CAMERA
 
     def setupSceneLayers(self) -> None:
         assert self.tileMap is not None
@@ -105,8 +107,7 @@ class Test(View):
         return tempList
 
     def on_show_view(self) -> None:
-        self.updateItemSprites()
-        self.updateItemTexts()
+        pass
 
     def on_draw(self) -> bool | None:
         # Función que se llama cada vez que se dibuja la escena
@@ -178,7 +179,6 @@ class Test(View):
     def handleInteractions(self):
         for interactObject in self.interactSprites:
             if is_near_to_sprite(self.player.sprite, interactObject, tolerance=40):
-                print(interactObject.name)
                 if interactObject.name.lower() == "door":
                     self.callback(Constants.SignalCodes.CHANGE_VIEW, "MENU")
                     return True
@@ -206,6 +206,8 @@ class Test(View):
         self.player.update_animation(delta_time)
         lastPosition = self.player.sprite.center_x, self.player.sprite.center_y
         self.player.updatePosition()
+        self.updateItemSprites()
+        self.updateItemTexts()
 
         # Colisiones físicas solo con capas físicas reales
         collisions = arcade.check_for_collision_with_lists(
