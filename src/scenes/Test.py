@@ -1,7 +1,6 @@
 import arcade
 from typing import Tuple
 
-from arcade.cache import crate_str_from_values
 from scenes.View import View
 import Constants
 from characters.Player import Player
@@ -152,6 +151,13 @@ class Test(View):
         # Borro la lista de keys activas para que no se siga moviendo al volver a la escena
         self.keysPressed.clear()
         self.player.updateState(-arcade.key.W)
+        # Limpio la pantalla y dibujo solo el mundo para que no aparezcan los textos
+        self.clear()
+        self.camera.use()
+        self.scene.draw(pixelated=True)
+        self.playerSpritesList.draw(pixelated=True)
+        self.backgroundSpriteList.draw(pixelated=True)
+
         screenshot = arcade.get_image()
         background_texture = arcade.texture.Texture.create_empty(
             "chest_bg", size=(screenshot.width, screenshot.height)
