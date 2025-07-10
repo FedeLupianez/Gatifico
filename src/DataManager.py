@@ -8,6 +8,12 @@ import os
 BASE_DIR = os.path.dirname(__file__)
 DATAFILES_DIR = BASE_DIR + "/resources/Data/"
 
+testChests: dict[str, dict[str, int]] = {
+    "chest_1": {"rubi": 4, "rock": 3},
+    "chest_2": {},
+    "chest_3": {},
+}
+
 
 def loadData(filename: str) -> dict:
     with open(DATAFILES_DIR + filename, "r") as file:
