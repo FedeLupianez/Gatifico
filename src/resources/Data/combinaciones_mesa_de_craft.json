@@ -1,0 +1,658 @@
+{
+  "Hongo bioluminiscente": {
+    "Hongo bioluminiscente": {
+      "resultado": "Bioluminina concentrada",
+      "descripción": "Sustancia líquida que emite una suave luz azul, útil para iluminar zonas oscuras o crear pociones luminosas."
+    },
+    "Hongo blanco": {
+      "resultado": "Tónico fotosensible",
+      "descripción": "Un líquido que reacciona a la luz solar; base ideal para filtros de visión o preparados energizantes."
+    },
+    "Hongo rojo con puntos": {
+      "resultado": "Compuesto neuroactivo",
+      "descripción": "Sustancia de efecto breve sobre el sistema nervioso; puede aumentar la agudeza o provocar alucinaciones."
+    },
+    "Hongo negro": {
+      "resultado": "Pigmento vivo",
+      "descripción": "Pigmento negro intenso que reacciona levemente a la temperatura; puede usarse en escritura o arte mágico."
+    },
+    "Hongo de sombra": {
+      "resultado": "Líquido fosfo-umbrío",
+      "descripción": "Líquido oscuro con destellos tenues; ingrediente clave en pociones de invisibilidad parcial o ocultamiento."
+    },
+    "Hongo de cristal": {
+      "resultado": "Extracto refractivo",
+      "descripción": "Fluido que distorsiona la luz; útil para espejismos, ilusiones o efectos visuales complejos."
+    }
+  },
+  "Hongo blanco": {
+    "Hongo blanco": {
+      "resultado": "Base digestiva",
+      "descripción": "Mezcla natural que calma el estómago y sirve como base para tónicos curativos."
+    },
+    "Hongo rojo con puntos": {
+      "resultado": "Pasta psicoactiva",
+      "descripción": "Sustancia espesa con propiedades mentales intensas; puede alterar la percepción por un corto tiempo."
+    },
+    "Hongo negro": {
+      "resultado": "Bálsamo antimicrobiano",
+      "descripción": "Mezcla que previene infecciones y acelera la curación de heridas leves."
+    },
+    "Hongo de sombra": {
+      "resultado": "Pasta somnífera",
+      "descripción": "Sustancia pastosa con efecto sedante; puede inducir sueño profundo o calmar estados de ansiedad."
+    },
+    "Hongo de cristal": {
+      "resultado": "Mezcla antifúngica",
+      "descripción": "Combinación medicinal que combate otras esporas o toxinas fúngicas; base para antídotos."
+    }
+  },
+  "Hongo rojo con puntos": {
+    "Hongo rojo con puntos": {
+      "resultado": "Compuesto alucinógeno crudo",
+      "descripción": "Sustancia mentalmente activa no refinada; su uso sin procesar puede ser peligroso o impredecible."
+    },
+    "Hongo negro": {
+      "resultado": "Tintura tóxica",
+      "descripción": "Colorante oscuro con propiedades venenosas; usado en flechas o trampas."
+    },
+    "Hongo de sombra": {
+      "resultado": "Poción de visión distorsionada",
+      "descripción": "Poción que deforma la percepción visual durante unos minutos, útil para confundir enemigos."
+    },
+    "Hongo de cristal": {
+      "resultado": "Resina neural cristalina",
+      "descripción": "Sólido semitransparente que estimula la actividad cerebral; usado en extractos de enfoque mental."
+    }
+  },
+  "Hongo negro": {
+    "Hongo negro": {
+      "resultado": "Pigmento oscuro",
+      "descripción": "Tinta muy densa ideal para marcar rituales, símbolos mágicos o mapas secretos."
+    },
+    "Hongo de sombra": {
+      "resultado": "Niebla líquida",
+      "descripción": "Sustancia que, al exponerse al aire, se transforma en una niebla densa por unos segundos."
+    },
+    "Hongo de cristal": {
+      "resultado": "Tinta espectral",
+      "descripción": "Tinta que solo se ve bajo luz lunar o ciertas lámparas; usada para mensajes ocultos o sellos mágicos."
+    }
+  },
+  "Hongo de sombra": {
+    "Hongo de sombra": {
+      "resultado": "Extracto de sombra pura",
+      "descripción": "Sombra líquida que absorbe la luz; puede ser combinada para fabricar pociones de camuflaje."
+    },
+    "Hongo de cristal": {
+      "resultado": "Fórmula de luz oculta",
+      "descripción": "Preparado que emite un resplandor solo visible para ciertos ojos entrenados o criaturas mágicas."
+    }
+  },
+  "Hongo de cristal": {
+    "Hongo de cristal": {
+      "resultado": "Cristal líquido micótico",
+      "descripción": "Sustancia gelatinosa que refleja la luz como un prisma; reactiva a sonidos o vibraciones."
+    }
+  },
+  "Manzanilla": {
+    "Menta": {
+      "resultado": "Infusión refrescante",
+      "descripción": "Combinación que genera una infusión que relaja y refresca, utilizada en pociones de alivio y descanso."
+    },
+    "Diente de león": {
+      "resultado": "Tisana curativa",
+      "descripción": "Mezcla que da lugar a una tisana rica en propiedades curativas, utilizada en pociones de regeneración de salud."
+    },
+    "Milenrama": {
+      "resultado": "Poción de sanación",
+      "descripción": "Combinación de manzanilla y milenrama que produce una potente poción curativa para heridas o estados alterados."
+    },
+    "Ortiga": {
+      "resultado": "Infusión antiinflamatoria",
+      "descripción": "Mezcla que resulta en una infusión que combate la inflamación, útil para pociones de alivio de dolores."
+    },
+    "Salvia": {
+      "resultado": "Elixir mental",
+      "descripción": "Combinación que mejora la concentración, utilizada en pociones para aumentar la claridad mental y enfoque."
+    },
+    "Tomillo": {
+      "resultado": "Poción anti resfriado",
+      "descripción": "Combinación que produce un brebaje que ayuda a combatir los resfriados o enfermedades respiratorias."
+    },
+    "Lavanda": {
+      "resultado": "Elixir relajante",
+      "descripción": "Mezcla que produce un elixir que induce la relajación y combate el estrés o la ansiedad."
+    },
+    "Hierba de San Juan": {
+      "resultado": "Poción antidepresiva",
+      "descripción": "Combinación que resulta en una poción que alivia síntomas depresivos y mejora el ánimo."
+    },
+    "Hierba amarga": {
+      "resultado": "Poción detox",
+      "descripción": "Combinación que da lugar a una bebida amarga que purifica el cuerpo, utilizada en pociones de desintoxicación."
+    },
+    "Albahaca silvestre": {
+      "resultado": "Elixir revitalizante",
+      "descripción": "Combinación que rejuvenece, utilizada en pociones para revitalizar la energía o resistencia."
+    },
+    "Hierba de luna": {
+      "resultado": "Tisana nocturna",
+      "descripción": "Combinación que induce al sueño profundo, ideal para pociones que mejoran el descanso nocturno."
+    }
+  },
+  "Menta": {
+    "Diente de león": {
+      "resultado": "Tisana digestiva",
+      "descripción": "Mezcla que ayuda a la digestión, ideal para pociones de alivio gastrointestinal."
+    },
+    "Milenrama": {
+      "resultado": "Poción calmante",
+      "descripción": "Combinación que ayuda a calmar el cuerpo y la mente, útil en pociones de relajación."
+    },
+    "Ortiga": {
+      "resultado": "Infusión purificante",
+      "descripción": "Combinación que purifica el cuerpo y ayuda a limpiar toxinas, ideal para pociones detox."
+    },
+    "Salvia": {
+      "resultado": "Elixir de sabiduría",
+      "descripción": "Mezcla que mejora la claridad mental y la memoria, usada en pociones para aumentar la concentración."
+    },
+    "Tomillo": {
+      "resultado": "Tisana revitalizante",
+      "descripción": "Mezcla que proporciona energía, ideal para pociones que aumentan la vitalidad."
+    },
+    "Lavanda": {
+      "resultado": "Elixir calmante",
+      "descripción": "Combinación que induce la relajación y reduce el estrés, perfecta para pociones de alivio emocional."
+    },
+    "Hierba de San Juan": {
+      "resultado": "Poción de energía",
+      "descripción": "Combinación que da como resultado una poción que revitaliza el cuerpo y la mente."
+    },
+    "Hierba amarga": {
+      "resultado": "Infusión curativa",
+      "descripción": "Mezcla que puede aliviar malestares físicos, ideal para pociones de recuperación."
+    },
+    "Albahaca silvestre": {
+      "resultado": "Tisana energizante",
+      "descripción": "Combinación que aumenta la energía física, utilizada en pociones de vigor."
+    },
+    "Hierba de luna": {
+      "resultado": "Poción para el sueño profundo",
+      "descripción": "Combinación que induce al sueño reparador, utilizada en pociones que favorecen el descanso."
+    }
+  },
+  "Diente de león": {
+    "Milenrama": {
+      "resultado": "Elixir de curación profunda",
+      "descripción": "Combinación potente para sanar heridas o lesiones, usada en pociones curativas."
+    },
+    "Ortiga": {
+      "resultado": "Poción contra inflamaciones",
+      "descripción": "Combinación que combate la inflamación, ideal para pociones antiinflamatorias."
+    },
+    "Salvia": {
+      "resultado": "Elixir clarificador",
+      "descripción": "Mezcla que ayuda a despejar la mente, utilizada en pociones que aumentan la claridad mental."
+    },
+    "Tomillo": {
+      "resultado": "Tisana de recuperación",
+      "descripción": "Mezcla que favorece la recuperación física, ideal para pociones de regeneración."
+    },
+    "Lavanda": {
+      "resultado": "Elixir relajante",
+      "descripción": "Combinación que relaja el cuerpo y la mente, utilizada en pociones de alivio de estrés."
+    },
+    "Hierba de San Juan": {
+      "resultado": "Poción revitalizante",
+      "descripción": "Combinación que revitaliza y da energía, ideal para pociones de recuperación."
+    },
+    "Hierba amarga": {
+      "resultado": "Poción purificante",
+      "descripción": "Combinación que limpia el cuerpo y purifica, útil en pociones detox."
+    },
+    "Albahaca silvestre": {
+      "resultado": "Elixir de fuerza",
+      "descripción": "Combinación que aumenta la resistencia y la vitalidad, usada en pociones de vigor físico."
+    },
+    "Hierba de luna": {
+      "resultado": "Tisana reparadora",
+      "descripción": "Combinación que ayuda a la recuperación durante la noche, ideal para pociones de descanso profundo."
+    }
+  },
+  "Agua de río baja": {
+    "Agua de río alta": {
+      "resultado": "Agua de río mezclada",
+      "descripción": "Combinación entre aguas de diferentes alturas, ideal para pociones de equilibrio o para estabilizar líquidos."
+    },
+    "Agua de lluvia": {
+      "resultado": "Agua de tormenta",
+      "descripción": "Mezcla de agua del río con agua de lluvia, usada en pociones que requieren poder natural o control climático."
+    },
+    "Agua de lago": {
+      "resultado": "Agua de estanque",
+      "descripción": "Combinación que da como resultado agua estancada, ideal para pociones de reposo o relajación."
+    },
+    "Agua estancada": {
+      "resultado": "Agua en descomposición",
+      "descripción": "Agua que ha permanecido demasiado tiempo, usada en pociones de desgaste o envejecimiento."
+    },
+    "Agua de escarcha": {
+      "resultado": "Agua congelada",
+      "descripción": "Combinación que transforma el agua en una forma congelada, útil para pociones de hielo o frío extremo."
+    }
+  },
+  "Agua de río alta": {
+    "Agua de lluvia": {
+      "resultado": "Agua de tormenta fuerte",
+      "descripción": "Mezcla de agua del río alto con lluvia intensa, se utiliza en pociones que controlan el clima o invocan tormentas."
+    },
+    "Agua de lago": {
+      "resultado": "Agua de lago profundo",
+      "descripción": "Combinación que da como resultado agua turbia, utilizada para pociones que requieren de un cambio profundo o oculto."
+    },
+    "Agua estancada": {
+      "resultado": "Agua envenenada",
+      "descripción": "Mezcla que resulta en agua no apta para el consumo, ideal para pociones de veneno o disuasión."
+    },
+    "Agua de escarcha": {
+      "resultado": "Agua gélida",
+      "descripción": "Combinación entre agua del río alto y escarcha, útil para pociones que requieren un control de frío extremo o congelación."
+    }
+  },
+  "Agua de lluvia": {
+    "Agua de lago": {
+      "resultado": "Agua de charco",
+      "descripción": "Combinación de agua de lluvia con agua de lago, usada en pociones de adaptación o regeneración."
+    },
+    "Agua estancada": {
+      "resultado": "Agua sucia",
+      "descripción": "Combinación que da como resultado agua contaminada, utilizada para pociones de disolución o limpieza de energía negativa."
+    },
+    "Agua de escarcha": {
+      "resultado": "Agua helada",
+      "descripción": "Mezcla de agua de lluvia con escarcha, utilizada para pociones de congelación o control del clima."
+    }
+  },
+  "Agua de lago": {
+    "Agua estancada": {
+      "resultado": "Agua turbia",
+      "descripción": "Combinación que da como resultado agua turbia y densa, usada en pociones de disolución o defensa contra la oscuridad."
+    },
+    "Agua de escarcha": {
+      "resultado": "Agua congelada",
+      "descripción": "Mezcla entre agua de lago y escarcha, ideal para pociones de frío o control sobre el hielo."
+    }
+  },
+  "Agua estancada": {
+    "Agua de escarcha": {
+      "resultado": "Agua gelificada",
+      "descripción": "Combinación de agua estancada y escarcha, utilizada en pociones de petrificación o entumecimiento."
+    }
+  },
+  "Hoja verde": {
+    "Hoja roja": {
+      "resultado": "Hoja de color mixto",
+      "descripción": "Combinación que da como resultado una hoja con un color verde y rojo, ideal para pociones de energía."
+    },
+    "Hoja amarilla": {
+      "resultado": "Hoja de otoño",
+      "descripción": "Una hoja que pasa de verde a amarillo, utilizada en pociones de sabiduría o envejecimiento."
+    },
+    "Hoja marchita": {
+      "resultado": "Hoja deteriorada",
+      "descripción": "Combinación que produce una hoja vieja y quebradiza, útil para pociones de desgaste o resistencia."
+    },
+    "Hoja brillante": {
+      "resultado": "Hoja luminosa",
+      "descripción": "Hoja que brilla levemente, puede ser usada en pociones de visibilidad o detección."
+    },
+    "Hoja de espina": {
+      "resultado": "Hoja espinosa",
+      "descripción": "Hoja con espinas integradas, utilizada en pociones de defensa o protección contra ataques."
+    }
+  },
+  "Hoja roja": {
+    "Hoja amarilla": {
+      "resultado": "Hoja otoñal",
+      "descripción": "Hoja con tonos rojizos y amarillos, representa la transición de la vida y es útil en pociones de transmutación."
+    },
+    "Hoja marchita": {
+      "resultado": "Hoja envejecida",
+      "descripción": "Combinación de hoja roja y marchita, usada en pociones que requieren decaimiento o transformación."
+    },
+    "Hoja brillante": {
+      "resultado": "Hoja radiante",
+      "descripción": "Hoja con un brillo sutil, usada en pociones de luz o visibilidad nocturna."
+    },
+    "Hoja de espina": {
+      "resultado": "Hoja punzante",
+      "descripción": "Hoja con espinas que dan lugar a una planta defensiva, ideal para pociones que mejoran la protección."
+    }
+  },
+  "Hoja amarilla": {
+    "Hoja marchita": {
+      "resultado": "Hoja envejecida",
+      "descripción": "Hoja que muestra signos de desgaste, utilizada en pociones de longevidad o sabiduría antigua."
+    },
+    "Hoja brillante": {
+      "resultado": "Hoja dorada",
+      "descripción": "Hoja que brilla con un tono dorado, utilizada en pociones de luz solar o visibilidad mejorada."
+    },
+    "Hoja de espina": {
+      "resultado": "Hoja defensiva",
+      "descripción": "Hoja de textura espinosa, ideal para pociones que aumentan las defensas naturales."
+    }
+  },
+  "Hoja marchita": {
+    "Hoja brillante": {
+      "resultado": "Hoja de resurgimiento",
+      "descripción": "Una hoja marchita que recobra vida y brilla, utilizada en pociones de resurrección o curación."
+    },
+    "Hoja de espina": {
+      "resultado": "Hoja de protección",
+      "descripción": "Hoja con espinas, usada para crear barreras defensivas o pociones de fortaleza."
+    }
+  },
+  "Hoja brillante": {
+    "Hoja de espina": {
+      "resultado": "Hoja de espina luminosa",
+      "descripción": "Hoja con espinas que emite luz, ideal para pociones de detección o protección nocturna."
+    }
+  },
+  "Hoja de espina": {
+    "Hoja verde": {
+      "resultado": "Hoja de espina defensiva",
+      "descripción": "Hoja espinosa, utilizada para pociones de protección, defendiendo al gato contra ataques."
+    },
+    "Hoja roja": {
+      "resultado": "Hoja espinosa radiante",
+      "descripción": "Combinación que produce una hoja con espinas que brilla, útil para pociones de defensa nocturna."
+    },
+    "Hoja amarilla": {
+      "resultado": "Hoja espinosa dorada",
+      "descripción": "Combinación de espinas con hojas doradas, ideal para pociones de defensa o visibilidad nocturna."
+    },
+    "Hoja marchita": {
+      "resultado": "Hoja espinosa antigua",
+      "descripción": "Una hoja que tiene espinas y un color marchito, usada en pociones de envejecimiento o defensa."
+    },
+    "Hoja brillante": {
+      "resultado": "Hoja de espina luminosa",
+      "descripción": "Hoja que combina espinas con brillo, creando una defensa mágica con luz."
+    }
+  },
+  "Semilla de diente de león": {
+    "Semilla de manzanilla": {
+      "resultado": "Semilla calmante",
+      "descripción": "Combinación que da lugar a una nueva semilla con propiedades relajantes suaves."
+    },
+    "Semilla de ortiga": {
+      "resultado": "Semilla estimulante",
+      "descripción": "Fusiona propiedades calmantes y urticantes, generando un efecto vigorizante controlado."
+    },
+    "Semilla de lavanda silvestre": {
+      "resultado": "Semilla aromática",
+      "descripción": "Produce una planta de olor intenso y agradable, útil en pociones de sueño y calma."
+    },
+    "Semilla de pino": {
+      "resultado": "Semilla resistente",
+      "descripción": "Combinación que produce una planta con una alta capacidad de adaptación a climas fríos."
+    },
+    "Semilla de abeto": {
+      "resultado": "Semilla de conífera",
+      "descripción": "Genera una planta resistente a los cambios climáticos, usada en pociones de longevidad."
+    },
+    "Bellota": {
+      "resultado": "Semilla de roble",
+      "descripción": "Combinación de diente de león y bellota que produce una semilla robusta, ideal para adaptarse a terrenos difíciles."
+    },
+    "Semilla de arce": {
+      "resultado": "Semilla ligera",
+      "descripción": "Semilla que crece rápidamente y se dispersa fácilmente, útil en pociones de agilidad."
+    },
+    "Semilla de helecho": {
+      "resultado": "Semilla frágil",
+      "descripción": "Produce una planta delicada, ideal para ambientes húmedos y sombríos."
+    }
+  },
+  "Semilla de pino": {
+    "Semilla de abeto": {
+      "resultado": "Semilla resinosa",
+      "descripción": "Fusión de dos coníferas que produce una semilla de alto contenido en resina pegajosa."
+    },
+    "Bellota": {
+      "resultado": "Semilla robusta",
+      "descripción": "Produce un árbol híbrido de madera densa, utilizado en crafteos estructurales."
+    },
+    "Semilla de arce": {
+      "resultado": "Semilla de crecimiento rápido",
+      "descripción": "Planta de gran resistencia que se adapta a ambientes fríos y se desarrolla rápidamente."
+    },
+    "Semilla de helecho": {
+      "resultado": "Semilla de sotobosque",
+      "descripción": "Semilla que prefiere zonas de sombra, generando plantas frágiles que necesitan humedad."
+    },
+    "Semilla de lavanda silvestre": {
+      "resultado": "Semilla aromática",
+      "descripción": "Produce una planta de propiedades calmantes que se utiliza en pociones de relajación."
+    }
+  },
+  "Semilla de abeto": {
+    "Bellota": {
+      "resultado": "Semilla de conífera resistente",
+      "descripción": "Combinación que produce una planta resistente a los climas fríos, con un crecimiento lento."
+    },
+    "Semilla de arce": {
+      "resultado": "Semilla vigorosa",
+      "descripción": "Semilla que crece rápido y fuerte, ideal para terrenos difíciles."
+    },
+    "Semilla de helecho": {
+      "resultado": "Semilla forestal",
+      "descripción": "Semilla de crecimiento rápido en suelos húmedos y sombríos, ideal para el sotobosque."
+    },
+    "Semilla de lavanda silvestre": {
+      "resultado": "Semilla relajante",
+      "descripción": "Combinación de dos plantas que genera una semilla con potentes propiedades calmantes."
+    }
+  },
+  "Bellota": {
+    "Semilla de arce": {
+      "resultado": "Semilla de roble",
+      "descripción": "Combinación que genera una semilla robusta, perfecta para árboles que crecen en terrenos difíciles."
+    },
+    "Semilla de helecho": {
+      "resultado": "Semilla resistente",
+      "descripción": "Planta que crece fuerte en ambientes húmedos, ideal para zonas sombrías del bosque."
+    },
+    "Semilla de lavanda silvestre": {
+      "resultado": "Semilla curativa",
+      "descripción": "Genera una planta con propiedades relajantes y medicinales, usada para pociones de sanación."
+    }
+  },
+  "Semilla de arce": {
+    "Semilla de helecho": {
+      "resultado": "Semilla decorativa",
+      "descripción": "Genera una planta ornamental con hojas finas y delicadas, ideal para ambientes de sombra."
+    },
+    "Semilla de lavanda silvestre": {
+      "resultado": "Semilla vigorizante",
+      "descripción": "Combinación de plantas con propiedades energizantes, usada en pociones de agilidad."
+    }
+  },
+  "Semilla de helecho": {
+    "Semilla de lavanda silvestre": {
+      "resultado": "Semilla de relajación",
+      "descripción": "Combinación que genera una planta especialmente relajante, perfecta para reducir el estrés."
+    }
+  },
+  "Cuarzo": {
+    "Granito": {
+      "resultado": "Piedra de sílice",
+      "descripción": "Roca con alto contenido en cuarzo, usada como base para cerámicas o construcción."
+    },
+    "Óxidos de hierro": {
+      "resultado": "Cristal teñido",
+      "descripción": "Fragmento de cuarzo impregnado con óxidos que le dan un tono rojizo opaco."
+    },
+    "Obsidiana": {
+      "resultado": "Vidrio endurecido",
+      "descripción": "Combinación vítrea de cuarzo y lava solidificada, extremadamente dura."
+    },
+    "Mica": {
+      "resultado": "Cuarzo laminar",
+      "descripción": "Cristal de cuarzo con inclusiones brillantes de mica entre sus capas."
+    },
+    "Pizarra": {
+      "resultado": "Fragmento tectónico",
+      "descripción": "Piedra laminada con cristales, resultado de presión geológica."
+    },
+    "Jaspe": {
+      "resultado": "Cuarzo jaspeado",
+      "descripción": "Cristal opaco con vetas rojas o marrones, usado como ornamento."
+    },
+    "Ágata": {
+      "resultado": "Cristal bandeado",
+      "descripción": "Cuarzo estratificado, translúcido y con anillos de color."
+    },
+    "Calcedonia": {
+      "resultado": "Silicato lechoso",
+      "descripción": "Cristal suave de tono blanco o gris, ideal para trabajos finos."
+    },
+    "Serpentina": {
+      "resultado": "Cuarzo serpentino",
+      "descripción": "Mineral fibroso de aspecto verde con propiedades aislantes."
+    },
+    "Fluorita": {
+      "resultado": "Cristal multicolor",
+      "descripción": "Cristal frágil de tonos violáceos, fluorescente bajo luz UV."
+    },
+    "Piedra básica": {
+      "resultado": "Piedra chispeante",
+      "descripción": "Roca simple con cuarzo que produce chispas al ser golpeada."
+    }
+  },
+  "Granito": {
+    "Mica": {
+      "resultado": "Granito brillante",
+      "descripción": "Granito con vetas brillantes, común en suelos volcánicos."
+    },
+    "Pizarra": {
+      "resultado": "Bloque tectónico",
+      "descripción": "Roca compacta formada por presión entre capas."
+    },
+    "Óxidos de hierro": {
+      "resultado": "Granito oxidado",
+      "descripción": "Piedra rojiza con alto contenido en óxidos férricos."
+    },
+    "Obsidiana": {
+      "resultado": "Granito fundido",
+      "descripción": "Resultado volcánico de granito mezclado con lava enfriada."
+    },
+    "Jaspe": {
+      "resultado": "Granito jaspeado",
+      "descripción": "Roca decorativa con vetas oscuras y rojizas."
+    },
+    "Ágata": {
+      "resultado": "Granito pulido",
+      "descripción": "Granito con incrustaciones translúcidas de ágata."
+    },
+    "Calcedonia": {
+      "resultado": "Granito lechoso",
+      "descripción": "Roca blanca-grisácea con apariencia opaca."
+    },
+    "Serpentina": {
+      "resultado": "Roca serpentina",
+      "descripción": "Piedra verde usada como aislante o decoración rústica."
+    },
+    "Fluorita": {
+      "resultado": "Granito fracturable",
+      "descripción": "Granito con fluorita que lo vuelve más frágil pero útil para separar compuestos."
+    },
+    "Piedra básica": {
+      "resultado": "Roca endurecida",
+      "descripción": "Roca común fortalecida por la estructura del granito."
+    }
+  },
+  "Mica": {
+    "Pizarra": {
+      "resultado": "Lámina mineral",
+      "descripción": "Piedra con capas brillantes, usada como aislante térmico."
+    },
+    "Óxidos de hierro": {
+      "resultado": "Mica ferruginosa",
+      "descripción": "Mica teñida de rojo, con propiedades magnéticas débiles."
+    },
+    "Obsidiana": {
+      "resultado": "Cristal oscuro laminado",
+      "descripción": "Obsidiana con reflejos brillantes en capas internas."
+    },
+    "Piedra básica": {
+      "resultado": "Fragmento reflectante",
+      "descripción": "Roca común con partículas brillantes de mica."
+    }
+  },
+  "Pizarra": {
+    "Óxidos de hierro": {
+      "resultado": "Piedra ferruginosa",
+      "descripción": "Fragmento oscuro con manchas rojizas por oxidación natural."
+    },
+    "Obsidiana": {
+      "resultado": "Roca volcánica laminada",
+      "descripción": "Pizarra expuesta a calor que adquiere aspecto vidrioso."
+    },
+    "Piedra básica": {
+      "resultado": "Piedra plana",
+      "descripción": "Roca lisa y delgada, ideal para crafteos planos o coberturas."
+    }
+  },
+  "Óxidos de hierro": {
+    "Obsidiana": {
+      "resultado": "Obsidiana oxidada",
+      "descripción": "Obsidiana con vetas rojizas, menos estable estructuralmente."
+    },
+    "Piedra básica": {
+      "resultado": "Roca oxidada",
+      "descripción": "Roca de color rojo pardo por la impregnación de óxidos."
+    }
+  },
+  "Obsidiana": {
+    "Jaspe": {
+      "resultado": "Vidrio jaspeado",
+      "descripción": "Obsidiana con inclusiones opacas de jaspe, de valor decorativo."
+    },
+    "Ágata": {
+      "resultado": "Cristal volcánico estriado",
+      "descripción": "Vidrio oscuro con líneas translúcidas por capas de ágata."
+    },
+    "Piedra básica": {
+      "resultado": "Fragmento volcánico",
+      "descripción": "Roca común con restos de obsidiana, más dura y abrasiva."
+    }
+  },
+  "Jaspe": {
+    "Ágata": {
+      "resultado": "Piedra jaspeada",
+      "descripción": "Piedra mixta de colores intensos, con usos ornamentales."
+    }
+  },
+  "Ágata": {
+    "Calcedonia": {
+      "resultado": "Nódulo silíceo",
+      "descripción": "Fragmento suave con apariencia lechosa y capas internas."
+    }
+  },
+  "Serpentina": {
+    "Fluorita": {
+      "resultado": "Cristal serpentínico",
+      "descripción": "Cristal inestable de tonos verdes y violetas, usado para reacciones mágicas."
+    }
+  },
+  "Fluorita": {
+    "Piedra básica": {
+      "resultado": "Piedra fluorescente",
+      "descripción": "Roca común con propiedades de brillo bajo luz especial."
+    }
+  }
+}

@@ -42,13 +42,8 @@ class ViewManager:
             del self.current_scene  # Libero los recursos ocupados anteriormente
 
             # Cambio la variable anterior por la nueva escena
-            if data in ["TEST", "MIX_TABLE", "SPLIT_TABLE"]:
+            if data in ["TEST", "MIX_TABLE", "SPLIT_TABLE", "CHEST"]:
                 self.current_scene = self.scenes[data](self.callback, self.player)
-            elif data[0] in ["CHEST"]:
-                self.current_scene = self.scenes[data[0]](
-                    self.callback, data[1], data[2]
-                )
-                print("cambiando a chest")
             else:
                 self.current_scene = self.scenes[data](self.callback)
             self.window.show_view(self.current_scene)  # Hago que la nueva escena se vea
