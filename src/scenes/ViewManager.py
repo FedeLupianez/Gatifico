@@ -4,7 +4,7 @@ from characters.Player import Player
 from scenes.Menu import Menu
 from scenes.Test import Test
 from scenes.MixTable import MixTable
-from scenes import SplitTable
+from scenes.SplitTable import SplitTable
 from scenes.Chest import Chest
 
 
@@ -42,10 +42,10 @@ class ViewManager:
             del self.current_scene  # Libero los recursos ocupados anteriormente
 
             # Cambio la variable anterior por la nueva escena
-            if data in ["TEST", "MIX_TABLE", "SPLIT_TABLE", "CHEST"]:
-                self.current_scene = self.scenes[data](self.callback, self.player)
-            else:
+            if data == "MENU":
                 self.current_scene = self.scenes[data](self.callback)
+            else:
+                self.current_scene = self.scenes[data](self.callback, self.player)
             self.window.show_view(self.current_scene)  # Hago que la nueva escena se vea
 
         if signal == Constants.SignalCodes.CLOSE_WINDOW:

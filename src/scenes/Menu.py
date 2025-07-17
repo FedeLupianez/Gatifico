@@ -43,6 +43,8 @@ class Menu(View):
                     SignalCodes.CHANGE_VIEW,
                     ("CHEST", "chest_1", {"rubi": 4, "rock": 2}),
                 )
+            case arcade.key.S:
+                self.callback(SignalCodes.CHANGE_VIEW, "SPLIT_TABLE")
 
     def on_mouse_press(
         self, x: int, y: int, button: int, modifiers: int
