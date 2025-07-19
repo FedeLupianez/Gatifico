@@ -33,3 +33,8 @@ def add_containers_to_list(
 def get_result(item_1: Item, item_2: Item, dictToFind: dict) -> str | None:
     result = dictToFind.get(item_1.name, {}).get(item_2.name, None)
     return result
+
+
+def del_references_list(listToDel: arcade.SpriteList):
+    for sprite in listToDel:
+        del sprite

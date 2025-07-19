@@ -1,6 +1,7 @@
 import arcade
 from Constants import Game, SignalCodes
 from scenes.View import View
+import DataManager
 
 StartButtonPath: str = ":resources:UI/PlayButton.png"
 ExitButtonPath: str = ":resources:UI/ExitButton.png"
@@ -12,12 +13,12 @@ class Menu(View):
         super().__init__(backgroundUrl=backgroundUrl, tileMapUrl=None)
 
         self.window.set_mouse_visible(True)
-        self.spriteList = arcade.SpriteList()
-        self.startButton = arcade.Sprite(StartButtonPath, scale=2)
+        self.spriteList: arcade.SpriteList = arcade.SpriteList()
+        self.startButton: arcade.Sprite = arcade.Sprite(StartButtonPath, scale=2)
         self.startButton.center_x = Game.SCREEN_WIDTH // 2
         self.startButton.center_y = Game.SCREEN_HEIGHT // 2
 
-        self.exitButton = arcade.Sprite(ExitButtonPath, scale=2)
+        self.exitButton: arcade.Sprite = arcade.Sprite(ExitButtonPath, scale=2)
         self.exitButton.center_x = Game.SCREEN_WIDTH // 2
         self.exitButton.center_y = (Game.SCREEN_HEIGHT // 2) - 100
         self.spriteList.append(self.startButton)
@@ -48,9 +49,17 @@ class Menu(View):
     ) -> bool | None:
         if self.startButton.collides_with_point((x, y)):
             print("Iniciando juego")
-            self.callback(SignalCodes.CHANGE_VIEW, "TEST")
+            self.callback(SignalCodes.CHANGE_VIEW, DataManager.gameData["scene"])
             return
 
         if self.exitButton.collides_with_point((x, y)):
             print("Saliendo ...")
             self.callback(SignalCodes.CLOSE_WINDOW, "Close window")
+
+    def cleanUp(self):
+        """Limpia todos los recursos"""
+        self.spriteList.clear()
+        del self.spriteList
+        del self.startButton
+        del self.exitButton
+        del self.callback

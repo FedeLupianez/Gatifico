@@ -1,5 +1,5 @@
 import arcade
-from typing import Optional, Tuple, Dict, Any
+from typing import Optional, Dict, Any
 
 from scenes.View import View
 import Constants
@@ -8,6 +8,7 @@ from typing import Callable
 from items.Mineral import Mineral
 import DataManager
 from items.Item import Item
+from Types import PlayerData
 from .utils import add_containers_to_list
 from .Chest import Chest
 
@@ -42,6 +43,7 @@ class Test(View):
         self.callback = callback
 
         self.player = player  # Defino el personaje
+        self.player.inventory = DataManager.gameData["player"]["inventory"]
         self.guiCamera = arcade.Camera2D()
 
         self.keysPressed: set = set()
@@ -78,12 +80,17 @@ class Test(View):
         )
 
     def setupPlayer(self) -> None:
-        self.player.sprite.center_x = Constants.Game.SCREEN_WIDTH // 2
-        self.player.sprite.center_y = Constants.Game.SCREEN_HEIGHT // 2
+        self.player.sprite.center_x = DataManager.gameData["player"]["position"][
+            "center_x"
+        ]
+        self.player.sprite.center_y = DataManager.gameData["player"]["position"][
+            "center_y"
+        ]
         self.player.setup()
         self.playerSpritesList.append(self.player.sprite)
         # Camara para seguir al jugador :
         self.camera.zoom = Constants.Game.FOREST_ZOOM_CAMERA
+        self.camera.position = self.player.sprite.position
 
     def setupSceneLayers(self) -> None:
         if not self.tileMap:
@@ -246,6 +253,14 @@ class Test(View):
 
     def on_key_press(self, symbol: int, modifiers: int) -> bool | None:
         if symbol == arcade.key.SPACE:
+            playerData: PlayerData = {
+                "Position": {
+                    "center_x": self.player.sprite.center_x,
+                    "center_y": self.player.sprite.center_y,
+                },
+                "Inventory": self.player.inventory,
+            }
+            DataManager.storeGameData(playerData, "TEST")
             self.callback(Constants.SignalCodes.CHANGE_VIEW, "MENU")
             return True
 
@@ -281,6 +296,15 @@ class Test(View):
         """Procesa la interaccion con un objeto"""
         object_name = interactObject.name.lower()
         if object_name == "door":
+            # Cambio de escena y guardo los datos actuales
+            playerData: PlayerData = {
+                "Position": {
+                    "center_x": self.player.sprite.center_x,
+                    "center_y": self.player.sprite.center_y,
+                },
+                "Inventory": self.player.inventory,
+            }
+            DataManager.storeGameData(playerData, "TEST")
             self.callback(Constants.SignalCodes.CHANGE_VIEW, "MENU")
             return True
         if "chest" in object_name:
@@ -336,3 +360,23 @@ class Test(View):
                     return True
 
         return False
+
+    def cleanUp(self) -> None:
+        del self.player
+        del self.camera
+        del self.interactSprites
+        del self.mineralsLayer
+        del self._collisionList
+        del self.floor
+        del self.walls
+        del self.backgroundObjects
+        del self.collisionSprites
+        del self.lastInventoryHash
+        del self.keysPressed
+        del self.inventoryDirty
+
+        del self.playerSpritesList
+        del self.backgroundSpriteList
+        del self.inventorySpriteList
+        del self.itemsInventory
+        del self.inventoryTexts

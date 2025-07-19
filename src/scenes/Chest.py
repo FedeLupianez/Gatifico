@@ -285,7 +285,7 @@ class Chest(View):
                 newPlayerInventory[item.name] = item.quantity
         self.player.inventory = newPlayerInventory
 
-    def cleanup(self):
+    def cleanUp(self):
         # Limpio todas las listas de sprites
         self.itemSprites = arcade.SpriteList()
         self.containerSprites = arcade.SpriteList()
@@ -301,5 +301,5 @@ class Chest(View):
     def on_key_press(self, symbol: int, modifiers: int) -> bool | None:
         if symbol == arcade.key.ESCAPE:
             self.updateInventories()
-            self.cleanup()
+            self.cleanUp()
             self.window.show_view(self.previusScene)

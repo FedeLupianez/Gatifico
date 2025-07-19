@@ -7,7 +7,7 @@ from scenes.View import View
 import DataManager
 from Constants import SignalCodes
 from characters.Player import Player
-from scenes.utils import add_containers_to_list
+from scenes.utils import add_containers_to_list, del_references_list
 
 RSC = DataManager.loadData("SplitTableResources.json")
 # Centros de los contenedores
@@ -265,3 +265,18 @@ class SplitTable(View):
         if self.itemToMove and self.is_mouse_active:
             # Cambio la posición del sprite a la del mouse
             self.itemToMove.change_position(x, y)
+
+    def cleanUp(self) -> None:
+        del_references_list(self.backgroundSprites)
+        del self.backgroundSprites
+        del_references_list(self.containerSprites)
+        del self.containerSprites
+        del_references_list(self.itemSprites)
+        del self.itemSprites
+        del self.itemTexts
+        del self.itemToMove
+        del self.is_mouse_active
+        del self.callback
+        del self.nextItemId
+        del self.resultContainers
+        del self.UIManager

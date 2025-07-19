@@ -7,7 +7,7 @@ from typing import Callable, Dict
 from Constants import SignalCodes
 from items.Container import Container
 from items.Item import Item
-from .utils import add_containers_to_list, get_result
+from .utils import add_containers_to_list, del_references_list, get_result
 
 Combinations: Dict[str, Dict[str, str]] = DataManager.loadData("CombinationsTest.json")
 
@@ -274,3 +274,16 @@ class MixTable(View):
         if self.itemToMove:
             # Cambio la posición del sprite a la del mouse
             self.itemToMove.change_position(x, y)
+
+    def cleanUp(self) -> None:
+        del_references_list(self.backgroundSprites)
+        del self.backgroundSprites
+        del_references_list(self.containerSprites)
+        del self.containerSprites
+        del_references_list(self.itemSprites)
+        del self.itemSprites
+        del self.itemToMove
+        del self.is_mouse_active
+        del self.callback
+        del self.UIManager
+        del self.itemTextSprites
