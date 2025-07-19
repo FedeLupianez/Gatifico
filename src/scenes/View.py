@@ -30,6 +30,8 @@ class View(arcade.View):
         if backgroundUrl:
             # En cambio sino solo se pone el fondo:
             backgroundImage = arcade.Sprite(backgroundUrl, scale=1)
+            backgroundImage.width = Constants.Game.SCREEN_WIDTH
+            backgroundImage.height = Constants.Game.SCREEN_HEIGHT
             # Centro la imagen
             backgroundImage.center_x = Constants.Game.SCREEN_WIDTH / 2
             backgroundImage.center_y = Constants.Game.SCREEN_HEIGHT / 2

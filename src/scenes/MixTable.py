@@ -197,14 +197,16 @@ class MixTable(View):
         self._generate_item_sprites()
         super().on_show_view()
 
+    def on_update(self, delta_time: float):
+        self._sync_item_text()
+        self._update_texts_position()
+
     def on_draw(self):
         self.clear()  # limpia la pantalla
         self.camera.use()
         self.backgroundSprites.draw(pixelated=True)
         self.containerSprites.draw(pixelated=True)
         self.itemSprites.draw(pixelated=True)
-        self._sync_item_text()
-        self._update_texts_position()
         for text in self.itemTextSprites:
             text.draw()
         self.UIManager.draw(pixelated=True)
@@ -240,8 +242,7 @@ class MixTable(View):
             return
 
         newContainer: Container = collisions[0]
-        lastContainerIndex: int = self.itemToMove.container_id
-        oldContainer: Container = self.containerSprites[lastContainerIndex]
+        oldContainer: Container = self.containerSprites[self.itemToMove.container_id]
 
         if newContainer.id == oldContainer.id:
             self._reset_sprite_position(self.itemToMove)

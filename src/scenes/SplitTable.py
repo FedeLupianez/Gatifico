@@ -75,6 +75,7 @@ class SplitTable(View):
     def _setup_items(self) -> None:
         for index, (name, quantity) in enumerate(self.items.items()):
             container: Container = self.containerSprites[index]
+            container.item_placed = True
             newItem = Item(name=name, quantity=quantity, scale=3)
             newItem.id = self.nextItemId
             self.nextItemId += 1

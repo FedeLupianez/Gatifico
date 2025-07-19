@@ -296,6 +296,7 @@ class Chest(View):
         # Elimno las referencias directas
         self.itemToMove = None
         self.playerInventory = None
+        self.window.set_mouse_visible(False)
 
     def on_key_press(self, symbol: int, modifiers: int) -> bool | None:
         if symbol == arcade.key.ESCAPE:
