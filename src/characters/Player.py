@@ -40,7 +40,7 @@ class Player(StateMachine):
             self.actualAnimationPath
         )  # objeto sprite del personaje
         self.speed = Game.PLAYER_SPEED
-        self.actualAnimationFrames: int = 5  # cantidad de frames de la animacion
+        self.actualAnimationFrames: int = 4  # cantidad de frames de la animacion
         self.frames: list[arcade.Texture] = []  # lista de texturas
         self.textureIndex = 0  # indice actual de la textura
         self.animationTimer: float = 0.0  # timer de la animacion
@@ -128,10 +128,7 @@ class Player(StateMachine):
 
     def updateState(self, event: int):
         """Actualiza el estado actual del personaje"""
-        tempState = self.actualStateId
         self.processState(event)  # Procesa el estado
-        if self.actualStateId != tempState:
-            self.updateSpriteList()
 
     def updateSpriteList(self):
         """
@@ -160,7 +157,12 @@ class Player(StateMachine):
 
     def update_animation(self, deltaTime: float):
         """Función para actualizar la animación del personaje"""
-        if not self.frames:
+        if not self.frames or self.actualStateId in [
+            IDLE_SIDE_LEFT,
+            IDLE_SIDE_RIGHT,
+            IDLE_FRONT,
+            IDLE_BACK,
+        ]:
             return
         self.animationTimer += deltaTime
         if self.animationTimer > 0.1:

@@ -9,7 +9,7 @@ class Game:
     FPS = 1 / 60
 
     # Personajes :
-    CHARACTER_SCALE = 1
+    CHARACTER_SCALE = 0.5
 
     # Valores del personaje principal :
     PLAYER_SPEED = 5
