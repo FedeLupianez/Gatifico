@@ -9,7 +9,7 @@ from Types import ChestsData, PlayerData
 BASE_DIR = os.path.dirname(__file__)
 DATAFILES_DIR = BASE_DIR + "/resources/Data/"
 
-testChests: ChestsData = {
+test_chests: ChestsData = {
     "chest_1": {"rubi": 4, "rock": 3},
     "chest_2": {},
     "chest_3": {},
@@ -21,11 +21,11 @@ def loadData(filename: str) -> dict:
         return json.load(file)
 
 
-gameData: dict = loadData("GameData.json")
+game_data: dict = loadData("GameData.json")
 
 
 def storeGameData(playerData: PlayerData, actualScene) -> None:
-    global gameData
+    global game_data
     print(playerData)
     with open(DATAFILES_DIR + "GameData.json", "w") as file:
         data = {
@@ -37,7 +37,7 @@ def storeGameData(playerData: PlayerData, actualScene) -> None:
                 "inventory": playerData["Inventory"],
             },
             "scene": actualScene,
-            "chests": testChests,
+            "chests": test_chests,
         }
-        gameData = data
+        game_data = data
         json.dump(data, file)

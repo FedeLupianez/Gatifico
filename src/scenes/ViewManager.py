@@ -39,7 +39,7 @@ class ViewManager:
         print("Mensaje recibido : ", data)
         if signal == Constants.SignalCodes.CHANGE_VIEW:
             self.current_scene_id = data
-            self.current_scene.cleanUp()
+            self.current_scene.clean_up()
             del self.current_scene  # Libero los recursos ocupados anteriormente
 
             # Cambio la variable anterior por la nueva escena

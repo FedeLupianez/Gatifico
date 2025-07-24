@@ -38,187 +38,185 @@ class Test(View):
     def __init__(self, callback: Callable, player: Player) -> None:
         backgroundUrl = None
         tileMapUrl = ":resources:Maps/Tests.tmx"
-        super().__init__(backgroundUrl=backgroundUrl, tileMapUrl=tileMapUrl)
+        super().__init__(background_url=backgroundUrl, tilemap_url=tileMapUrl)
         self.window.set_mouse_visible(False)
 
         self.callback = callback
 
         self.player = player  # Defino el personaje
-        self.player.inventory = DataManager.gameData["player"]["inventory"]
-        self.guiCamera = arcade.Camera2D()
+        self.gui_camera = arcade.Camera2D()
 
-        self.keysPressed: set = set()
+        self.keys_pressed: set = set()
         # Flag para actualizaciones selectivas del inventario
-        self.inventoryDirty = True
+        self.inventory_dirty = True
         # Hash para detectar cambios en el inventario
-        self.lastInventoryHash = None
+        self.last_inventory_hash = None
         self._setup_scene()
 
     def _setup_scene(self) -> None:
         """Configuración principal"""
-        self.setupSpriteLists()
-        self.setupSceneLayers()
-        self.setupPlayer()
-        self.updateInventorySprites()
-        self.updateInventoryTexts()
+        self.setup_spritelists()
+        self.setup_scene_layer()
+        self.setup_player()
+        self.update_inventory_sprites()
+        self.update_inventory_texts()
 
-    def setupSpriteLists(self):
+    def setup_spritelists(self):
         # Listas de Sprites
-        self.playerSpritesList: arcade.SpriteList = arcade.SpriteList()
-        self.backgroundSpriteList: arcade.SpriteList = arcade.SpriteList()
-        self.inventorySpriteList: arcade.SpriteList = arcade.SpriteList()
-        self.itemsInventory: arcade.SpriteList = arcade.SpriteList()
-        self.inventoryTexts: list[arcade.Text] = []
-        self.setupInventoryContainers()
+        self.player_sprites: arcade.SpriteList = arcade.SpriteList()
+        self.background_sprites: arcade.SpriteList = arcade.SpriteList()
+        self.inventory_sprites: arcade.SpriteList = arcade.SpriteList()
+        self.items_inventory: arcade.SpriteList = arcade.SpriteList()
+        self.inventory_texts: list[arcade.Text] = []
+        self.setup_inventory_containers()
 
-    def setupInventoryContainers(self) -> None:
+    def setup_inventory_containers(self) -> None:
         """Agrego los contenedores a la lista del inventario"""
         CONTAINER_SIZE = 50
         ITEMS_INIT = Constants.PlayerConfig.PLAYER_INVENTORY_POSITION
         positions = [(ITEMS_INIT[0] + 60 * i, ITEMS_INIT[1]) for i in range(5)]
         add_containers_to_list(
-            positions, self.inventorySpriteList, containerSize=CONTAINER_SIZE
+            positions, self.inventory_sprites, container_size=CONTAINER_SIZE
         )
 
-    def setupPlayer(self) -> None:
-        self.player.sprite.center_x = DataManager.gameData["player"]["position"][
-            "center_x"
-        ]
-        self.player.sprite.center_y = DataManager.gameData["player"]["position"][
-            "center_y"
-        ]
+    def setup_player(self) -> None:
+        player_data = DataManager.game_data["player"]
+        self.player.sprite.center_x = player_data["position"]["center_x"]
+        self.player.sprite.center_y = player_data["position"]["center_y"]
+        self.player.inventory = player_data["inventory"]
         self.player.setup()
-        self.playerSpritesList.append(self.player.sprite)
+        self.player_sprites.append(self.player.sprite)
         # Camara para seguir al jugador :
         self.camera.zoom = Constants.Game.FOREST_ZOOM_CAMERA
         self.camera.position = self.player.sprite.position
+        del player_data
 
-    def setupSceneLayers(self) -> None:
-        if not self.tileMap:
+    def setup_scene_layer(self) -> None:
+        if not self.tilemap:
             raise ValueError("TileMap no puede set None")
 
         # Capas de vista :
         self.floor = self.scene["Piso"]
         self.walls = self.scene["Paredes"]
-        self.backgroundObjects = self.scene["Objetos"]
+        self.background_objects = self.scene["Objetos"]
         # Capas de colisiones :
-        self.collisionSprites = self.loadObjectLayers("Colisiones", self.tileMap)
-        self.interactSprites = self.loadObjectLayers("Interactuables", self.tileMap)
-        self.mineralsLayer = self.loadMineralLayer()
+        self.collision_objects = self.load_object_layers("Colisiones", self.tilemap)
+        self.interact_objects = self.load_object_layers("Interactuables", self.tilemap)
+        self.minerals_layer = self.load_mineral_layer()
         # Variable para precomputar las listas de colisiones
-        self._collisionList = [self.collisionSprites, self.walls]
+        self._collision_list = [self.collision_objects, self.walls]
 
-    def loadMineralLayer(self) -> arcade.SpriteList:
-        if "Minerales" not in self.tileMap.object_lists:
+    def load_mineral_layer(self) -> arcade.SpriteList:
+        if "Minerales" not in self.tilemap.object_lists:
             return arcade.SpriteList()
 
-        tempLayer = self.tileMap.object_lists["Minerales"]
-        tempList = arcade.SpriteList()
-        mineralsResources = get_minerals_resources()
+        temp_layer = self.tilemap.object_lists["Minerales"]
+        temp_list = arcade.SpriteList()
+        mineral_resources = get_minerals_resources()
 
-        for obj in tempLayer:
+        for obj in temp_layer:
             if not obj.name or not obj.properties:
                 continue
             try:
-                mineral = self.createMineralFromObject(obj, mineralsResources)
-                tempList.append(mineral)
+                mineral = self.create_mineral_from_object(obj)
+                temp_list.append(mineral)
             except ValueError as e:
                 print(e)
-        tempList.extend(self.loadRandomMinerals(mineralsResources))
-        return tempList
+        temp_list.extend(self.load_random_minerals(mineral_resources))
+        return temp_list
 
-    def createMineralFromObject(self, obj: Any, mineralResources: Dict) -> Mineral:
+    def create_mineral_from_object(self, obj: Any) -> Mineral:
         """Función para crear un minerl a partir de un objeto de Tilemap"""
         shape = obj.shape
         if len(shape) != 4:
             raise ValueError(f"Forma del objeto {obj.name} invalida")
 
-        topLeft, topRight, _, bottomLeft = shape[:4]
-        width: float = topRight[0] - topLeft[0]
-        height: float = topLeft[1] - bottomLeft[1]
-        center_x: float = topLeft[0] + (width) / 2
-        center_y: float = bottomLeft[1] + (height) / 2
+        top_left, top_right, *_, bottom_left = shape[:4]
+        width: float = top_right[0] - top_left[0]
+        height: float = top_left[1] - bottom_left[1]
+        center_x: float = top_left[0] + (width) / 2
+        center_y: float = bottom_left[1] + (height) / 2
         size = str(obj.properties.get("size", "mid"))
 
         return Mineral(
-            obj.name,
-            size,
+            mineral=obj.name,
+            size_type=size,
             center_x=center_x,
             center_y=center_y,
-            mineralAttributes=get_minerals_resources(),
+            mineral_attr=get_minerals_resources(),
         )
 
-    def loadRandomMinerals(self, mineralsResources: Dict) -> arcade.SpriteList:
-        tempList = arcade.SpriteList()
-        names = list(list(mineralsResources.keys()))
+    def load_random_minerals(self, mineral_resources: Dict) -> arcade.SpriteList:
+        temp_list = arcade.SpriteList()
+        names = list(list(mineral_resources.keys()))
         sizes = ["big", "mid", "small"]
         # Pongo un límite en los intentos de crear
         # el mineral para evitar loops infinitos
-        maxCollisionAttempts = 10
-        collisionAttempts = 0
+        max_collision_attemps = 10
+        collision_attemps = 0
 
         # en este loop creo 10 minerales con atributos random
         for _ in range(10):
             mineral = Mineral(
-                random.choice(names),
-                random.choice(sizes),
+                mineral=random.choice(names),
+                size_type=random.choice(sizes),
                 center_x=random.randint(0, Constants.Game.SCREEN_WIDTH),
                 center_y=random.randint(0, Constants.Game.SCREEN_HEIGHT),
-                mineralAttributes=mineralsResources,
+                mineral_attr=mineral_resources,
             )
 
-            while collisionAttempts < maxCollisionAttempts:
-                collisions = mineral.collides_with_list(self.collisionSprites)
+            while collision_attemps < max_collision_attemps:
+                collisions = mineral.collides_with_list(self.collision_objects)
                 if not collisions:
                     break
                 mineral.center_x = random.randint(50, Constants.Game.SCREEN_WIDTH - 50)
                 mineral.center_y = random.randint(50, Constants.Game.SCREEN_HEIGHT - 50)
-                collisionAttempts += 1
-            if collisionAttempts < 10:
-                tempList.append(mineral)
-        return tempList
+                collision_attemps += 1
+            if collision_attemps < 10:
+                temp_list.append(mineral)
+        return temp_list
 
     def on_draw(self) -> bool | None:
         # Función que se llama cada vez que se dibuja la escena
         self.clear()  # limpia la pantalla
         self.camera.use()
         self.scene.draw(pixelated=True)  # dibuja la escena
-        self.playerSpritesList.draw(pixelated=True)  # dibuja el personaje
-        self.backgroundSpriteList.draw(pixelated=True)
-        self.mineralsLayer.draw(pixelated=True)
+        self.player_sprites.draw(pixelated=True)  # dibuja el personaje
+        self.background_sprites.draw(pixelated=True)
+        self.minerals_layer.draw(pixelated=True)
 
-        self.guiCamera.use()
-        self.inventorySpriteList.draw(pixelated=True)
-        self.itemsInventory.draw(pixelated=True)
-        for text in self.inventoryTexts:
+        self.gui_camera.use()
+        self.inventory_sprites.draw(pixelated=True)
+        self.items_inventory.draw(pixelated=True)
+        for text in self.inventory_texts:
             text.draw()
 
-    def updateInventoryDisplay(self) -> None:
+    def update_inventory_display(self) -> None:
         """Esta función se asegura de actualizar el inventario solo cuando hay cambios en este"""
-        currentInventoryHash = hash(tuple(sorted(self.player.inventory.items())))
+        current_hash = hash(tuple(sorted(self.player.inventory.items())))
 
         # Si los hashes son iguales no actualiza la vista
-        if self.lastInventoryHash == currentInventoryHash:
+        if self.last_inventory_hash == current_hash:
             return
-        self.lastInventoryHash = currentInventoryHash
-        self.updateInventorySprites()
-        self.updateInventoryTexts()
+        self.last_inventory_hash = current_hash
+        self.update_inventory_sprites()
+        self.update_inventory_texts()
 
-    def updateInventorySprites(self):
-        self.itemsInventory.clear()
+    def update_inventory_sprites(self):
+        self.items_inventory.clear()
         for index, (item, quantity) in enumerate(self.player.inventory.items()):
-            container = self.inventorySpriteList[index]
-            newItem: Item = Item(name=item, quantity=quantity, scale=2)
-            newItem.id = index
-            newItem.change_container(container.id)
-            newItem.change_position(container.center_x, container.center_y)
-            self.itemsInventory.append(newItem)
+            container = self.inventory_sprites[index]
+            new_item: Item = Item(name=item, quantity=quantity, scale=2)
+            new_item.id = index
+            new_item.change_container(container.id)
+            new_item.change_position(container.center_x, container.center_y)
+            self.items_inventory.append(new_item)
 
-    def updateInventoryTexts(self):
-        self.inventoryTexts.clear()
+    def update_inventory_texts(self):
+        self.inventory_texts.clear()
         for index, (item, quantity) in enumerate(self.player.inventory.items()):
-            container = self.inventorySpriteList[index]
-            newText = arcade.Text(
+            container = self.inventory_sprites[index]
+            new_text = arcade.Text(
                 text=f"{item} x {quantity}",
                 font_size=9,
                 x=container.center_x,
@@ -226,18 +224,18 @@ class Test(View):
                 anchor_x="center",
                 anchor_y="baseline",
             )
-            self.inventoryTexts.append(newText)
+            self.inventory_texts.append(new_text)
 
-    def pauseGame(self) -> None:
+    def pause_game(self) -> None:
         # Borro la lista de keys activas para que no se siga moviendo al volver a la escena
-        self.keysPressed.clear()
-        self.player.updateState(-arcade.key.W)
+        self.keys_pressed.clear()
+        self.player.update_state(-arcade.key.W)
         # Limpio la pantalla y dibujo solo el mundo para que no aparezcan los textos
         self.clear()
         self.camera.use()
         self.scene.draw(pixelated=True)
-        self.playerSpritesList.draw(pixelated=True)
-        self.backgroundSpriteList.draw(pixelated=True)
+        self.player_sprites.draw(pixelated=True)
+        self.background_sprites.draw(pixelated=True)
 
         screenshot = arcade.get_image()
         background_texture = arcade.texture.Texture.create_empty(
@@ -249,47 +247,40 @@ class Test(View):
             self.store_player_data()
             self.callback(Constants.SignalCodes.CHANGE_VIEW, "MENU")
 
-        newPauseScene = Pause(
+        new_scene = Pause(
             previus_scene=self,
             background_image=background_texture,
             callback=change_to_menu,
         )
-        self.window.show_view(newPauseScene)
+        self.window.show_view(new_scene)
 
-    def openChest(self, chestId: str) -> None:
+    def open_chest(self, chestId: str) -> None:
         # Borro la lista de keys activas para que no se siga moviendo al volver a la escena
-        self.keysPressed.clear()
-        self.player.updateState(-arcade.key.W)
+        self.keys_pressed.clear()
+        self.player.update_state(-arcade.key.W)
         # Limpio la pantalla y dibujo solo el mundo para que no aparezcan los textos
         self.clear()
         self.camera.use()
         self.scene.draw(pixelated=True)
-        self.playerSpritesList.draw(pixelated=True)
-        self.backgroundSpriteList.draw(pixelated=True)
+        self.player_sprites.draw(pixelated=True)
+        self.background_sprites.draw(pixelated=True)
 
         screenshot = arcade.get_image()
         background_texture = arcade.texture.Texture.create_empty(
             "chest_bg", size=(screenshot.width, screenshot.height)
         )
         background_texture.image = screenshot
-        newChestScene = Chest(
+        new_scene = Chest(
             chestId=chestId,
             player=self.player,
             previusScene=self,
-            backgroundImage=background_texture,
+            background_image=background_texture,
         )
-        self.window.show_view(newChestScene)
+        self.window.show_view(new_scene)
 
     def on_key_press(self, symbol: int, modifiers: int) -> bool | None:
         if symbol == arcade.key.SPACE:
-            playerData: PlayerData = {
-                "Position": {
-                    "center_x": self.player.sprite.center_x,
-                    "center_y": self.player.sprite.center_y,
-                },
-                "Inventory": self.player.inventory,
-            }
-            DataManager.storeGameData(playerData, "TEST")
+            self.store_player_data()
             self.callback(Constants.SignalCodes.CHANGE_VIEW, "MENU")
             return True
 
@@ -297,28 +288,28 @@ class Test(View):
             return self.handleInteractions()
 
         if symbol == arcade.key.ESCAPE:
-            self.pauseGame()
+            self.pause_game()
             return True
 
-        self.keysPressed.add(symbol)
+        self.keys_pressed.add(symbol)
         return None
 
     def handleInteractions(self):
-        for interactObject in self.interactSprites:
+        for interactObject in self.interact_objects:
             if is_near_to_sprite(self.player.sprite, interactObject, tolerance=40):
-                return self.processObjectInteraction(interactObject)
+                return self.process_object_interaction(interactObject)
 
-        for mineral in self.mineralsLayer:
+        for mineral in self.minerals_layer:
             if is_near_to_sprite(self.player.sprite, mineral, tolerance=35):
-                return self.processMineralInteraction(mineral)
+                return self.process_mineral_interaction(mineral)
 
-        for mineral in self.mineralsLayer:
+        for mineral in self.minerals_layer:
             if is_near_to_sprite(self.player.sprite, mineral, tolerance=35):
                 mineral.setup()
                 mineral.stateMachine.processState(arcade.key.E)
-                self.player.addToInventory(mineral.mineral, 1)
-                self.updateInventorySprites()
-                self.updateInventoryTexts()
+                self.player.add_to_inventory(mineral.mineral, 1)
+                self.update_inventory_sprites()
+                self.update_inventory_texts()
 
                 if mineral.should_removed:
                     mineral.remove_from_sprite_lists()
@@ -335,61 +326,61 @@ class Test(View):
         }
         DataManager.storeGameData(playerData, "TEST")
 
-    def processObjectInteraction(self, interactObject: arcade.Sprite) -> bool:
+    def process_object_interaction(self, interact_obj: arcade.Sprite) -> bool:
         """Procesa la interaccion con un objeto"""
-        object_name = interactObject.name.lower()
+        object_name = interact_obj.name.lower()
         if object_name == "door":
             # Cambio de escena y guardo los datos actuales
             self.store_player_data()
             self.callback(Constants.SignalCodes.CHANGE_VIEW, "MENU")
             return True
         if "chest" in object_name:
-            self.openChest(chestId=object_name)
+            self.open_chest(chestId=object_name)
             return True
         return False
 
-    def processMineralInteraction(self, mineral: Mineral) -> bool:
+    def process_mineral_interaction(self, mineral: Mineral) -> bool:
         mineral.setup()
-        mineral.stateMachine.processState(arcade.key.E)
-        self.player.addToInventory(mineral.mineral, 1)
+        mineral.state_machine.process_state(arcade.key.E)
+        self.player.add_to_inventory(mineral.mineral, 1)
 
         # Cambio el valor del hash del inventario para que se actualice
-        self.lastInventoryHash = None
+        self.last_inventory_hash = None
 
         if mineral.should_removed:
             mineral.remove_from_sprite_lists()
         return True
 
     def on_key_release(self, symbol: int, modifiers: int) -> bool | None:
-        self.keysPressed.discard(symbol)
-        self.player.updateState(-symbol)
+        self.keys_pressed.discard(symbol)
+        self.player.update_state(-symbol)
 
     def on_update(self, delta_time: float) -> bool | None:
         self.player.update_animation(delta_time)
         lastPosition = self.player.sprite.center_x, self.player.sprite.center_y
-        self.player.updatePosition()
-        self.updateInventoryDisplay()
+        self.player.update_position()
+        self.update_inventory_display()
 
         # Detección de colisiones
-        if self.checkCollisions():
+        if self.check_collision():
             self.player.sprite.center_x, self.player.sprite.center_y = lastPosition
 
-        for key in self.keysPressed:
-            self.player.updateState(key)
+        for key in self.keys_pressed:
+            self.player.update_state(key)
 
         self.camera.position = arcade.math.lerp_2d(
             self.camera.position, self.player.sprite.position, 0.50
         )
 
-    def checkCollisions(self) -> bool:
+    def check_collision(self) -> bool:
         """Función para detectar si hay colisiones"""
         physicalCollisions = arcade.check_for_collision_with_lists(
-            self.player.sprite, self._collisionList
+            self.player.sprite, self._collision_list
         )
         if physicalCollisions:
             return True
         # Colisiones con cosas interactuables
-        for spriteList in [self.interactSprites, self.mineralsLayer]:
+        for spriteList in [self.interact_objects, self.minerals_layer]:
             for sprite in spriteList:
                 if arcade.check_for_collision(self.player.sprite, sprite):
                     # No bloquea el movimiento, pero si registra la colisión
@@ -397,22 +388,22 @@ class Test(View):
 
         return False
 
-    def cleanUp(self) -> None:
+    def clean_up(self) -> None:
         del self.player
         del self.camera
-        del self.interactSprites
-        del self.mineralsLayer
-        del self._collisionList
+        del self.interact_objects
+        del self.minerals_layer
+        del self._collision_list
         del self.floor
         del self.walls
-        del self.backgroundObjects
-        del self.collisionSprites
-        del self.lastInventoryHash
-        del self.keysPressed
-        del self.inventoryDirty
+        del self.background_objects
+        del self.collision_objects
+        del self.last_inventory_hash
+        del self.keys_pressed
+        del self.inventory_dirty
 
-        del self.playerSpritesList
-        del self.backgroundSpriteList
-        del self.inventorySpriteList
-        del self.itemsInventory
-        del self.inventoryTexts
+        del self.player_sprites
+        del self.background_sprites
+        del self.inventory_sprites
+        del self.items_inventory
+        del self.inventory_texts

@@ -3,26 +3,26 @@ from Constants import Game, SignalCodes
 from scenes.View import View
 import DataManager
 
-StartButtonPath: str = ":resources:UI/PlayButton.png"
-ExitButtonPath: str = ":resources:UI/ExitButton.png"
+Start_button_path: str = ":resources:UI/PlayButton.png"
+Exit_button_path: str = ":resources:UI/ExitButton.png"
 
 
 class Menu(View):
     def __init__(self, callback):
-        backgroundUrl = ":resources:UI/MenuBackground.jpg"
-        super().__init__(backgroundUrl=backgroundUrl, tileMapUrl=None)
+        background_url = ":resources:UI/MenuBackground.jpg"
+        super().__init__(background_url=background_url, tilemap_url=None)
 
         self.window.set_mouse_visible(True)
-        self.spriteList: arcade.SpriteList = arcade.SpriteList()
-        self.startButton: arcade.Sprite = arcade.Sprite(StartButtonPath, scale=2)
-        self.startButton.center_x = Game.SCREEN_WIDTH // 2
-        self.startButton.center_y = Game.SCREEN_HEIGHT // 2
+        self.sprite_list: arcade.SpriteList = arcade.SpriteList()
+        self.start_button: arcade.Sprite = arcade.Sprite(Start_button_path, scale=2)
+        self.start_button.center_x = Game.SCREEN_WIDTH // 2
+        self.start_button.center_y = Game.SCREEN_HEIGHT // 2
 
-        self.exitButton: arcade.Sprite = arcade.Sprite(ExitButtonPath, scale=2)
-        self.exitButton.center_x = Game.SCREEN_WIDTH // 2
-        self.exitButton.center_y = (Game.SCREEN_HEIGHT // 2) - 100
-        self.spriteList.append(self.startButton)
-        self.spriteList.append(self.exitButton)
+        self.exit_button: arcade.Sprite = arcade.Sprite(Exit_button_path, scale=2)
+        self.exit_button.center_x = Game.SCREEN_WIDTH // 2
+        self.exit_button.center_y = (Game.SCREEN_HEIGHT // 2) - 100
+        self.sprite_list.append(self.start_button)
+        self.sprite_list.append(self.exit_button)
 
         self.callback = callback
         self.camera.zoom = 1
@@ -31,7 +31,7 @@ class Menu(View):
         self.clear()
         self.camera.use()
         self.scene.draw(pixelated=True)
-        self.spriteList.draw(pixelated=True)
+        self.sprite_list.draw(pixelated=True)
 
     def on_key_press(self, symbol: int, modifiers: int) -> bool | None:
         data_to_send = {
@@ -47,19 +47,19 @@ class Menu(View):
     def on_mouse_press(
         self, x: int, y: int, button: int, modifiers: int
     ) -> bool | None:
-        if self.startButton.collides_with_point((x, y)):
+        if self.start_button.collides_with_point((x, y)):
             print("Iniciando juego")
-            self.callback(SignalCodes.CHANGE_VIEW, DataManager.gameData["scene"])
+            self.callback(SignalCodes.CHANGE_VIEW, DataManager.game_data["scene"])
             return
 
-        if self.exitButton.collides_with_point((x, y)):
+        if self.exit_button.collides_with_point((x, y)):
             print("Saliendo ...")
             self.callback(SignalCodes.CLOSE_WINDOW, "Close window")
 
-    def cleanUp(self):
+    def clean_up(self):
         """Limpia todos los recursos"""
-        self.spriteList.clear()
-        del self.spriteList
-        del self.startButton
-        del self.exitButton
+        self.sprite_list.clear()
+        del self.sprite_list
+        del self.start_button
+        del self.exit_button
         del self.callback

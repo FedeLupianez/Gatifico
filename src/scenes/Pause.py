@@ -6,7 +6,7 @@ from Constants import Game, SignalCodes
 class Pause(View):
     def __init__(self, previus_scene: View, background_image: arcade.Texture, callback):
         background_url = ":resources:Background/Texture/TX Plant.png"
-        super().__init__(background_url, tileMapUrl=None)
+        super().__init__(background_url, tilemap_url=None)
         self.background_image = background_image
         self.window.set_mouse_visible(True)
         self.previus_scene = previus_scene
