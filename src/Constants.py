@@ -6,17 +6,19 @@ class Game:
     # Tamaños de la pantalla :
     SCREEN_WIDTH = 1280
     SCREEN_HEIGHT = 720
+    SCREEN_CENTER_X = SCREEN_WIDTH / 2
+    SCREEN_CENTER_Y = SCREEN_HEIGHT / 2
+
     FPS = 1 / 60
 
-    # Personajes :
-    CHARACTER_SCALE = 0.5
+    FOREST_ZOOM_CAMERA = 3.5  # Zoom de la camara en el bosque
 
+
+class PlayerConfig:
     # Valores del personaje principal :
+    CHARACTER_SCALE = 0.5
     PLAYER_SPEED = 5
-    PLAYER_WIDTH = 10
-    PLAYER_HEIGHT = 10
     PLAYER_INVENTORY_POSITION = (550, 100)
-    FOREST_ZOOM_CAMERA = 3.5
 
 
 class SignalCodes:

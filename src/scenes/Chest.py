@@ -39,7 +39,7 @@ class Chest(View):
     def _setup_containers(self) -> None:
         positions_1 = [(ITEMS_INIT[0] + 60 * i, ITEMS_INIT[1]) for i in range(4)]
         positions_2 = [(ITEMS_INIT[0] + 60 * i, ITEMS_INIT[1] + 60) for i in range(4)]
-        playerInitPosition = Constants.Game.PLAYER_INVENTORY_POSITION
+        playerInitPosition = Constants.PlayerConfig.PLAYER_INVENTORY_POSITION
         playerItems = [
             (playerInitPosition[0] + 60 * i, playerInitPosition[1]) for i in range(5)
         ]

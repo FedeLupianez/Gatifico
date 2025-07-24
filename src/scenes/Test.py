@@ -11,6 +11,7 @@ from items.Item import Item
 from Types import PlayerData
 from .utils import add_containers_to_list
 from .Chest import Chest
+from .Pause import Pause
 
 import random
 
@@ -73,7 +74,7 @@ class Test(View):
     def setupInventoryContainers(self) -> None:
         """Agrego los contenedores a la lista del inventario"""
         CONTAINER_SIZE = 50
-        ITEMS_INIT = Constants.Game.PLAYER_INVENTORY_POSITION
+        ITEMS_INIT = Constants.PlayerConfig.PLAYER_INVENTORY_POSITION
         positions = [(ITEMS_INIT[0] + 60 * i, ITEMS_INIT[1]) for i in range(5)]
         add_containers_to_list(
             positions, self.inventorySpriteList, containerSize=CONTAINER_SIZE
@@ -227,6 +228,34 @@ class Test(View):
             )
             self.inventoryTexts.append(newText)
 
+    def pauseGame(self) -> None:
+        # Borro la lista de keys activas para que no se siga moviendo al volver a la escena
+        self.keysPressed.clear()
+        self.player.updateState(-arcade.key.W)
+        # Limpio la pantalla y dibujo solo el mundo para que no aparezcan los textos
+        self.clear()
+        self.camera.use()
+        self.scene.draw(pixelated=True)
+        self.playerSpritesList.draw(pixelated=True)
+        self.backgroundSpriteList.draw(pixelated=True)
+
+        screenshot = arcade.get_image()
+        background_texture = arcade.texture.Texture.create_empty(
+            "pause_bg", size=(screenshot.width, screenshot.height)
+        )
+        background_texture.image = screenshot
+
+        def change_to_menu() -> None:
+            self.store_player_data()
+            self.callback(Constants.SignalCodes.CHANGE_VIEW, "MENU")
+
+        newPauseScene = Pause(
+            previus_scene=self,
+            background_image=background_texture,
+            callback=change_to_menu,
+        )
+        self.window.show_view(newPauseScene)
+
     def openChest(self, chestId: str) -> None:
         # Borro la lista de keys activas para que no se siga moviendo al volver a la escena
         self.keysPressed.clear()
@@ -267,6 +296,10 @@ class Test(View):
         if symbol == arcade.key.E:
             return self.handleInteractions()
 
+        if symbol == arcade.key.ESCAPE:
+            self.pauseGame()
+            return True
+
         self.keysPressed.add(symbol)
         return None
 
@@ -292,19 +325,22 @@ class Test(View):
                 return True
         return False
 
+    def store_player_data(self) -> None:
+        playerData: PlayerData = {
+            "Position": {
+                "center_x": self.player.sprite.center_x,
+                "center_y": self.player.sprite.center_y,
+            },
+            "Inventory": self.player.inventory,
+        }
+        DataManager.storeGameData(playerData, "TEST")
+
     def processObjectInteraction(self, interactObject: arcade.Sprite) -> bool:
         """Procesa la interaccion con un objeto"""
         object_name = interactObject.name.lower()
         if object_name == "door":
             # Cambio de escena y guardo los datos actuales
-            playerData: PlayerData = {
-                "Position": {
-                    "center_x": self.player.sprite.center_x,
-                    "center_y": self.player.sprite.center_y,
-                },
-                "Inventory": self.player.inventory,
-            }
-            DataManager.storeGameData(playerData, "TEST")
+            self.store_player_data()
             self.callback(Constants.SignalCodes.CHANGE_VIEW, "MENU")
             return True
         if "chest" in object_name:

@@ -1,7 +1,6 @@
 from typing import Dict, Literal
 import arcade
-from Constants import Game, AssetsConstants
-import Constants
+from Constants import AssetsConstants, PlayerConfig
 from StateMachine import StateMachine
 import DataManager
 
@@ -39,12 +38,12 @@ class Player(StateMachine):
         self.sprite: arcade.Sprite = arcade.Sprite(
             self.actualAnimationPath
         )  # objeto sprite del personaje
-        self.speed = Game.PLAYER_SPEED
+        self.speed = PlayerConfig.PLAYER_SPEED
         self.actualAnimationFrames: int = 4  # cantidad de frames de la animacion
         self.frames: list[arcade.Texture] = []  # lista de texturas
         self.textureIndex = 0  # indice actual de la textura
         self.animationTimer: float = 0.0  # timer de la animacion
-        self.sprite.scale = Constants.Game.CHARACTER_SCALE
+        self.sprite.scale = PlayerConfig.CHARACTER_SCALE
         self.spriteCache: dict[
             str, arcade.Texture
         ] = {}  # Diccionario con las texturas cargadas para ahorrar llamdas a memoria
