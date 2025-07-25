@@ -226,10 +226,7 @@ class Test(View):
             )
             self.inventory_texts.append(new_text)
 
-    def pause_game(self) -> None:
-        # Borro la lista de keys activas para que no se siga moviendo al volver a la escena
-        self.keys_pressed.clear()
-        self.player.update_state(-arcade.key.W)
+    def get_screenshot(self, image_name: str):
         # Limpio la pantalla y dibujo solo el mundo para que no aparezcan los textos
         self.clear()
         self.camera.use()
@@ -239,17 +236,19 @@ class Test(View):
 
         screenshot = arcade.get_image()
         background_texture = arcade.texture.Texture.create_empty(
-            "pause_bg", size=(screenshot.width, screenshot.height)
+            image_name, size=(screenshot.width, screenshot.height)
         )
         background_texture.image = screenshot
+        return background_texture
 
+    def pause_game(self) -> None:
         def change_to_menu() -> None:
             self.store_player_data()
             self.callback(Constants.SignalCodes.CHANGE_VIEW, "MENU")
 
         new_scene = Pause(
             previus_scene=self,
-            background_image=background_texture,
+            background_image=self.get_screenshot("pause_image"),
             callback=change_to_menu,
         )
         self.window.show_view(new_scene)
@@ -258,23 +257,12 @@ class Test(View):
         # Borro la lista de keys activas para que no se siga moviendo al volver a la escena
         self.keys_pressed.clear()
         self.player.update_state(-arcade.key.W)
-        # Limpio la pantalla y dibujo solo el mundo para que no aparezcan los textos
-        self.clear()
-        self.camera.use()
-        self.scene.draw(pixelated=True)
-        self.player_sprites.draw(pixelated=True)
-        self.background_sprites.draw(pixelated=True)
 
-        screenshot = arcade.get_image()
-        background_texture = arcade.texture.Texture.create_empty(
-            "chest_bg", size=(screenshot.width, screenshot.height)
-        )
-        background_texture.image = screenshot
         new_scene = Chest(
             chestId=chestId,
             player=self.player,
             previusScene=self,
-            background_image=background_texture,
+            background_image=self.get_screenshot("chest_image"),
         )
         self.window.show_view(new_scene)
 
@@ -295,9 +283,9 @@ class Test(View):
         return None
 
     def handleInteractions(self):
-        for interactObject in self.interact_objects:
-            if is_near_to_sprite(self.player.sprite, interactObject, tolerance=40):
-                return self.process_object_interaction(interactObject)
+        for interact_obj in self.interact_objects:
+            if is_near_to_sprite(self.player.sprite, interact_obj, tolerance=50):
+                return self.process_object_interaction(interact_obj)
 
         for mineral in self.minerals_layer:
             if is_near_to_sprite(self.player.sprite, mineral, tolerance=35):
