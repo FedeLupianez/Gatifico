@@ -296,7 +296,7 @@ class Test(View):
 
     def handleInteractions(self):
         for interactObject in self.interact_objects:
-            if is_near_to_sprite(self.player.sprite, interactObject, tolerance=40):
+            if is_near_to_sprite(self.player.sprite, interactObject, tolerance=50):
                 return self.process_object_interaction(interactObject)
 
         for mineral in self.minerals_layer:

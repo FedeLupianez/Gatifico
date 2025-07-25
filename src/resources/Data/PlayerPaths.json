@@ -1,8 +1,8 @@
 {
   "IDLE": {
-    "FRONT": ":resources:Player/frente/frente_{}.png",
-    "BACK": ":resources:Player/atras/atras_{}.png",
-    "SIDE": ":resources:Player/lado/lado_{}.png"
+    "FRONT": ":resources:Player/normal_frente/frente_{}.png",
+    "BACK": ":resources:Player/normal_atras/atras_{}.png",
+    "SIDE": ":resources:Player/normal_lado/lado_{}.png"
   },
 
   "RUN": {
