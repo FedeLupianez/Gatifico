@@ -1,5 +1,6 @@
 import arcade
 from typing import Optional, Dict, Any
+from PIL import Image
 
 from scenes.View import View
 import Constants
@@ -184,12 +185,16 @@ class Test(View):
         self.player_sprites.draw(pixelated=True)  # dibuja el personaje
         self.background_sprites.draw(pixelated=True)
         self.minerals_layer.draw(pixelated=True)
+        self.player.sprite.draw_hit_box(color=arcade.color.RED, line_thickness=2)
+        for sprite in self.interact_objects:
+            sprite.draw_hit_box(color=arcade.color.GREEN, line_thickness=2)
 
         self.gui_camera.use()
         self.inventory_sprites.draw(pixelated=True)
         self.items_inventory.draw(pixelated=True)
         for text in self.inventory_texts:
             text.draw()
+
 
     def update_inventory_display(self) -> None:
         """Esta función se asegura de actualizar el inventario solo cuando hay cambios en este"""
@@ -226,7 +231,7 @@ class Test(View):
             )
             self.inventory_texts.append(new_text)
 
-    def pause_game(self) -> None:
+    def get_screenshot(self) -> arcade.Texture:
         # Borro la lista de keys activas para que no se siga moviendo al volver a la escena
         self.keys_pressed.clear()
         self.player.update_state(-arcade.key.W)
@@ -238,10 +243,15 @@ class Test(View):
         self.background_sprites.draw(pixelated=True)
 
         screenshot = arcade.get_image()
+        overlay = Image.new('RGBA', screenshot.size, (0, 0, 0, 100))
+        image_with_dark_filter = Image.alpha_composite(screenshot.convert("RGBA"), overlay)
         background_texture = arcade.texture.Texture.create_empty(
             "pause_bg", size=(screenshot.width, screenshot.height)
         )
-        background_texture.image = screenshot
+        background_texture.image = image_with_dark_filter
+        return background_texture
+
+    def pause_game(self) -> None:
 
         def change_to_menu() -> None:
             self.store_player_data()
@@ -249,32 +259,17 @@ class Test(View):
 
         new_scene = Pause(
             previus_scene=self,
-            background_image=background_texture,
+            background_image=self.get_screenshot(),
             callback=change_to_menu,
         )
         self.window.show_view(new_scene)
 
     def open_chest(self, chestId: str) -> None:
-        # Borro la lista de keys activas para que no se siga moviendo al volver a la escena
-        self.keys_pressed.clear()
-        self.player.update_state(-arcade.key.W)
-        # Limpio la pantalla y dibujo solo el mundo para que no aparezcan los textos
-        self.clear()
-        self.camera.use()
-        self.scene.draw(pixelated=True)
-        self.player_sprites.draw(pixelated=True)
-        self.background_sprites.draw(pixelated=True)
-
-        screenshot = arcade.get_image()
-        background_texture = arcade.texture.Texture.create_empty(
-            "chest_bg", size=(screenshot.width, screenshot.height)
-        )
-        background_texture.image = screenshot
         new_scene = Chest(
             chestId=chestId,
             player=self.player,
             previusScene=self,
-            background_image=background_texture,
+            background_image=self.get_screenshot(),
         )
         self.window.show_view(new_scene)
 
@@ -377,7 +372,7 @@ class Test(View):
         physicalCollisions = arcade.check_for_collision_with_lists(
             self.player.sprite, self._collision_list
         )
-        if physicalCollisions:
+        if (physicalCollisions):
             return True
         # Colisiones con cosas interactuables
         for spriteList in [self.interact_objects, self.minerals_layer]:

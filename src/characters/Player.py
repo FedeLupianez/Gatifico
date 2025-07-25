@@ -38,6 +38,17 @@ class Player(StateMachine):
         self.sprite: arcade.Sprite = arcade.Sprite(
             self.actual_animation_path, scale=PlayerConfig.CHARACTER_SCALE
         )  # objeto sprite del personaje
+
+        # Coordenadas de un cuadrado de 40x40 centrado en (0,0)
+        hit_box = [
+            (-10, -10),
+            (10, -10),
+            (10, 10),
+            (-10, 10)
+        ]
+        hit_box = [(x * PlayerConfig.CHARACTER_SCALE, y * PlayerConfig.CHARACTER_SCALE) for x, y in hit_box]
+
+        self.sprite._points = hit_box
         self.speed = PlayerConfig.PLAYER_SPEED
         self.actual_animation_frames: int = 4  # cantidad de frames de la animacion
         self.frames: list[arcade.Texture] = []  # lista de texturas
