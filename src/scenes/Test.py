@@ -1,6 +1,5 @@
 import arcade
 from typing import Optional, Dict, Any
-from PIL import Image
 
 from scenes.View import View
 import Constants
@@ -231,7 +230,7 @@ class Test(View):
             )
             self.inventory_texts.append(new_text)
 
-    def get_screenshot(self) -> arcade.Texture:
+    def get_screenshot(self):
         # Borro la lista de keys activas para que no se siga moviendo al volver a la escena
         self.keys_pressed.clear()
         self.player.update_state(-arcade.key.W)
@@ -243,16 +242,9 @@ class Test(View):
         self.background_sprites.draw(pixelated=True)
 
         screenshot = arcade.get_image()
-        overlay = Image.new('RGBA', screenshot.size, (0, 0, 0, 100))
-        image_with_dark_filter = Image.alpha_composite(screenshot.convert("RGBA"), overlay)
-        background_texture = arcade.texture.Texture.create_empty(
-            "pause_bg", size=(screenshot.width, screenshot.height)
-        )
-        background_texture.image = image_with_dark_filter
-        return background_texture
+        return screenshot
 
     def pause_game(self) -> None:
-
         def change_to_menu() -> None:
             self.store_player_data()
             self.callback(Constants.SignalCodes.CHANGE_VIEW, "MENU")
