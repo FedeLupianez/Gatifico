@@ -1,13 +1,20 @@
+from PIL import Image
 import arcade
 from .View import View
 from Constants import Game, SignalCodes
 
 
 class Pause(View):
-    def __init__(self, previus_scene: View, background_image: arcade.Texture, callback):
+    def __init__(self, previus_scene: View, background_image, callback):
         background_url = ":resources:Background/Texture/TX Plant.png"
         super().__init__(background_url, tilemap_url=None)
-        self.background_image = background_image
+        # Le pongo filtro oscuro al fondo
+        overlay = Image.new('RGBA', background_image.size, (0, 0, 0, 100))
+        image_with_dark_filter = Image.alpha_composite(background_image.convert("RGBA"), overlay)
+        self.background_image = arcade.texture.Texture.create_empty(
+            "pause_bg", size=(background_image.width, background_image.height)
+        )
+        self.background_image.image = image_with_dark_filter
         self.window.set_mouse_visible(True)
         self.previus_scene = previus_scene
         self.buttons_scale = 3

@@ -2,7 +2,7 @@
   "IDLE_FRONT": {
     "action": "IDLE",
     "direction": "FRONT",
-    "frames": 4,
+    "frames": 2,
     "speed_x": 0,
     "speed_y": 0,
     "flip_x": false
@@ -11,7 +11,7 @@
   "IDLE_BACK": {
     "action": "IDLE",
     "direction": "BACK",
-    "frames": 4,
+    "frames": 2,
     "speed_x": 0,
     "speed_y": 0,
     "flip_x": false
@@ -20,7 +20,7 @@
   "IDLE_SIDE_LEFT": {
     "action": "IDLE",
     "direction": "SIDE",
-    "frames": 4,
+    "frames": 2,
     "speed_x": 0,
     "speed_y": 0,
     "flip_x": false
@@ -29,7 +29,7 @@
   "IDLE_SIDE_RIGHT": {
     "action": "IDLE",
     "direction": "SIDE",
-    "frames": 4,
+    "frames": 2,
     "speed_x": 0,
     "speed_y": 0,
     "flip_x": true

@@ -36,14 +36,24 @@ class Player(StateMachine):
             ),  # como es el sprite inicial lo intercambiamos por el indice inicial
         )
         self.sprite: arcade.Sprite = arcade.Sprite(
-            self.actual_animation_path
+            self.actual_animation_path, scale=PlayerConfig.CHARACTER_SCALE
         )  # objeto sprite del personaje
+
+        # Coordenadas de un cuadrado de 40x40 centrado en (0,0)
+        hit_box = [
+            (-10, -10),
+            (10, -10),
+            (10, 10),
+            (-10, 10)
+        ]
+        hit_box = [(x * PlayerConfig.CHARACTER_SCALE, y * PlayerConfig.CHARACTER_SCALE) for x, y in hit_box]
+
+        self.sprite._points = hit_box
         self.speed = PlayerConfig.PLAYER_SPEED
         self.actual_animation_frames: int = 4  # cantidad de frames de la animacion
         self.frames: list[arcade.Texture] = []  # lista de texturas
         self.texture_index = 0  # indice actual de la textura
         self.animation_timer: float = 0.0  # timer de la animacion
-        self.sprite.scale = PlayerConfig.CHARACTER_SCALE
         self.sprite_cache: dict[
             str, arcade.Texture
         ] = {}  # Diccionario con las texturas cargadas para ahorrar llamdas a memoria
@@ -156,13 +166,6 @@ class Player(StateMachine):
 
     def update_animation(self, deltaTime: float):
         """Función para actualizar la animación del personaje"""
-        if not self.frames or self.actual_state_id in [
-            IDLE_SIDE_LEFT,
-            IDLE_SIDE_RIGHT,
-            IDLE_FRONT,
-            IDLE_BACK,
-        ]:
-            return
         self.animation_timer += deltaTime
         if self.animation_timer > 0.1:
             self.animation_timer = 0

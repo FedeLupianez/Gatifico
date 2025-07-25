@@ -15,7 +15,7 @@ test_chests: ChestsData = {
     "chest_3": {},
 }
 
-
+# Función para leer un archivo json
 def loadData(filename: str) -> dict:
     with open(DATAFILES_DIR + filename, "r") as file:
         return json.load(file)
