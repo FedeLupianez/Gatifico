@@ -55,6 +55,7 @@ class Test(View):
         self.mineral_active: Mineral | None
         self.mineral_interact_time: float = 0.0
         self._chache_update_timer: float = 0.0
+        self._view_hitboxes: bool = False
         self._setup_scene()
 
     def _setup_scene(self) -> None:
@@ -190,9 +191,11 @@ class Test(View):
         self.player_sprites.draw(pixelated=True)  # dibuja el personaje
         self.background_sprites.draw(pixelated=True)
         self.minerals_layer.draw(pixelated=True)
-        self.player.sprite.draw_hit_box(color=arcade.color.RED, line_thickness=2)
-        for sprite in self.interact_objects:
-            sprite.draw_hit_box(color=arcade.color.GREEN, line_thickness=2)
+
+        if self._view_hitboxes:
+            self.player.sprite.draw_hit_box(color=arcade.color.RED, line_thickness=2)
+            for sprite in self.interact_objects:
+                sprite.draw_hit_box(color=arcade.color.GREEN, line_thickness=2)
 
         self.gui_camera.use()
         self.inventory_sprites.draw(pixelated=True)
@@ -289,7 +292,7 @@ class Test(View):
         self.window.show_view(new_scene)
 
     def on_key_press(self, symbol: int, modifiers: int) -> bool | None:
-        if symbol == arcade.key.SPACE:
+        if symbol == arcade.key.SPACE and Constants.Game.DEBUG_MODE:
             self.store_player_data()
             self.callback(Constants.SignalCodes.CHANGE_VIEW, "MENU")
             return True
@@ -299,6 +302,10 @@ class Test(View):
 
         if symbol == arcade.key.ESCAPE:
             self.pause_game()
+            return True
+
+        if symbol == arcade.key.H and Constants.Game.DEBUG_MODE:
+            self._view_hitboxes = not self._view_hitboxes
             return True
 
         self.keys_pressed.add(symbol)
