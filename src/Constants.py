@@ -29,3 +29,7 @@ class SignalCodes:
 class AssetsConstants:
     # Indice inicial de los sprites (comienzan por 1)
     INITIAL_INDEX = 0
+
+
+class Filter:
+    DARK = (0, 0, 0, 100)

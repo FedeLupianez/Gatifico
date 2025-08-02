@@ -1,6 +1,7 @@
 import arcade
 from items.Container import Container
 from items.Item import Item
+from PIL import Image
 
 
 def add_containers_to_list(
@@ -38,3 +39,9 @@ def get_result(item_1: Item, item_2: Item, dict_to_find: dict) -> str | None:
 def del_references_list(listToDel: arcade.SpriteList):
     for sprite in listToDel:
         del sprite
+
+
+def apply_filter(image: Image.Image, filter: tuple[int, int, int, int]) -> Image.Image:
+    overlay = Image.new("RGBA", image.size, filter)
+    image_with_filter = Image.alpha_composite(image.convert("RGBA"), overlay)
+    return image_with_filter

@@ -12,6 +12,8 @@ KILL_STATE = "KILL"
 
 
 class Mineral(arcade.Sprite):
+    __slots__ = ["attributes", "state_machine", "mineral", "size_type"]
+
     def __init__(
         self,
         mineral: str,
@@ -44,60 +46,48 @@ class Mineral(arcade.Sprite):
 
         self.should_removed: bool = False
 
-    def big_size_state(self, key: int):
-        self.size_type = BIG_SIZE
-        data = self.attributes[self.mineral][BIG_SIZE]
+    def handle_state(self, key: int, actual_state: str, next_state: str) -> str:
+        """
+        Función genérica para todos los estados
+        Args:
+            key (int) -> es la tecla presionada
+            actual_state (str) -> es el estado que va a tomar la función como actual
+            next_state (str) -> es el estado que va a tomar la función como siguiente
+        """
+        self.size_type = actual_state.lower()
+        data = self.attributes[self.mineral][self.size_type]
         new_texture_path = data["path"]
         self.update_sprite(new_texture_path)
         if key != arcade.key.E:
             return self.state_machine.actual_state_id
-
         self.actual_touches += 1
         if self.actual_touches >= self.touches:
             self.actual_touches = 0
-            return MID_STATE
-        return BIG_STATE
+            return next_state
+        return actual_state
+
+    def big_size_state(self, key: int):
+        return self.handle_state(key=key, actual_state=BIG_STATE, next_state=MID_STATE)
 
     def mid_size_state(self, key: int):
-        self.size_type = MID_SIZE
-        data = self.attributes[self.mineral][MID_SIZE]
-        new_texture_path = data["path"]
-        self.touches = data["touches"]
-        self.update_sprite(new_texture_path)
-
-        if key != arcade.key.E:
-            return self.state_machine.actual_state_id
-        self.actual_touches += 1
-
-        if self.actual_touches >= self.touches:
-            self.actual_touches = 0
-            return SMALL_STATE
-        return MID_STATE
+        return self.handle_state(
+            key=key, actual_state=MID_STATE, next_state=SMALL_STATE
+        )
 
     def small_size_state(self, key: int):
-        self.size_type = SMALL_SIZE
-        data = self.attributes[self.mineral][SMALL_SIZE]
-        new_texture_path = data["path"]
-        self.touches = data["touches"]
-        self.update_sprite(new_texture_path)
-
-        if key != arcade.key.E:
-            return self.state_machine.actual_state_id
-        self.actual_touches += 1
-
-        if self.actual_touches >= self.touches:
-            self.actual_touches = 0
-            return KILL_STATE
-        return SMALL_STATE
+        return self.handle_state(
+            key=key, actual_state=SMALL_STATE, next_state=KILL_STATE
+        )
 
     def kill_state(self, key: int):
+        # Indico que este mineral debe de ser removido de la lista
         self.should_removed = True
 
     def setup(self):
-        self.state_machine.add_state(BIG_STATE, self.big_size_state)
-        self.state_machine.add_state(MID_STATE, self.mid_size_state)
-        self.state_machine.add_state(SMALL_STATE, self.small_size_state)
-        self.state_machine.add_state(KILL_STATE, self.kill_state)
+        self.state_machine.add_state(id=BIG_STATE, state=self.big_size_state)
+        self.state_machine.add_state(id=MID_STATE, state=self.mid_size_state)
+        self.state_machine.add_state(id=SMALL_STATE, state=self.small_size_state)
+        self.state_machine.add_state(id=KILL_STATE, state=self.kill_state)
 
     def update_state(self, key: int):
         self.state_machine.process_state(key)

@@ -24,6 +24,15 @@ class Menu(View):
         self.sprite_list.append(self.start_button)
         self.sprite_list.append(self.exit_button)
 
+        self.title = arcade.Text(
+            text="Gatifico",
+            font_size=80,
+            color=(0, 0, 0),
+            x=Game.SCREEN_CENTER_X,
+            y=Game.SCREEN_CENTER_Y + 150,
+            anchor_x="center",
+        )
+
         self.callback = callback
         self.camera.zoom = 1
 
@@ -32,6 +41,7 @@ class Menu(View):
         self.camera.use()
         self.scene.draw(pixelated=True)
         self.sprite_list.draw(pixelated=True)
+        self.title.draw()
 
     def on_key_press(self, symbol: int, modifiers: int) -> bool | None:
         data_to_send = {

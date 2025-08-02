@@ -229,7 +229,7 @@ class Test(View):
             )
             self.inventory_texts.append(new_text)
 
-    def get_screenshot(self, image_name: str):
+    def get_screenshot(self):
         # Borro la lista de keys activas para que no se siga moviendo al volver a la escena
         self.keys_pressed.clear()
         self.player.update_state(-arcade.key.W)
@@ -239,13 +239,10 @@ class Test(View):
         self.scene.draw(pixelated=True)
         self.player_sprites.draw(pixelated=True)
         self.background_sprites.draw(pixelated=True)
+        self.minerals_layer.draw(pixelated=True)
 
         screenshot = arcade.get_image()
-        background_texture = arcade.texture.Texture.create_empty(
-            image_name, size=(screenshot.width, screenshot.height)
-        )
-        background_texture.image = screenshot
-        return background_texture
+        return screenshot
 
     def pause_game(self) -> None:
         def change_to_menu() -> None:
@@ -254,7 +251,7 @@ class Test(View):
 
         new_scene = Pause(
             previus_scene=self,
-            background_image=self.get_screenshot("pause_image"),
+            background_image=self.get_screenshot(),
             callback=change_to_menu,
         )
         self.window.show_view(new_scene)
@@ -264,7 +261,7 @@ class Test(View):
             chestId=chestId,
             player=self.player,
             previusScene=self,
-            background_image=self.get_screenshot("chest_image"),
+            background_image=self.get_screenshot(),
         )
         self.window.show_view(new_scene)
 

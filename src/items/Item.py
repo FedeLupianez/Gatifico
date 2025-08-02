@@ -9,10 +9,11 @@ MineralsResources: Dict[
         Dict[Literal["path", "touches"], str | int],
     ],
 ] = DataManager.loadData("Minerals.json")
-print("Data cargada")
 
 
 class Item(arcade.Sprite):
+    __slots__ = ["id", "name", "quantity", "container_id"]
+
     def __init__(self, name: str, quantity: int, scale: int = 1) -> None:
         path: str = str(MineralsResources[name]["item"]["path"])
         super().__init__(path, scale=scale)
