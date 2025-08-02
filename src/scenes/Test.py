@@ -16,6 +16,7 @@ from .Pause import Pause
 import random
 
 _minerals_cache: Optional[Dict[str, Any]] = None
+_nearby_objects_cache: dict[str, list] = {"interact": [], "mineral": []}
 
 
 def get_minerals_resources() -> Dict[str, Any]:
@@ -51,6 +52,9 @@ class Test(View):
         self.inventory_dirty = True
         # Hash para detectar cambios en el inventario
         self.last_inventory_hash = None
+        self.mineral_active: Mineral | None
+        self.mineral_interact_time: float = 0.0
+        self._chache_update_timer: float = 0.0
         self._setup_scene()
 
     def _setup_scene(self) -> None:
@@ -231,6 +235,23 @@ class Test(View):
             )
             self.inventory_texts.append(new_text)
 
+    def update_nearby_cache(self, delta_time: float):
+        global _nearby_objects_cache
+        self._chache_update_timer += delta_time
+        if self._chache_update_timer >= 0.5:
+            self._chache_update_timer = 0.0
+            _nearby_objects_cache["interact"] = []
+            _nearby_objects_cache["mineral"] = []
+
+            for obj in self.interact_objects:
+                if is_near_to_sprite(self.player.sprite, obj, tolerance=80):
+                    _nearby_objects_cache["interact"].append(obj)
+
+            for obj in self.minerals_layer:
+                if is_near_to_sprite(self.player.sprite, obj, tolerance=100):
+                    _nearby_objects_cache["mineral"].append(obj)
+            print(_nearby_objects_cache)
+
     def get_screenshot(self):
         # Borro la lista de keys activas para que no se siga moviendo al volver a la escena
         self.keys_pressed.clear()
@@ -284,25 +305,19 @@ class Test(View):
         return None
 
     def handleInteractions(self):
-        for interact_obj in self.interact_objects:
+        global _nearby_objects_cache
+        interact_list = _nearby_objects_cache["interact"]
+        for interact_obj in interact_list:
             if is_near_to_sprite(self.player.sprite, interact_obj, tolerance=50):
                 return self.process_object_interaction(interact_obj)
 
-        for mineral in self.minerals_layer:
+        mineral_list = _nearby_objects_cache["mineral"]
+        for mineral in mineral_list:
             if is_near_to_sprite(self.player.sprite, mineral, tolerance=35):
+                self.mineral_interact_time = 0.6
+                self.mineral_active = mineral
                 return self.process_mineral_interaction(mineral)
 
-        for mineral in self.minerals_layer:
-            if is_near_to_sprite(self.player.sprite, mineral, tolerance=35):
-                mineral.setup()
-                mineral.stateMachine.processState(arcade.key.E)
-                self.player.add_to_inventory(mineral.mineral, 1)
-                self.update_inventory_sprites()
-                self.update_inventory_texts()
-
-                if mineral.should_removed:
-                    mineral.remove_from_sprite_lists()
-                return True
         return False
 
     def store_player_data(self) -> None:
@@ -349,6 +364,7 @@ class Test(View):
         lastPosition = self.player.sprite.center_x, self.player.sprite.center_y
         self.player.update_position()
         self.update_inventory_display()
+        self.update_nearby_cache(delta_time)
 
         # Detección de colisiones
         if self.check_collision():
@@ -361,8 +377,12 @@ class Test(View):
             self.camera.position, self.player.sprite.position, 0.50
         )
 
-        for mineral in self.minerals_layer:
-            mineral.update_flash(delta_time)
+        if self.mineral_interact_time > 0 and self.mineral_active:
+            self.mineral_active.update_flash(delta_time)
+            self.mineral_interact_time -= delta_time
+
+            if self.mineral_interact_time <= 0:
+                self.mineral_active = None
 
     def check_collision(self) -> bool:
         """Función para detectar si hay colisiones"""
