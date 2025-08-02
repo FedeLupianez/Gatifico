@@ -105,6 +105,8 @@ class Test(View):
         self.minerals_layer = self.load_mineral_layer()
         # Variable para precomputar las listas de colisiones
         self._collision_list = [self.collision_objects, self.walls]
+        # Precalculo la lista de colisiones interactuables
+        self.interact_list = [self.interact_objects, self.minerals_layer]
 
     def load_mineral_layer(self) -> arcade.SpriteList:
         if "Minerales" not in self.tilemap.object_lists:
@@ -359,6 +361,9 @@ class Test(View):
             self.camera.position, self.player.sprite.position, 0.50
         )
 
+        for mineral in self.minerals_layer:
+            mineral.update_flash(delta_time)
+
     def check_collision(self) -> bool:
         """Función para detectar si hay colisiones"""
         physicalCollisions = arcade.check_for_collision_with_lists(
@@ -367,7 +372,7 @@ class Test(View):
         if physicalCollisions:
             return True
         # Colisiones con cosas interactuables
-        for spriteList in [self.interact_objects, self.minerals_layer]:
+        for spriteList in self.interact_list:
             for sprite in spriteList:
                 if arcade.check_for_collision(self.player.sprite, sprite):
                     # No bloquea el movimiento, pero si registra la colisión
@@ -388,6 +393,7 @@ class Test(View):
         del self.last_inventory_hash
         del self.keys_pressed
         del self.inventory_dirty
+        del self.interact_list
 
         del self.player_sprites
         del self.background_sprites
