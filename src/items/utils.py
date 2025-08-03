@@ -1,14 +1,10 @@
+from functools import lru_cache
 from PIL import Image
 from arcade import Texture
 
-white_cache: dict[str, Texture] = {}
 
-
+@lru_cache(maxsize=None)
 def create_white_texture(texture_path: str):
-    global white_cache
-    if texture_path in white_cache:
-        return white_cache[texture_path]
-
     try:
         image = Image.open(texture_path)
         if image.mode != "RGBA":
