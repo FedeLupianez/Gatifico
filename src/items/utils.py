@@ -1,14 +1,14 @@
 from PIL import Image
 from arcade import Texture
 
-
-def apply_filter(image: Image.Image, filter: tuple[int, int, int, int]) -> Image.Image:
-    overlay = Image.new("RGBA", image.size, filter)
-    image_with_filter = Image.alpha_composite(image.convert("RGBA"), overlay)
-    return image_with_filter
+white_cache: dict[str, Texture] = {}
 
 
 def create_white_texture(texture_path: str):
+    global white_cache
+    if texture_path in white_cache:
+        return white_cache[texture_path]
+
     try:
         image = Image.open(texture_path)
         if image.mode != "RGBA":

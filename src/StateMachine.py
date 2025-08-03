@@ -36,7 +36,12 @@ class StateMachine:
     def process_state(self, event):
         # Ejecuto el estado actual
         # este debe retornar el estado al que debe cambiar o el mismo
-        new_state: str = self.states[self.actual_state_id](event)
+        if self.actual_state_id not in self.states:
+            raise ValueError(
+                f"Estado {self.actual_state_id} no encontrado en la maquina"
+            )
+        function = self.states[self.actual_state_id]
+        new_state: str = function(event)
         # Si el estado es el mismo no hace ningún cambio
         if new_state == self.actual_state_id:
             return

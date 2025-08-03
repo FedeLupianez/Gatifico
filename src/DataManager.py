@@ -5,6 +5,7 @@
 import json
 import os
 from Types import ChestsData, PlayerData
+from arcade import TextureCacheManager
 
 BASE_DIR = os.path.dirname(__file__)
 DATAFILES_DIR = BASE_DIR + "/resources/Data/"
@@ -14,6 +15,7 @@ test_chests: ChestsData = {
     "chest_2": {},
     "chest_3": {},
 }
+
 
 # Función para leer un archivo json
 def loadData(filename: str) -> dict:
@@ -41,3 +43,6 @@ def storeGameData(playerData: PlayerData, actualScene) -> None:
         }
         game_data = data
         json.dump(data, file)
+
+
+texture_manager = TextureCacheManager()
