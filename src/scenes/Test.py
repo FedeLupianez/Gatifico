@@ -1,8 +1,6 @@
 import arcade
 from typing import Optional, Dict, Any
 
-from arcade.sprite_list.collision import get_distance_between_sprites
-
 from scenes.View import View
 import Constants
 from characters.Player import Player
@@ -123,7 +121,7 @@ class Test(View):
             return arcade.SpriteList()
 
         temp_layer = self.tilemap.object_lists["Minerales"]
-        temp_list = arcade.SpriteList()
+        temp_list = arcade.SpriteList(use_spatial_hash=True)
         mineral_resources = get_minerals_resources()
 
         for obj in temp_layer:
@@ -244,13 +242,7 @@ class Test(View):
             )
             self.inventory_texts.append(new_text)
 
-    def update_nearby_cache(self, delta_time: float):
-        self._chache_update_timer += delta_time
-
-        if self._chache_update_timer < 0.5:
-            return
-
-        self._chache_update_timer = 0.0
+    def update_nearby_cache(self):
         self._nearby_objects_cache["interact"] = (
             self.interact_objects.get_nearby_sprites_gpu(
                 self.player.sprite.position, (100, 100)
@@ -372,19 +364,30 @@ class Test(View):
         self.player.update_animation(delta_time)
         player = self.player.sprite
         lastPosition = player.center_x, player.center_y
-        self.player.update_position()
-        self.update_inventory_display()
-        self.update_nearby_cache(delta_time)
-
-        # Detección de colisiones
-        if self.check_collision():
-            self.player.sprite.center_x, self.player.sprite.center_y = lastPosition
 
         for key in self.keys_pressed:
             self.player.update_state(key)
 
+        self.player.update_position()
+
+        player_moved = (player.center_x != lastPosition[0]) or (
+            player.center_y != lastPosition[1]
+        )
+
+        self._chache_update_timer += delta_time
+        if player_moved and self._chache_update_timer > 0.5:
+            self._chache_update_timer = 0
+            self.update_nearby_cache()
+
+        # Detección de colisiones
+        if player_moved and self.check_collision():
+            self.player.sprite.center_x, self.player.sprite.center_y = lastPosition
+
+        self.update_inventory_display()
+
+        cam_lerp = 0.25 if (player_moved) else 0.06
         self.camera.position = arcade.math.lerp_2d(
-            self.camera.position, self.player.sprite.position, 0.50
+            self.camera.position, self.player.sprite.position, cam_lerp
         )
 
         if self.mineral_interact_time > 0 and self.mineral_active:
@@ -396,19 +399,27 @@ class Test(View):
 
     def check_collision(self) -> bool:
         """Función para detectar si hay colisiones"""
+        player = self.player.sprite
+
         physical_collisions = arcade.check_for_collision_with_lists(
             self.player.sprite, self._collision_list
         )
+        if (
+            not self._nearby_objects_cache["interact"]
+            and not self._nearby_objects_cache["mineral"]
+        ):
+            if physical_collisions:
+                return True
 
         if physical_collisions:
             return True
 
         for obj in self._nearby_objects_cache["interact"]:
-            if arcade.check_for_collision(self.player.sprite, obj):
+            if arcade.check_for_collision(player, obj):
                 return True
 
         for obj in self._nearby_objects_cache["mineral"]:
-            if arcade.check_for_collision(self.player.sprite, obj):
+            if arcade.check_for_collision(player, obj):
                 return True
         return False
 
@@ -432,3 +443,5 @@ class Test(View):
         del self.inventory_sprites
         del self.items_inventory
         del self.inventory_texts
+
+        self._nearby_objects_cache.clear()

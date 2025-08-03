@@ -8,6 +8,7 @@ from scenes.SplitTable import SplitTable
 from scenes.Chest import Chest
 from typing import Callable
 from scenes.Pause import Pause
+import gc
 
 
 # Esta clase va a manejar la vista que se muestra en la pantalla
@@ -41,6 +42,9 @@ class ViewManager:
         print("Mensaje recibido : ", data)
         if signal == Constants.SignalCodes.CHANGE_VIEW:
             self.current_scene_id = data
+
+            # Garbage collector, lo fuerzo para que limpie la memoria
+            gc.collect()
             self.current_scene.clean_up()
             del self.current_scene  # Libero los recursos ocupados anteriormente
 
