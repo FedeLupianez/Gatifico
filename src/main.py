@@ -29,4 +29,5 @@ class Main(arcade.Window):
 
 if __name__ == "__main__":
     window = Main()
+    arcade.enable_timings()
     arcade.run()

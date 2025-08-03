@@ -6,6 +6,9 @@ from scenes.Test import Test
 from scenes.MixTable import MixTable
 from scenes.SplitTable import SplitTable
 from scenes.Chest import Chest
+from typing import Callable
+from scenes.Pause import Pause
+import gc
 
 
 # Esta clase va a manejar la vista que se muestra en la pantalla
@@ -30,7 +33,7 @@ class ViewManager:
             self.current_scene
         )  # Pongo que se vea la view por default apenas se crea el manager, o sea el menu
 
-    def callback(self, signal: int, data: str):
+    def callback(self, signal: int, data):
         """
         Función de la clase padre para recibir las señales
         signal (int) : Codigo de señal
@@ -39,6 +42,9 @@ class ViewManager:
         print("Mensaje recibido : ", data)
         if signal == Constants.SignalCodes.CHANGE_VIEW:
             self.current_scene_id = data
+
+            # Garbage collector, lo fuerzo para que limpie la memoria
+            gc.collect()
             self.current_scene.clean_up()
             del self.current_scene  # Libero los recursos ocupados anteriormente
 
@@ -51,3 +57,13 @@ class ViewManager:
 
         if signal == Constants.SignalCodes.CLOSE_WINDOW:
             self.window.close()
+        if signal == Constants.SignalCodes.PAUSE_GAME:
+            self.pause_game(self.current_scene.get_screenshot, data)
+
+    def pause_game(self, screenshot_function: Callable, callback: Callable) -> None:
+        new_scene = Pause(
+            previus_scene=self.current_scene,
+            background_image=screenshot_function(),
+            callback=callback,
+        )
+        self.window.show_view(new_scene)

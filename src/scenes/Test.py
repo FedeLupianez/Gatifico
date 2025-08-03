@@ -11,12 +11,10 @@ from items.Item import Item
 from Types import PlayerData
 from .utils import add_containers_to_list
 from .Chest import Chest
-from .Pause import Pause
 
 import random
 
 _minerals_cache: Optional[Dict[str, Any]] = None
-_nearby_objects_cache: dict[str, list] = {"interact": [], "mineral": []}
 
 
 def get_minerals_resources() -> Dict[str, Any]:
@@ -28,10 +26,10 @@ def get_minerals_resources() -> Dict[str, Any]:
 
 
 def is_near_to_sprite(
-    sprite1: arcade.Sprite, sprite2: arcade.Sprite, tolerance: float = 16.0
+    point_1: tuple[float, float], point_2: tuple[float, float], tolerance: float = 16.0
 ) -> bool:
-    dx = sprite1.center_x - sprite2.center_x
-    dy = sprite1.center_y - sprite2.center_y
+    dx = point_1[0] - point_2[0]
+    dy = point_1[1] - point_2[1]
     return (dx * dx + dy * dy) <= (tolerance * tolerance)
 
 
@@ -55,6 +53,10 @@ class Test(View):
         self.mineral_active: Mineral | None
         self.mineral_interact_time: float = 0.0
         self._chache_update_timer: float = 0.0
+        self._nearby_objects_cache: dict[str, list[arcade.Sprite]] = {
+            "interact": [],
+            "mineral": [],
+        }
         self._view_hitboxes: bool = False
         self._setup_scene()
 
@@ -112,13 +114,14 @@ class Test(View):
         self._collision_list = [self.collision_objects, self.walls]
         # Precalculo la lista de colisiones interactuables
         self.interact_list = [self.interact_objects, self.minerals_layer]
+        self.search_rect: arcade.SpriteSolidColor | None = None
 
     def load_mineral_layer(self) -> arcade.SpriteList:
         if "Minerales" not in self.tilemap.object_lists:
             return arcade.SpriteList()
 
         temp_layer = self.tilemap.object_lists["Minerales"]
-        temp_list = arcade.SpriteList()
+        temp_list = arcade.SpriteList(use_spatial_hash=True)
         mineral_resources = get_minerals_resources()
 
         for obj in temp_layer:
@@ -198,10 +201,11 @@ class Test(View):
                 sprite.draw_hit_box(color=arcade.color.GREEN, line_thickness=2)
 
         self.gui_camera.use()
-        self.inventory_sprites.draw(pixelated=True)
-        self.items_inventory.draw(pixelated=True)
-        for text in self.inventory_texts:
-            text.draw()
+        if self.inventory_dirty:
+            self.inventory_sprites.draw(pixelated=True)
+            self.items_inventory.draw(pixelated=True)
+            for text in self.inventory_texts:
+                text.draw()
 
     def update_inventory_display(self) -> None:
         """Esta función se asegura de actualizar el inventario solo cuando hay cambios en este"""
@@ -238,22 +242,18 @@ class Test(View):
             )
             self.inventory_texts.append(new_text)
 
-    def update_nearby_cache(self, delta_time: float):
-        global _nearby_objects_cache
-        self._chache_update_timer += delta_time
-        if self._chache_update_timer >= 0.5:
-            self._chache_update_timer = 0.0
-            _nearby_objects_cache["interact"] = []
-            _nearby_objects_cache["mineral"] = []
+    def update_nearby_cache(self):
+        self._nearby_objects_cache["interact"] = (
+            self.interact_objects.get_nearby_sprites_gpu(
+                self.player.sprite.position, (100, 100)
+            )
+        )
 
-            for obj in self.interact_objects:
-                if is_near_to_sprite(self.player.sprite, obj, tolerance=80):
-                    _nearby_objects_cache["interact"].append(obj)
-
-            for obj in self.minerals_layer:
-                if is_near_to_sprite(self.player.sprite, obj, tolerance=100):
-                    _nearby_objects_cache["mineral"].append(obj)
-            print(_nearby_objects_cache)
+        self._nearby_objects_cache["mineral"] = (
+            self.minerals_layer.get_nearby_sprites_gpu(
+                self.player.sprite.position, (100, 100)
+            )
+        )
 
     def get_screenshot(self):
         # Borro la lista de keys activas para que no se siga moviendo al volver a la escena
@@ -270,17 +270,9 @@ class Test(View):
         screenshot = arcade.get_image()
         return screenshot
 
-    def pause_game(self) -> None:
-        def change_to_menu() -> None:
-            self.store_player_data()
-            self.callback(Constants.SignalCodes.CHANGE_VIEW, "MENU")
-
-        new_scene = Pause(
-            previus_scene=self,
-            background_image=self.get_screenshot(),
-            callback=change_to_menu,
-        )
-        self.window.show_view(new_scene)
+    def change_to_menu(self) -> None:
+        self.store_player_data()
+        self.callback(Constants.SignalCodes.CHANGE_VIEW, "MENU")
 
     def open_chest(self, chestId: str) -> None:
         new_scene = Chest(
@@ -301,29 +293,32 @@ class Test(View):
             return self.handleInteractions()
 
         if symbol == arcade.key.ESCAPE:
-            self.pause_game()
+            self.callback(Constants.SignalCodes.PAUSE_GAME, self.change_to_menu)
             return True
 
         if symbol == arcade.key.H and Constants.Game.DEBUG_MODE:
             self._view_hitboxes = not self._view_hitboxes
             return True
 
+        if symbol == arcade.key.T and Constants.Game.DEBUG_MODE:
+            arcade.print_timings()
+
         self.keys_pressed.add(symbol)
         return None
 
     def handleInteractions(self):
-        global _nearby_objects_cache
-        interact_list = _nearby_objects_cache["interact"]
-        for interact_obj in interact_list:
-            if is_near_to_sprite(self.player.sprite, interact_obj, tolerance=50):
-                return self.process_object_interaction(interact_obj)
+        closest_obj = arcade.get_closest_sprite(
+            self.player.sprite, self.interact_objects
+        )
+        if closest_obj and closest_obj[1] <= 50:
+            return self.process_object_interaction(closest_obj[0])
 
-        mineral_list = _nearby_objects_cache["mineral"]
-        for mineral in mineral_list:
-            if is_near_to_sprite(self.player.sprite, mineral, tolerance=35):
-                self.mineral_interact_time = 0.6
-                self.mineral_active = mineral
-                return self.process_mineral_interaction(mineral)
+        closest_obj = arcade.get_closest_sprite(self.player.sprite, self.minerals_layer)
+        if closest_obj and closest_obj[1] <= 50:
+            self.mineral_interact_time = 0.6
+            self.mineral_active = closest_obj[0]
+            return self.process_mineral_interaction(closest_obj[0])
+        del closest_obj
 
         return False
 
@@ -351,7 +346,6 @@ class Test(View):
         return False
 
     def process_mineral_interaction(self, mineral: Mineral) -> bool:
-        mineral.setup()
         mineral.state_machine.process_state(arcade.key.E)
         self.player.add_to_inventory(mineral.mineral, 1)
 
@@ -368,20 +362,32 @@ class Test(View):
 
     def on_update(self, delta_time: float) -> bool | None:
         self.player.update_animation(delta_time)
-        lastPosition = self.player.sprite.center_x, self.player.sprite.center_y
-        self.player.update_position()
-        self.update_inventory_display()
-        self.update_nearby_cache(delta_time)
-
-        # Detección de colisiones
-        if self.check_collision():
-            self.player.sprite.center_x, self.player.sprite.center_y = lastPosition
+        player = self.player.sprite
+        lastPosition = player.center_x, player.center_y
 
         for key in self.keys_pressed:
             self.player.update_state(key)
 
+        self.player.update_position()
+
+        player_moved = (player.center_x != lastPosition[0]) or (
+            player.center_y != lastPosition[1]
+        )
+
+        self._chache_update_timer += delta_time
+        if player_moved and self._chache_update_timer > 0.5:
+            self._chache_update_timer = 0
+            self.update_nearby_cache()
+
+        # Detección de colisiones
+        if player_moved and self.check_collision():
+            self.player.sprite.center_x, self.player.sprite.center_y = lastPosition
+
+        self.update_inventory_display()
+
+        cam_lerp = 0.25 if (player_moved) else 0.06
         self.camera.position = arcade.math.lerp_2d(
-            self.camera.position, self.player.sprite.position, 0.50
+            self.camera.position, self.player.sprite.position, cam_lerp
         )
 
         if self.mineral_interact_time > 0 and self.mineral_active:
@@ -393,18 +399,28 @@ class Test(View):
 
     def check_collision(self) -> bool:
         """Función para detectar si hay colisiones"""
-        physicalCollisions = arcade.check_for_collision_with_lists(
+        player = self.player.sprite
+
+        physical_collisions = arcade.check_for_collision_with_lists(
             self.player.sprite, self._collision_list
         )
-        if physicalCollisions:
-            return True
-        # Colisiones con cosas interactuables
-        for spriteList in self.interact_list:
-            for sprite in spriteList:
-                if arcade.check_for_collision(self.player.sprite, sprite):
-                    # No bloquea el movimiento, pero si registra la colisión
-                    return True
+        if (
+            not self._nearby_objects_cache["interact"]
+            and not self._nearby_objects_cache["mineral"]
+        ):
+            if physical_collisions:
+                return True
 
+        if physical_collisions:
+            return True
+
+        for obj in self._nearby_objects_cache["interact"]:
+            if arcade.check_for_collision(player, obj):
+                return True
+
+        for obj in self._nearby_objects_cache["mineral"]:
+            if arcade.check_for_collision(player, obj):
+                return True
         return False
 
     def clean_up(self) -> None:
@@ -427,3 +443,5 @@ class Test(View):
         del self.inventory_sprites
         del self.items_inventory
         del self.inventory_texts
+
+        self._nearby_objects_cache.clear()

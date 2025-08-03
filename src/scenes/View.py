@@ -46,14 +46,17 @@ class View(arcade.View):
     def load_object_layers(
         self, layerName: str, tileMap: arcade.TileMap
     ) -> arcade.SpriteList:
-        temp_list = arcade.SpriteList()
+        temp_list = arcade.SpriteList(use_spatial_hash=True)
         temp_layer = tileMap.object_lists[layerName]
 
         for obj in temp_layer:
             # Crear un sprite que represente el objeto
             # Por ejemplo, un rectángulo sólido con las dimensiones del objeto
             # Obtengo el ancho y alto del objeto :
-            top_left, top_right, _, bottom_left = obj.shape
+            shape = obj.shape
+            if len(shape) != 4:
+                raise ValueError(f"Forma del objeto {obj.name} invalida")
+            top_left, top_right, _, bottom_left = shape[:4]
 
             width: float = top_right[0] - top_left[0]
             height: float = top_left[1] - bottom_left[1]

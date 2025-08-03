@@ -25,6 +25,7 @@ class PlayerConfig:
 class SignalCodes:
     CHANGE_VIEW = 0
     CLOSE_WINDOW = 1
+    PAUSE_GAME = 2
 
 
 class AssetsConstants:

@@ -3,6 +3,8 @@ from arcade.types import RGBA
 
 
 class Container(arcade.SpriteSolidColor):
+    __slots__ = ["type", "id", "item_placed"]
+
     def __init__(
         self,
         width: int,

@@ -1,6 +1,7 @@
 import arcade
 from StateMachine import StateMachine
 from .utils import create_white_texture
+from DataManager import texture_manager
 
 BIG_SIZE = "big"
 MID_SIZE = "mid"
@@ -13,6 +14,20 @@ KILL_STATE = "KILL"
 
 
 class Mineral(arcade.Sprite):
+    __slots__ = [
+        "attributes",
+        "mineral",
+        "size_type",
+        "touches",
+        "actual_touches",
+        "is_flashing",
+        "flash_timer",
+        "original_texture",
+        "white_texture",
+        "should_removed",
+        "state_machine",
+    ]
+
     def __init__(
         self,
         mineral: str,
@@ -47,6 +62,7 @@ class Mineral(arcade.Sprite):
         self.is_flashing: bool = False
         self.flash_timer: float = 0.0
         self.original_texture = self.texture
+        self.setup()
 
     def handle_state(self, key: int, actual_state: str, next_state: str) -> str:
         """
@@ -97,7 +113,7 @@ class Mineral(arcade.Sprite):
 
     def update_sprite(self, newPath: str):
         if not self.is_flashing:
-            self.texture = arcade.load_texture(newPath)
+            self.texture = texture_manager.load_or_get_texture(newPath)
 
     def start_flashing(self):
         """

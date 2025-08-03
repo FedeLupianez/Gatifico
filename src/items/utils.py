@@ -1,13 +1,9 @@
+from functools import lru_cache
 from PIL import Image
 from arcade import Texture
 
 
-def apply_filter(image: Image.Image, filter: tuple[int, int, int, int]) -> Image.Image:
-    overlay = Image.new("RGBA", image.size, filter)
-    image_with_filter = Image.alpha_composite(image.convert("RGBA"), overlay)
-    return image_with_filter
-
-
+@lru_cache(maxsize=None)
 def create_white_texture(texture_path: str):
     try:
         image = Image.open(texture_path)
