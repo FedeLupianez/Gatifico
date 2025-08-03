@@ -1,1 +1,1 @@
-{"player": {"position": {"center_x": 995, "center_y": 665}, "inventory": {}}, "scene": "TEST", "chests": {"chest_1": {"rubi": 4, "rock": 3}, "chest_2": {}, "chest_3": {"rock": 3, "rubi": 23, "water": 13}}}
+{"player": {"position": {"center_x": 900, "center_y": 700}, "inventory": {"rubi": 1}}, "scene": "TEST", "chests": {"chest_1": {"rubi": 4, "rock": 3}, "chest_2": {}, "chest_3": {}}}

@@ -12,6 +12,7 @@ class Game:
     FPS = 1 / 60
 
     FOREST_ZOOM_CAMERA = 3.5  # Zoom de la camara en el bosque
+    DEBUG_MODE = True
 
 
 class PlayerConfig:
