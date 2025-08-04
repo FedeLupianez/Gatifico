@@ -2,20 +2,19 @@ import arcade
 from typing import Dict, Literal
 import DataManager
 
-MineralsResources: Dict[
-    str,
-    Dict[
-        Literal["big", "mid", "small", "item"],
-        Dict[Literal["path", "touches"], str | int],
-    ],
-] = DataManager.loadData("Minerals.json")
-
 
 class Item(arcade.Sprite):
+    MineralsResources: Dict[
+        str,
+        Dict[
+            Literal["big", "mid", "small", "item"],
+            Dict[Literal["path", "touches"], str | int],
+        ],
+    ] = DataManager.loadData("Minerals.json")
     __slots__ = ["id", "name", "quantity", "container_id"]
 
     def __init__(self, name: str, quantity: int, scale: int = 1) -> None:
-        path: str = str(MineralsResources[name]["item"]["path"])
+        path: str = str(Item.MineralsResources[name]["item"]["path"])
         super().__init__(path, scale=scale)
         self.id: int = -1
         self.name = name

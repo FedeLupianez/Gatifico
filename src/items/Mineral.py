@@ -3,17 +3,16 @@ from StateMachine import StateMachine
 from .utils import create_white_texture
 from DataManager import texture_manager
 
-BIG_SIZE = "big"
-MID_SIZE = "mid"
-SMALL_SIZE = "small"
-
-BIG_STATE = "BIG"
-MID_STATE = "MID"
-SMALL_STATE = "SMALL"
-KILL_STATE = "KILL"
-
 
 class Mineral(arcade.Sprite):
+    BIG_SIZE = "big"
+    MID_SIZE = "mid"
+    SMALL_SIZE = "small"
+
+    BIG_STATE = "BIG"
+    MID_STATE = "MID"
+    SMALL_STATE = "SMALL"
+    KILL_STATE = "KILL"
     __slots__ = [
         "attributes",
         "mineral",
@@ -44,12 +43,12 @@ class Mineral(arcade.Sprite):
         )
 
         initial_state = ""
-        if size_type.lower() == BIG_SIZE:
-            initial_state = BIG_STATE
-        elif size_type.lower() == MID_SIZE:
-            initial_state = MID_STATE
+        if size_type.lower() == Mineral.BIG_SIZE:
+            initial_state = Mineral.BIG_STATE
+        elif size_type.lower() == Mineral.MID_SIZE:
+            initial_state = Mineral.MID_STATE
         else:
-            initial_state = SMALL_STATE
+            initial_state = Mineral.SMALL_STATE
         self.state_machine = StateMachine(initial_state)
 
         self.mineral = mineral
@@ -86,16 +85,18 @@ class Mineral(arcade.Sprite):
         return actual_state
 
     def big_size_state(self, key: int):
-        return self.handle_state(key=key, actual_state=BIG_STATE, next_state=MID_STATE)
+        return self.handle_state(
+            key=key, actual_state=Mineral.BIG_STATE, next_state=Mineral.MID_STATE
+        )
 
     def mid_size_state(self, key: int):
         return self.handle_state(
-            key=key, actual_state=MID_STATE, next_state=SMALL_STATE
+            key=key, actual_state=Mineral.MID_STATE, next_state=Mineral.SMALL_STATE
         )
 
     def small_size_state(self, key: int):
         return self.handle_state(
-            key=key, actual_state=SMALL_STATE, next_state=KILL_STATE
+            key=key, actual_state=Mineral.SMALL_STATE, next_state=Mineral.KILL_STATE
         )
 
     def kill_state(self, key: int):
@@ -103,10 +104,12 @@ class Mineral(arcade.Sprite):
         self.should_removed = True
 
     def setup(self):
-        self.state_machine.add_state(id=BIG_STATE, state=self.big_size_state)
-        self.state_machine.add_state(id=MID_STATE, state=self.mid_size_state)
-        self.state_machine.add_state(id=SMALL_STATE, state=self.small_size_state)
-        self.state_machine.add_state(id=KILL_STATE, state=self.kill_state)
+        self.state_machine.add_state(id=Mineral.BIG_STATE, state=self.big_size_state)
+        self.state_machine.add_state(id=Mineral.MID_STATE, state=self.mid_size_state)
+        self.state_machine.add_state(
+            id=Mineral.SMALL_STATE, state=self.small_size_state
+        )
+        self.state_machine.add_state(id=Mineral.KILL_STATE, state=self.kill_state)
 
     def update_state(self, key: int):
         self.state_machine.process_state(key)
