@@ -1,9 +1,9 @@
 {
-  "rock":{
+  "stone":{
     "rubi":"rubi"
   },
 
   "rubi":{
-    "rock":"rubi"
+    "stone":"rubi"
   }
 }

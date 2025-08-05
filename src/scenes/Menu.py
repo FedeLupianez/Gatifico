@@ -47,7 +47,7 @@ class Menu(View):
         data_to_send = {
             arcade.key.SPACE: "TEST",
             arcade.key.M: "MIX_TABLE",
-            arcade.key.C: ("CHEST", "chest_1", {"rubi": 4, "rock": 2}),
+            arcade.key.C: ("CHEST", "chest_1", {"rubi": 4, "stone": 2}),
             arcade.key.S: "SPLIT_TABLE",
         }
         result = data_to_send.get(symbol, None)

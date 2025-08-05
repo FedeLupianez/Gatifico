@@ -79,12 +79,16 @@ class Test(View):
 
     def setup_inventory_containers(self) -> None:
         """Agrego los contenedores a la lista del inventario"""
-        CONTAINER_SIZE = 50
+        CONTAINER_SIZE = 35
         ITEMS_INIT = Constants.PlayerConfig.PLAYER_INVENTORY_POSITION
-        positions = [(ITEMS_INIT[0] + 60 * i, ITEMS_INIT[1]) for i in range(5)]
+        positions = [(ITEMS_INIT[0] + 50 * i, ITEMS_INIT[1]) for i in range(4)]
         add_containers_to_list(
             positions, self.inventory_sprites, container_size=CONTAINER_SIZE
         )
+        inventory_sprite = arcade.Sprite(":resources:UI/inventory_tools.png", scale=3)
+        inventory_sprite.center_x = ITEMS_INIT[0] + 75
+        inventory_sprite.center_y = ITEMS_INIT[1]
+        self.inventory_sprites.append(inventory_sprite)
 
     def setup_player(self) -> None:
         player_data = DataManager.game_data["player"]
@@ -236,7 +240,7 @@ class Test(View):
                 text=f"{item} x {quantity}",
                 font_size=9,
                 x=container.center_x,
-                y=container.center_y - (container.height / 2 + 15),
+                y=container.center_y - (container.height / 2 + 10),
                 anchor_x="center",
                 anchor_y="baseline",
             )

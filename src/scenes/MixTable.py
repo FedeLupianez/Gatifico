@@ -28,7 +28,7 @@ class MixTable(View):
         # Init de la clase
         self.callback = callback
         self.player = player
-        self.items: dict = player.get_inventory() or {"rubi": 4, "rock": 3, "water": 5}
+        self.items: dict = player.get_inventory() or {"rubi": 4, "stone": 3, "water": 5}
         self.next_item_id: int = 0
 
         # Configuraciones de cámara

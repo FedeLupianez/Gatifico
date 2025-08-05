@@ -11,7 +11,7 @@ BASE_DIR = os.path.dirname(__file__)
 DATAFILES_DIR = BASE_DIR + "/resources/Data/"
 
 test_chests: ChestsData = {
-    "chest_1": {"rubi": 4, "rock": 3},
+    "chest_1": {"rubi": 4, "stone": 3},
     "chest_2": {},
     "chest_3": {},
 }

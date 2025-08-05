@@ -6,9 +6,10 @@ from PIL import Image
 
 def add_containers_to_list(
     point_list: list[tuple[int, int]],
-    list_to_add: arcade.SpriteList,
+    list_to_add: arcade.SpriteList | list,
     container_size: int,
     container_type: str | None = None,
+    color: arcade.types.Color = arcade.color.GRAY,
     last_id: int = -1,
 ) -> None:
     id = last_id
@@ -18,7 +19,7 @@ def add_containers_to_list(
             height=container_size,
             center_x=x,
             center_y=y,
-            color=arcade.color.GRAY,
+            color=color,
         )
         tempSprite.item_placed = False
         if last_id > -1:

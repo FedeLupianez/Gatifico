@@ -20,6 +20,8 @@ ITEMS_INIT: tuple[int, int] = (100, 100)
 
 
 class SplitTable(View):
+    RESOURCE = DataManager.loadData("SplitTableResources.json")
+
     def __init__(
         self,
         callback: Callable[[int, str], None],
@@ -31,7 +33,7 @@ class SplitTable(View):
 
         self.callback = callback
         self.player = player
-        self.items: dict = player.get_inventory() or {"rubi": 4, "rock": 3, "water": 5}
+        self.items: dict = player.get_inventory() or {"rubi": 4, "stone": 3, "water": 5}
         self.next_item_id: int = 0
         self.camera.zoom = 1
         self.is_mouse_active: bool = False
@@ -123,7 +125,7 @@ class SplitTable(View):
         value_to_find: int | str,
         list_to_find: list | arcade.SpriteList,
         actualIndex: int = 0,
-    ):
+    ) -> Item | None:
         if actualIndex == len(list_to_find):
             return None
         item = list_to_find[actualIndex]
@@ -150,6 +152,32 @@ class SplitTable(View):
             actual_text.x = item.center_x
             actual_text.y = item.center_y - (item.height / 2 + 15)
 
+    def create_result_containers(self, containers_cant: int) -> None:
+        # Creo los contenedores faltantes :
+        if len(self.result_containers) < containers_cant:
+            print("creando contenedores de resulado")
+
+            for _ in range(containers_cant):
+                last_container: Container | None = None
+                if len(self.result_containers) > 0:
+                    last_container = self.result_containers[-1]
+                center_x = 0
+                if last_container:
+                    center_x = last_container.center_x + CONTAINER_SIZE + 25
+                else:
+                    center_x = INPUT_POSITION[0] + CONTAINER_SIZE + 25
+
+                new_container = Container(
+                    width=CONTAINER_SIZE,
+                    height=CONTAINER_SIZE,
+                    center_x=center_x,
+                    center_y=INPUT_POSITION[1],
+                )
+                new_container.id = len(self.container_sprites)
+
+                self.result_containers.append(new_container)
+                self.container_sprites.append(self.result_containers[-1])
+
     def load_result(self) -> None:
         input_item: Item | None = self._find_item_with_attr(
             "container_id", self.input_container.id, self.item_sprites
@@ -157,33 +185,43 @@ class SplitTable(View):
         if not input_item:
             return
         print("nombre del item de input : ", input_item.name)
-        file = DataManager.loadData("SplitTableResources.json")
-        result = file.get(input_item.name, {}).items()
+
+        result = SplitTable.RESOURCE.get(input_item.name, {})
         if not (result):
             return
         print("Resultados : ", result)
-        for name, quantity in result:
-            pos_x, pos_y = RESULT_INIT_POSITION[0], RESULT_INIT_POSITION[1]
-            if len(self.result_containers) > 0:
-                pos_x = self.result_containers[-1].center_x + CONTAINER_SIZE * 2
+        self.create_result_containers(len(result))
 
-            new_container = Container(
-                width=CONTAINER_SIZE,
-                height=CONTAINER_SIZE,
-                center_x=pos_x,
-                center_y=pos_y,
+        actual_items: list[Item | None] = [
+            self._find_item_with_attr("container_id", container.id, self.item_sprites)
+            for container in self.result_containers
+        ]
+        actual_names: list[str] = [item.name for item in actual_items if item]
+        # Cargo los items :
+        for index, (name, quantity) in enumerate(result.items()):
+            if name in actual_names:
+                old_item = actual_items[actual_names.index(name)]
+                if old_item:
+                    print(f"Cambiando {name} a {old_item.quantity + quantity}")
+                    old_item.quantity += quantity
+            else:
+                container: Container = self.result_containers[index]
+                new_item = Item(name=name, quantity=quantity, scale=3)
+                new_item.id = self.next_item_id
+                new_item.container_id = container.id
+                self.next_item_id += 1
+                new_item.change_container(container.id)
+                new_item.change_position(container.center_x, container.center_y)
+                container.item_placed = True
+                self.item_texts.append(self._create_item_text(new_item))
+                self.item_sprites.append(new_item)
+        input_item.quantity -= 1
+        if input_item.quantity == 0:
+            self.item_sprites.remove(input_item)
+            self.item_texts.remove(
+                self._find_item_with_attr("id", input_item.id, self.item_texts)
             )
-            new_container.id = len(self.container_sprites)
-
-            self.result_containers.append(new_container)
-            new_item = Item(name=name, quantity=quantity, scale=3)
-            new_item.id = self.next_item_id
-            self._move_sprite_to_container(new_item, new_container)
-            self.next_item_id += 1
-            self.container_sprites.append(new_container)
-            self.item_texts.append(self._create_item_text(new_item))
-            self.item_sprites.append(new_item)
-        del file
+            self.input_container.item_placed = False
 
     def on_update(self, delta_time: float) -> bool | None:
         self._sync_item_text()
@@ -250,9 +288,7 @@ class SplitTable(View):
             if not (item):
                 return
             if item.name == self.item_to_move.name:
-                text = self._find_item_with_attr(
-                    "id", item.id, self.item_texts, item.id
-                )
+                text = self._find_item_with_attr("id", item.id, self.item_texts)
                 if not text:
                     return
                 self._move_sprite_to_container(self.item_to_move, new_container)
