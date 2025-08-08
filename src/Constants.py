@@ -11,14 +11,14 @@ class Game:
 
     FPS = 1 / 60
 
-    FOREST_ZOOM_CAMERA = 3.5  # Zoom de la camara en el bosque
+    FOREST_ZOOM_CAMERA = 4  # Zoom de la camara en el bosque
     DEBUG_MODE = True
 
 
 class PlayerConfig:
     # Valores del personaje principal :
     CHARACTER_SCALE = 0.5
-    PLAYER_SPEED = 5
+    PLAYER_SPEED = 2
     PLAYER_INVENTORY_POSITION = (550, 100)
 
 
@@ -30,7 +30,7 @@ class SignalCodes:
 
 class AssetsConstants:
     # Indice inicial de los sprites (comienzan por 1)
-    INITIAL_INDEX = 0
+    INITIAL_INDEX = 1
 
 
 class Filter:

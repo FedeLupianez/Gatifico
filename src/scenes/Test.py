@@ -1,10 +1,9 @@
 import arcade
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, Callable, Literal
 
 from scenes.View import View
 import Constants
 from characters.Player import Player
-from typing import Callable
 from items.Mineral import Mineral
 import DataManager
 from items.Item import Item
@@ -53,7 +52,7 @@ class Test(View):
         self.mineral_active: Mineral | None
         self.mineral_interact_time: float = 0.0
         self._chache_update_timer: float = 0.0
-        self._nearby_objects_cache: dict[str, list[arcade.Sprite]] = {
+        self._nearby_objects_cache: dict[Literal["interact", "mineral"], list[arcade.Sprite]] = {
             "interact": [],
             "mineral": [],
         }
@@ -342,7 +341,7 @@ class Test(View):
         if object_name == "door":
             # Cambio de escena y guardo los datos actuales
             self.store_player_data()
-            self.callback(Constants.SignalCodes.CHANGE_VIEW, "MENU")
+            self.callback(Constants.SignalCodes.PAUSE_GAME, self.player)
             return True
         if "chest" in object_name:
             self.open_chest(chestId=object_name)
@@ -379,13 +378,14 @@ class Test(View):
         )
 
         self._chache_update_timer += delta_time
-        if player_moved and self._chache_update_timer > 0.5:
-            self._chache_update_timer = 0
-            self.update_nearby_cache()
+        if player_moved:
+            if self._chache_update_timer > 0.5:
+                self._chache_update_timer = 0
+                self.update_nearby_cache()
 
-        # Detección de colisiones
-        if player_moved and self.check_collision():
-            self.player.sprite.center_x, self.player.sprite.center_y = lastPosition
+            # Detección de colisiones
+            if  self.check_collision():
+                self.player.sprite.center_x, self.player.sprite.center_y = lastPosition
 
         self.update_inventory_display()
 
@@ -408,12 +408,6 @@ class Test(View):
         physical_collisions = arcade.check_for_collision_with_lists(
             self.player.sprite, self._collision_list
         )
-        if (
-            not self._nearby_objects_cache["interact"]
-            and not self._nearby_objects_cache["mineral"]
-        ):
-            if physical_collisions:
-                return True
 
         if physical_collisions:
             return True
