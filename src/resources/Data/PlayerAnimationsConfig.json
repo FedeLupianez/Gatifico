@@ -5,7 +5,8 @@
     "frames": 2,
     "speed_x": 0,
     "speed_y": 0,
-    "flip_x": false
+    "flip_x": false,
+    "animation_speed": 0.3
   },
 
   "IDLE_BACK": {
@@ -14,7 +15,8 @@
     "frames": 2,
     "speed_x": 0,
     "speed_y": 0,
-    "flip_x": false
+    "flip_x": false,
+    "animation_speed": 0.3
   },
 
   "IDLE_SIDE_LEFT": {
@@ -23,7 +25,8 @@
     "frames": 2,
     "speed_x": 0,
     "speed_y": 0,
-    "flip_x": false
+    "flip_x": false,
+    "animation_speed": 0.3
   },
 
   "IDLE_SIDE_RIGHT": {
@@ -32,7 +35,8 @@
     "frames": 2,
     "speed_x": 0,
     "speed_y": 0,
-    "flip_x": true
+    "flip_x": true,
+    "animation_speed": 0.3
   },
 
   "LEFT": {

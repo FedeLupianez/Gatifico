@@ -44,6 +44,7 @@ class Player(StateMachine):
         self.frames: list[arcade.Texture] = []  # lista de texturas
         self.texture_index = 0  # indice actual de la textura
         self.animation_timer: float = 0.0  # timer de la animacion
+        self.actual_animation_speed: float = 0.1
         # Diccionario para el inventario
         self.inventory: dict[str, int] = {}
         self.animation_cache: dict[str, list[arcade.Texture]] = {}
@@ -64,6 +65,7 @@ class Player(StateMachine):
         action = config["action"]
         direction = config["direction"]
         frames = config["frames"]
+        self.actual_animation_speed = config.get("animation_speed", 0.1)
 
         templatePath = TexturePaths[action][direction]
         if templatePath != self.actual_animation_path:
@@ -156,7 +158,7 @@ class Player(StateMachine):
     def update_animation(self, deltaTime: float):
         """Función para actualizar la animación del personaje"""
         self.animation_timer += deltaTime
-        if self.animation_timer > 0.1:
+        if self.animation_timer > self.actual_animation_speed:
             self.animation_timer = 0
             self.texture_index = (self.texture_index + 1) % self.actual_animation_frames
             self.sprite.texture = self.frames[self.texture_index]
