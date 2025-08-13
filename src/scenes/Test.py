@@ -52,7 +52,9 @@ class Test(View):
         self.mineral_active: Mineral | None
         self.mineral_interact_time: float = 0.0
         self._chache_update_timer: float = 0.0
-        self._nearby_objects_cache: dict[Literal["interact", "mineral"], list[arcade.Sprite]] = {
+        self._nearby_objects_cache: dict[
+            Literal["interact", "mineral"], list[arcade.Sprite]
+        ] = {
             "interact": [],
             "mineral": [],
         }
@@ -70,7 +72,6 @@ class Test(View):
     def setup_spritelists(self):
         # Listas de Sprites
         self.player_sprites: arcade.SpriteList = arcade.SpriteList()
-        self.background_sprites: arcade.SpriteList = arcade.SpriteList()
         self.inventory_sprites: arcade.SpriteList = arcade.SpriteList()
         self.items_inventory: arcade.SpriteList = arcade.SpriteList()
         self.inventory_texts: list[arcade.Text] = []
@@ -195,7 +196,6 @@ class Test(View):
         self.camera.use()
         self.scene.draw(pixelated=True)  # dibuja la escena
         self.player_sprites.draw(pixelated=True)  # dibuja el personaje
-        self.background_sprites.draw(pixelated=True)
         self.minerals_layer.draw(pixelated=True)
 
         if self._view_hitboxes:
@@ -267,7 +267,6 @@ class Test(View):
         self.camera.use()
         self.scene.draw(pixelated=True)
         self.player_sprites.draw(pixelated=True)
-        self.background_sprites.draw(pixelated=True)
         self.minerals_layer.draw(pixelated=True)
 
         screenshot = arcade.get_image()
@@ -296,7 +295,8 @@ class Test(View):
             return self.handleInteractions()
 
         if symbol == arcade.key.ESCAPE:
-            self.callback(Constants.SignalCodes.PAUSE_GAME, self.change_to_menu)
+            self.store_player_data()
+            self.callback(Constants.SignalCodes.PAUSE_GAME, "Pause Game")
             return True
 
         if symbol == arcade.key.H and Constants.Game.DEBUG_MODE:
@@ -341,7 +341,7 @@ class Test(View):
         if object_name == "door":
             # Cambio de escena y guardo los datos actuales
             self.store_player_data()
-            self.callback(Constants.SignalCodes.PAUSE_GAME, self.player)
+            self.callback(Constants.SignalCodes.PAUSE_GAME, "Pause Game")
             return True
         if "chest" in object_name:
             self.open_chest(chestId=object_name)
@@ -384,7 +384,7 @@ class Test(View):
                 self.update_nearby_cache()
 
             # Detección de colisiones
-            if  self.check_collision():
+            if self.check_collision():
                 self.player.sprite.center_x, self.player.sprite.center_y = lastPosition
 
         self.update_inventory_display()
@@ -437,7 +437,6 @@ class Test(View):
         del self.interact_list
 
         del self.player_sprites
-        del self.background_sprites
         del self.inventory_sprites
         del self.items_inventory
         del self.inventory_texts

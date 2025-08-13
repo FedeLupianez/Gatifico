@@ -33,12 +33,20 @@ class ViewManager:
             self.current_scene
         )  # Pongo que se vea la view por default apenas se crea el manager, o sea el menu
 
-    def callback(self, signal: int, data):
+    def callback(self, signal: int, data=None):
         """
         Función de la clase padre para recibir las señales
         signal (int) : Codigo de señal
         data (str) : La información que trae consigo la señal
         """
+
+        if signal == Constants.SignalCodes.CLOSE_WINDOW:
+            # Cierra la ventana
+            self.window.close()
+        if signal == Constants.SignalCodes.PAUSE_GAME:
+            # Pausa el juego
+            self.pause_game(self.current_scene.get_screenshot)
+
         print("Mensaje recibido : ", data)
         if signal == Constants.SignalCodes.CHANGE_VIEW:
             self.current_scene_id = data
@@ -48,6 +56,8 @@ class ViewManager:
             self.current_scene.clean_up()
             del self.current_scene  # Libero los recursos ocupados anteriormente
 
+            if not data:
+                raise ValueError("Data no está disponible")
             # Cambio la variable anterior por la nueva escena
             if data == "MENU":
                 self.current_scene = self.scenes[data](self.callback)
@@ -55,15 +65,10 @@ class ViewManager:
                 self.current_scene = self.scenes[data](self.callback, self.player)
             self.window.show_view(self.current_scene)  # Hago que la nueva escena se vea
 
-        if signal == Constants.SignalCodes.CLOSE_WINDOW:
-            self.window.close()
-        if signal == Constants.SignalCodes.PAUSE_GAME:
-            self.pause_game(self.current_scene.get_screenshot, data)
-
-    def pause_game(self, screenshot_function: Callable, callback: Callable) -> None:
+    def pause_game(self, screenshot_function: Callable) -> None:
         new_scene = Pause(
             previus_scene=self.current_scene,
             background_image=screenshot_function(),
-            callback=callback,
+            callback=self.callback,  # Le paso el callback del ViewManager para que pueda cerrar o cambiar a una escena
         )
         self.window.show_view(new_scene)

@@ -2,7 +2,7 @@ from typing import Dict, Literal
 import arcade
 from Constants import AssetsConstants, PlayerConfig
 from StateMachine import StateMachine
-from DataManager import loadData, texture_manager
+from DataManager import loadData, texture_manager, game_data
 
 
 actionKeys = Literal["IDLE", "RUN", "WALK"]
@@ -118,7 +118,12 @@ class Player(StateMachine):
         self.add_state(Player.RIGHT, self.genericStateHandler)
         self.add_state(Player.DOWN, self.genericStateHandler)
         self.add_state(Player.UP, self.genericStateHandler)
+        antique_data = game_data["player"]
+        self.sprite.center_x = antique_data["position"]["center_x"]
+        self.sprite.center_y = antique_data["position"]["center_y"]
+        self.inventory = antique_data["inventory"]
         self.update_spritelist()
+        del antique_data
 
     def update_position(self):
         """Actualiza la posición del personaje segun la velocidad actual"""

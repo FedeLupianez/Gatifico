@@ -1,7 +1,6 @@
 import arcade
-
 from .View import View
-from Constants import Game, Filter
+from Constants import Game, Filter, SignalCodes
 from .utils import apply_filter
 
 
@@ -72,7 +71,7 @@ class Pause(View):
             self.window.show_view(self.previus_scene)
 
         if self.exit_button.collides_with_point((x, y)):
-            self.callback()
+            self.callback(SignalCodes.CLOSE_WINDOW, data="Close window")
 
     def on_key_press(self, symbol: int, modifiers: int) -> bool | None:
         if symbol == arcade.key.ESCAPE:
