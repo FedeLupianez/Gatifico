@@ -7,7 +7,6 @@ from DataManager import loadData, texture_manager, game_data
 
 actionKeys = Literal["IDLE", "RUN", "WALK"]
 directionKeys = Literal["FRONT", "SIDE", "BACK"]
-TexturePaths: Dict[actionKeys, Dict[directionKeys, str]] = loadData("PlayerPaths.json")
 
 
 class Player(StateMachine):
@@ -24,16 +23,16 @@ class Player(StateMachine):
     INITIAL_INDEX = AssetsConstants.INITIAL_INDEX
     SCALE = PlayerConfig.CHARACTER_SCALE
     SPEED = PlayerConfig.PLAYER_SPEED
+    TexturePaths: Dict[actionKeys, Dict[directionKeys, str]] = loadData(
+        "PlayerPaths.json"
+    )
 
     def __init__(self):
         super().__init__(Player.IDLE_FRONT)
         self.motions = [arcade.key.W, arcade.key.A, arcade.key.S, arcade.key.D]
         # Todos los path tienen llaves {} donde iría el numero de sprite
-        self.actual_animation_path: str = TexturePaths["IDLE"]["FRONT"].replace(
-            "{}",
-            str(
-                Player.INITIAL_INDEX
-            ),  # como es el sprite inicial lo intercambiamos por el indice inicial
+        self.actual_animation_path: str = Player.TexturePaths["IDLE"]["FRONT"].replace(
+            "{}", str(Player.INITIAL_INDEX)
         )
         self.sprite: arcade.Sprite = arcade.Sprite(
             self.actual_animation_path, scale=Player.SCALE
@@ -41,13 +40,35 @@ class Player(StateMachine):
 
         self.speed = Player.SPEED
         self.actual_animation_frames: int = 4  # cantidad de frames de la animacion
-        self.frames: list[arcade.Texture] = []  # lista de texturas
+        self.frames: list[arcade.Texture] = []  # lista de texturas actual
+
+        self.animations: dict[str, list[arcade.Texture]] = {
+            Player.IDLE_SIDE_LEFT: [],
+            Player.IDLE_SIDE_RIGHT: [],
+            Player.IDLE_FRONT: [],
+            Player.IDLE_BACK: [],
+            Player.LEFT: [],
+            Player.RIGHT: [],
+            Player.UP: [],
+            Player.DOWN: [],
+        }
+
+        # Cargo las texturas en el diccionario
+        for state in self.animations:
+            cant_frames = Player.ANIMATION_STATE_CONFIG[state]["frames"]
+            for i in range(
+                Player.INITIAL_INDEX,
+                cant_frames + Player.INITIAL_INDEX,
+            ):
+                self.animations[state].append(
+                    self._load_texture(Player.ANIMATION_STATE_CONFIG[state]["path"], i)
+                )
+
         self.texture_index = 0  # indice actual de la textura
         self.animation_timer: float = 0.0  # timer de la animacion
         self.actual_animation_speed: float = 0.1
         # Diccionario para el inventario
         self.inventory: dict[str, int] = {}
-        self.animation_cache: dict[str, list[arcade.Texture]] = {}
 
     def genericStateHandler(self, event: int):
         """Función genérica para todos los estados del personaje, ya que casi todos hacen lo mismo"""
@@ -67,9 +88,9 @@ class Player(StateMachine):
         frames = config["frames"]
         self.actual_animation_speed = config.get("animation_speed", 0.1)
 
-        templatePath = TexturePaths[action][direction]
-        if templatePath != self.actual_animation_path:
-            self.actual_animation_path = templatePath
+        template_path = Player.TexturePaths[action][direction]
+        if template_path != self.actual_animation_path:
+            self.actual_animation_path = template_path
             self.actual_animation_frames = frames
             self.update_spritelist()
         newState = self.handleMovementEvent(event)
@@ -131,34 +152,15 @@ class Player(StateMachine):
         self.sprite.center_x += self.sprite.change_x
         self.sprite.center_y += self.sprite.change_y
 
-    def update_state(self, event: int):
-        """Actualiza el estado actual del personaje"""
-        self.process_state(event)  # Procesa el estado
+    def _load_texture(self, path: str, index: int):
+        route = path.replace("{}", str(index))
+        return texture_manager.load_or_get_texture(route)
 
     def update_spritelist(self):
         """
         Actualiza la lista de texturas segun el estado actual
         """
-
-        self.last_animation_path = self.actual_animation_path
-        if self.actual_animation_path in self.animation_cache:
-            self.frames = self.animation_cache[self.actual_animation_path]
-            self.texture_index = 0
-            return
-        self.frames.clear()
-
-        def load_texture(path: str, index: int):
-            route = path.replace("{}", str(index))
-            return texture_manager.load_or_get_texture(route)
-
-        load_textures = (
-            load_texture(self.actual_animation_path, i)
-            for i in range(
-                Player.INITIAL_INDEX,
-                self.actual_animation_frames + Player.INITIAL_INDEX,
-            )
-        )
-        self.frames = list(load_textures)
+        self.frames = self.animations[self.actual_state_id]
         self.texture_index = 0
 
     def update_animation(self, deltaTime: float):

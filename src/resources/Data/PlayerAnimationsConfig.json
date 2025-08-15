@@ -1,77 +1,85 @@
 {
-  "IDLE_FRONT": {
-    "action": "IDLE",
-    "direction": "FRONT",
-    "frames": 2,
-    "speed_x": 0,
-    "speed_y": 0,
-    "flip_x": false,
-    "animation_speed": 0.3
-  },
+   "IDLE_FRONT": {
+      "path": ":resources:Player/gatifico_normal_frente/sprite_gat_nor_frente_{}.png",
+      "action": "IDLE",
+      "direction": "FRONT",
+      "frames": 2,
+      "speed_x": 0,
+      "speed_y": 0,
+      "flip_x": false,
+      "animation_speed": 0.3
+   },
 
-  "IDLE_BACK": {
-    "action": "IDLE",
-    "direction": "BACK",
-    "frames": 2,
-    "speed_x": 0,
-    "speed_y": 0,
-    "flip_x": false,
-    "animation_speed": 0.3
-  },
+   "IDLE_BACK": {
+      "path": ":resources:Player/gatifico_normal_atras/sprite_gat_nor_atras_{}.png",
+      "action": "IDLE",
+      "direction": "BACK",
+      "frames": 2,
+      "speed_x": 0,
+      "speed_y": 0,
+      "flip_x": false,
+      "animation_speed": 0.3
+   },
 
-  "IDLE_SIDE_LEFT": {
-    "action": "IDLE",
-    "direction": "SIDE",
-    "frames": 2,
-    "speed_x": 0,
-    "speed_y": 0,
-    "flip_x": false,
-    "animation_speed": 0.3
-  },
+   "IDLE_SIDE_LEFT": {
+      "path": ":resources:Player/gatifico_normal_lado/sprite_gat_nor_lado_{}.png",
+      "action": "IDLE",
+      "direction": "SIDE",
+      "frames": 2,
+      "speed_x": 0,
+      "speed_y": 0,
+      "flip_x": false,
+      "animation_speed": 0.3
+   },
 
-  "IDLE_SIDE_RIGHT": {
-    "action": "IDLE",
-    "direction": "SIDE",
-    "frames": 2,
-    "speed_x": 0,
-    "speed_y": 0,
-    "flip_x": true,
-    "animation_speed": 0.3
-  },
+   "IDLE_SIDE_RIGHT": {
+      "path": ":resources:Player/gatifico_normal_lado/sprite_gat_nor_lado_{}.png",
+      "action": "IDLE",
+      "direction": "SIDE",
+      "frames": 2,
+      "speed_x": 0,
+      "speed_y": 0,
+      "flip_x": true,
+      "animation_speed": 0.3
+   },
 
-  "LEFT": {
-    "action": "RUN",
-    "direction": "SIDE",
-    "frames": 4,
-    "speed_x": -5,
-    "speed_y": 0,
-    "flip_x": false
-  },
-  
-  "RIGHT": {
-    "action": "RUN",
-    "direction": "SIDE",
-    "frames": 4,
-    "speed_x": 5,
-    "speed_y": 0,
-    "flip_x": true
-  },
+   "LEFT": {
+      "path": ":resources:Player/gatifico_caminando_lado/sprite_gat_cam_lado_{}.png",
+      "action": "RUN",
+      "direction": "SIDE",
+      "frames": 4,
+      "speed_x": -5,
+      "speed_y": 0,
+      "flip_x": false
+   },
 
-  "UP": {
-    "action": "RUN",
-    "direction": "BACK",
-    "frames": 4,
-    "speed_x": 0,
-    "speed_y": 5,
-    "flip_x": false
-  },
+   "RIGHT": {
+      "path": ":resources:Player/gatifico_caminando_lado/sprite_gat_cam_lado_{}.png",
+      "action": "RUN",
+      "direction": "SIDE",
+      "frames": 4,
+      "speed_x": 5,
+      "speed_y": 0,
+      "flip_x": true
+   },
 
-  "DOWN": {
-    "action": "RUN",
-    "direction": "FRONT",
-    "frames": 4,
-    "speed_x": 0,
-    "speed_y": -5,
-    "flip_x": false
-  }
+   "UP": {
+      "path": ":resources:Player/gatifico_caminando_atras/sprite_gat_cam_atras_{}.png",
+      "action": "RUN",
+      "direction": "BACK",
+      "frames": 4,
+      "speed_x": 0,
+      "speed_y": 5,
+      "flip_x": false
+   },
+
+   "DOWN": {
+      "path": ":resources:Player/gatifico_caminando_frente/sprite_gat_cam_frente_{}.png",
+      "action": "RUN",
+      "direction": "FRONT",
+      "frames": 4,
+      "speed_x": 0,
+      "speed_y": -5,
+      "flip_x": false
+   }
 }

@@ -261,7 +261,7 @@ class Test(View):
     def get_screenshot(self):
         # Borro la lista de keys activas para que no se siga moviendo al volver a la escena
         self.keys_pressed.clear()
-        self.player.update_state(-arcade.key.W)
+        self.player.process_state(-arcade.key.W)
         # Limpio la pantalla y dibujo solo el mundo para que no aparezcan los textos
         self.clear()
         self.camera.use()
@@ -361,7 +361,7 @@ class Test(View):
 
     def on_key_release(self, symbol: int, modifiers: int) -> bool | None:
         self.keys_pressed.discard(symbol)
-        self.player.update_state(-symbol)
+        self.player.process_state(-symbol)
 
     def on_update(self, delta_time: float) -> bool | None:
         self.player.update_animation(delta_time)
@@ -369,7 +369,7 @@ class Test(View):
         lastPosition = player.center_x, player.center_y
 
         for key in self.keys_pressed:
-            self.player.update_state(key)
+            self.player.process_state(key)
 
         self.player.update_position()
 

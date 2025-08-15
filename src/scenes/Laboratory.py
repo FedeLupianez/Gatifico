@@ -14,7 +14,7 @@ class Laboratory(View):
         self.player = player
         self.player_sprites = arcade.SpriteList()
         self.callback = callback
-        self.keys_pressed: set = set()
+        self.keys_pressed: list[int] = []
         self.window.set_mouse_visible(False)
         self.camera.zoom = Constants.Game.FOREST_ZOOM_CAMERA
         self.camera.position = self.player.sprite.position
@@ -48,8 +48,8 @@ class Laboratory(View):
 
     def get_screenshot(self):
         # Borro la lista de keys activas para que no se siga moviendo al volver a la escena
-        self.keys_pressed.clear()
-        self.player.update_state(-arcade.key.W)
+        self.keys_pressed = set()
+        self.player.process_state(-arcade.key.W)
         # Limpio la pantalla y dibujo solo el mundo para que no aparezcan los textos
         self.clear()
         self.camera.use()
@@ -95,12 +95,13 @@ class Laboratory(View):
                 self.callback(Constants.SignalCodes.PAUSE_GAME, self.change_to_menu)
                 return True
 
-        self.keys_pressed.add(symbol)
+        self.keys_pressed.append(symbol)
         return None
 
     def on_key_release(self, symbol: int, modifiers: int) -> bool | None:
-        self.keys_pressed.discard(symbol)
-        self.player.update_state(-symbol)
+        if symbol in self.keys_pressed:
+            self.keys_pressed.remove(symbol)
+        self.player.process_state(-symbol)
 
     def on_draw(self) -> None:
         self.clear()
@@ -113,9 +114,8 @@ class Laboratory(View):
         player = self.player.sprite
         last_position = player.center_x, player.center_y
 
-        for key in self.keys_pressed:
-            # Actualica el estado del personaje según la tecla
-            self.player.update_state(key)
+        if self.keys_pressed:
+            self.player.process_state(self.keys_pressed[-1])
         self.player.update_position()
 
         player_moved = (player.center_x != last_position[0]) or (
