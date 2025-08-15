@@ -23,17 +23,14 @@ class Player(StateMachine):
     INITIAL_INDEX = AssetsConstants.INITIAL_INDEX
     SCALE = PlayerConfig.CHARACTER_SCALE
     SPEED = PlayerConfig.PLAYER_SPEED
-    TexturePaths: Dict[actionKeys, Dict[directionKeys, str]] = loadData(
-        "PlayerPaths.json"
-    )
 
     def __init__(self):
         super().__init__(Player.IDLE_FRONT)
         self.motions = [arcade.key.W, arcade.key.A, arcade.key.S, arcade.key.D]
         # Todos los path tienen llaves {} donde iría el numero de sprite
-        self.actual_animation_path: str = Player.TexturePaths["IDLE"]["FRONT"].replace(
-            "{}", str(Player.INITIAL_INDEX)
-        )
+        self.actual_animation_path: str = Player.ANIMATION_STATE_CONFIG["IDLE_FRONT"][
+            "path"
+        ].replace("{}", str(Player.INITIAL_INDEX))
         self.sprite: arcade.Sprite = arcade.Sprite(
             self.actual_animation_path, scale=Player.SCALE
         )  # objeto sprite del personaje
@@ -83,12 +80,10 @@ class Player(StateMachine):
         else:
             self.sprite.scale_x = abs(self.sprite.scale_x)
 
-        action = config["action"]
-        direction = config["direction"]
         frames = config["frames"]
         self.actual_animation_speed = config.get("animation_speed", 0.1)
 
-        template_path = Player.TexturePaths[action][direction]
+        template_path = Player.ANIMATION_STATE_CONFIG[self.actual_state_id]["path"]
         if template_path != self.actual_animation_path:
             self.actual_animation_path = template_path
             self.actual_animation_frames = frames
