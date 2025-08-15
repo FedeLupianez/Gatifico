@@ -26,6 +26,9 @@ class Main(arcade.Window):
         self.player = Player()
         self.ViewManager = ViewManager(self.player, self)
 
+    def on_resize(self, width: int, height: int):
+        self.ViewManager.update_camera_view()
+
 
 if __name__ == "__main__":
     window = Main()

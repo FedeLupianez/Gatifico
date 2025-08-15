@@ -74,3 +74,6 @@ class ViewManager:
             callback=self.callback,  # Le paso el callback del ViewManager para que pueda cerrar o cambiar a una escena
         )
         self.window.show_view(new_scene)
+
+    def update_camera_view(self):
+        self.current_scene.camera.match_window()
