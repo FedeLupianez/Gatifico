@@ -118,6 +118,7 @@ class Player(StateMachine):
         self.add_state(Player.RIGHT, self.genericStateHandler)
         self.add_state(Player.DOWN, self.genericStateHandler)
         self.add_state(Player.UP, self.genericStateHandler)
+
         antique_data = game_data["player"]
         self.sprite.center_x = antique_data["position"]["center_x"]
         self.sprite.center_y = antique_data["position"]["center_y"]

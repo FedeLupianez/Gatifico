@@ -8,6 +8,7 @@ from scenes.SplitTable import SplitTable
 from scenes.Chest import Chest
 from typing import Callable
 from scenes.Pause import Pause
+from scenes.Laboratory import Laboratory
 import gc
 
 
@@ -25,6 +26,7 @@ class ViewManager:
         self.scenes = {
             "MENU": Menu,
             "TEST": Test,
+            "Laboratory": Laboratory,
             "MIX_TABLE": MixTable,
             "SPLIT_TABLE": SplitTable,
             "CHEST": Chest,
