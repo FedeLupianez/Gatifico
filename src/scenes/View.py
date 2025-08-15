@@ -9,9 +9,11 @@ class View(arcade.View):
 
         if tilemap_url:
             self.tilemap = arcade.load_tilemap(tilemap_url)
+            self.tilemap.use_spatial_hash = True
 
         self.scene = self.CreateScene(
-            background_url=background_url, tilemap_url=tilemap_url
+            background_url=background_url,
+            tilemap_url=tilemap_url,
         )
         self.camera = Camera2D()
 
@@ -66,8 +68,8 @@ class View(arcade.View):
             sprite = arcade.SpriteSolidColor(
                 int(width), int(height), center_x=center_x, center_y=center_y
             )
-            sprite.name = obj.name
-            sprite.type = obj.type
-            sprite.props = obj.properties
+            sprite.__setattr__("name", obj.name)
+            sprite.__setattr__("type", obj.type)
+            sprite.__setattr__("props", obj.properties)
             temp_list.append(sprite)
         return temp_list

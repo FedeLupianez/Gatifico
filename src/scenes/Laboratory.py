@@ -19,6 +19,15 @@ class Laboratory(View):
         self.camera.zoom = Constants.Game.FOREST_ZOOM_CAMERA
         self.camera.position = self.player.sprite.position
 
+        # constantes para precalcular las operacions para actualizar la camara
+        self._screen_width = self.camera.viewport_width
+        self._screen_height = self.camera.viewport_height
+        self._half_w = (self._screen_width / self.camera.zoom) / 2
+        self._half_h = (self._screen_height / self.camera.zoom) / 2
+
+        self._map_width = self.tilemap.width * self.tilemap.tile_width
+        self._map_height = self.tilemap.height * self.tilemap.tile_height
+
         # Inicializacion de funciones
         self.setup_player()
         self.setup_layers()
@@ -32,7 +41,9 @@ class Laboratory(View):
             raise ValueError("TileMap no cargado")
         self.background_layer = self.scene["Fondo"]
         self.collisions_layer = self.scene["Colisiones"]
+        self.collisions_layer.enable_spatial_hashing()
         self.interact_layer = self.load_object_layers("Interactuables", self.tilemap)
+        self.interact_layer.enable_spatial_hashing()
         # Meto las listas de colisiones en otra lista para precomputar antes del
         # check de colisiones
         self.collisions_list = [self.collisions_layer, self.interact_layer]
@@ -48,7 +59,7 @@ class Laboratory(View):
 
     def get_screenshot(self):
         # Borro la lista de keys activas para que no se siga moviendo al volver a la escena
-        self.keys_pressed = set()
+        self.keys_pressed.clear()
         self.player.process_state(-arcade.key.W)
         # Limpio la pantalla y dibujo solo el mundo para que no aparezcan los textos
         self.clear()
@@ -124,8 +135,20 @@ class Laboratory(View):
         if player_moved:
             if self.check_collision():
                 self.player.sprite.center_x, self.player.sprite.center_y = last_position
+        self.update_camera(player_moved)
 
+    def update_camera(self, player_moved: bool) -> None:
         cam_lerp = 0.25 if (player_moved) else 0.06
+
+        target_x = self.player.sprite.center_x
+        target_y = self.player.sprite.center_y
+
+        target_x = max(self._half_w, min(target_x, self._map_width - self._half_w))
+        target_y = max(self._half_h, min(target_y, self._map_height - self._half_h))
+
         self.camera.position = arcade.math.lerp_2d(
-            self.camera.position, self.player.sprite.position, cam_lerp
+            self.camera.position, (target_x, target_y), cam_lerp
         )
+        # self.camera.position = arcade.math.lerp_2d(
+        #     self.camera.position, self.player.sprite.position, cam_lerp
+        # )
