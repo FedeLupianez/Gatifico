@@ -267,7 +267,6 @@ class Test(View):
             chestId=chestId,
             player=self.player,
             previusScene=self,
-            background_image=self.get_screenshot(),
         )
         self.window.show_view(new_scene)
 

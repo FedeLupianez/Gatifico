@@ -17,32 +17,35 @@ Ejecutar los siguientes comandos en la terminal de vscode :
 
 ## Personajes :
 - **Protagonista**
-  - *¿Quién es? :* Es un estudiante de 5to año que reprueba todo y no se preocupa por la escuela porque cree que todo lo que le enseñan en la escuela no le va a ser útil en la vida.
-  - *¿Qué quiere? :* Quiere aprobar todas las materias que se llevó a coloquio para que sus padres no lo reten echandole agua (porque es un gato).
+  - **Nombre :** Dr. Miauskis.
+  - **Historia : ** Antiguo científico brillante, fue exiliado de la sociedad por ser considerado un “gato loco”. Obsesionado con alcanzar la inmortalidad y decidido a demostrar que no estaba tan equivocado, se retira a un bosque solo, donde lleva a cabo extraños experimentos en busca de la combinación perfecta de elementos que lo convierta en un super-gatito.
+Para lograr esto tiene que explorar su entorno para obtener material y llevarlo a su taller, experimentar con estos y conseguir nuevas combinaciones en el camino a la creación de un super gatito.
+Sin un camino definido, el jugador podrá alcanzar el objetivo de diferentes formas. El “super-gatito” se consigue con la unificación de distintas habilidades como: visión nocturna, super-fuerza, velocidad, respiración bajo el agua, etc.
 
-## **Antagonistas :**
-  - Son todos los profesores de las materias que se llevó, estos son :
-    - Matemática
-    - Química
-    - Ed. Física
-    - Programación
-    - x
+- **Antagonistas :**
+El antagonista de esta historia es el “**Perro del Orden**” , quien detesta la “ciencia creativa-inalcanzable” del Dr. Miauskis. Quiere que todos sigan las reglas tradicionales de la química, sin mezclar leyendas con la realidad. Es un perro ordenado y con una apariencia prolija. 
+Mientras el científico no esta en casa, o sea, esta explorando, el Perro se mete a su laboratorio y cambia cosas de lugar, rompe notas, roba elementos, etc.
+La mecánica de que el antagonista rompa notas, se explica como que, al descubrir una nueva combinación el científico la desbloquea y guarda sus ingredientes en una nota, pero el perro rompería esta y por lo tanto borraría los ingredientes de la combinación y arruinaría el progreso del jugador. 
+Para evitar esto, el científico debe esconder bien sus cosas y proteger su laboratorio de los extraños.
 
-## Mundo de Gatitos :
-  - Todos los personajes dentro del juego son gatos o animales que estudian y tienen una vida normal, como los humanos, pero con las necesidades gatunas.
-  - **Ambientación:**
-    - Ocurre en el colegio del protagonista (Manuel de Falla Gatuno)
+## ¿Dónde ocurre? :
+   Ocurre en un mundo paralelo donde los gatos (y otros animales) ocupan una vida tal cual los humanos en nuestro universo, pero con muchas de sus características y necesidades animales. La sociedad está estructurada como la nuestra: hay escuelas, universidades, trabajos, tecnología, etc.
+   Los eventos del juego ocurren en un bosque/pradera, con una cabaña alejada de la sociedad. Sera un mapa abierto, el jugador podrá explorar a su ritmo y decisión el escenario.
 
-  - Va a haber un pasillo central donde puede recorrer libremente y entrar a las aulas para que le tomen el coloquio.
+## Reglas de este mundo :
+  - Los animales son antropomórficos: Caminan en dos patas, usan ropa, hablan y manejan herramientas.
+  - Conservan sus necesidades felinas: Duermen muchas horas, cazan, ronronean, y odian el agua.
+  - Instinto gatuno parte de su personalidad: Se distraen con luces, cajas, plumas, etc.
+  - Tienen 7 vidas: Al morir, un gato puede revivir hasta 7 veces.
+  - Hablan en español, los gatos pueden hablar y escribir en este idioma.
+  - La tecnología es similar a la humana, pero adaptada: laptops con teclas grandes para sus patitas, por ejemplo.
 
-## Conflicto :
-  - **¿Qué está en juego? :**
-    - El aprobar cada una de las materias, o sea niveles que se encuentran en las aulas del colegio.
+## Escenas :
+  - *Laboratorio*:
+El científico tiene su laboratorio donde desarrolla todos sus locos experimentos, esta es un área simple dentro del mapa del mundo, pero es donde se encuentran todas las máquinas que el científico utiliza durante la aventura. Como por ejemplo la máquina de mezclas, horno, picos que haya creado para recolectar minerales, etc. Y también donde estará la sección de cofres para que el personaje pueda guardar los elementos que haya recolectado durante el tiempo que no estuvo en casa.
 
-## Narrativa :
-  - Cada nivel es una reflexión, la cual le hace ver al protagonista ver la importancia de los temas que por tanto tiempo estuvo ignorando.
+  - *Mundo Libre :*
+Es el mundo donde vive el personaje principal, rodeado de distintos climas y paisajes, lo que afecta a los elementos que puede encontrar dentro de ellos y contribuyendo a las ganas de explorar todo el mapa para abastecerse de materiales.
 
-## A tener en cuenta :
-  - **Jefe Final :**
-    - Va a ser el profesor de _Programación_, donde tiene que programar su propia salida del colegio.
-    Si lo logra, llega a su casa y le muestra su libreta a sus padres.
+  - *Mesa de Trabajo:*
+Dentro del laboratorio de este curioso gato se encuentra su mesa de trabajo, donde puede realizar las acciones necesarias para conseguir nuevas combinaciones, como juntar elementos en la máquina de mezcla, separar mezclas que no salieron tan bien en la máquina de separación, etc.
