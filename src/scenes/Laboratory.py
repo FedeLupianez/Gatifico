@@ -57,18 +57,6 @@ class Laboratory(View):
     def change_to_menu(self):
         self.callback(Constants.SignalCodes.CHANGE_VIEW, "TEST")
 
-    def get_screenshot(self):
-        # Borro la lista de keys activas para que no se siga moviendo al volver a la escena
-        self.keys_pressed.clear()
-        self.player.process_state(-arcade.key.W)
-        # Limpio la pantalla y dibujo solo el mundo para que no aparezcan los textos
-        self.clear()
-        self.camera.use()
-        self.scene.draw(pixelated=True)
-        self.player_sprites.draw(pixelated=True)
-
-        return arcade.get_image()
-
     def open_chest(self, chest_id: str):
         new_scene = Chest(
             chestId=chest_id,
@@ -149,6 +137,3 @@ class Laboratory(View):
         self.camera.position = arcade.math.lerp_2d(
             self.camera.position, (target_x, target_y), cam_lerp
         )
-        # self.camera.position = arcade.math.lerp_2d(
-        #     self.camera.position, self.player.sprite.position, cam_lerp
-        # )

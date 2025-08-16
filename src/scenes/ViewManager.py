@@ -46,7 +46,7 @@ class ViewManager:
             # Cierra la ventana
             self.window.close()
         if signal == Constants.SignalCodes.PAUSE_GAME:
-            # Pausa el juego
+            # Pausa el juego pasandole un callback de la funcion para obtener una screenshot
             self.pause_game(self.current_scene.get_screenshot)
 
         print("Mensaje recibido : ", data)

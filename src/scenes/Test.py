@@ -258,20 +258,6 @@ class Test(View):
             )
         )
 
-    def get_screenshot(self):
-        # Borro la lista de keys activas para que no se siga moviendo al volver a la escena
-        self.keys_pressed.clear()
-        self.player.process_state(-arcade.key.W)
-        # Limpio la pantalla y dibujo solo el mundo para que no aparezcan los textos
-        self.clear()
-        self.camera.use()
-        self.scene.draw(pixelated=True)
-        self.player_sprites.draw(pixelated=True)
-        self.minerals_layer.draw(pixelated=True)
-
-        screenshot = arcade.get_image()
-        return screenshot
-
     def change_to_menu(self) -> None:
         self.store_player_data()
         self.callback(Constants.SignalCodes.CHANGE_VIEW, "MENU")

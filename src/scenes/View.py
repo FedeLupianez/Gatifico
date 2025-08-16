@@ -73,3 +73,6 @@ class View(arcade.View):
             sprite.__setattr__("props", obj.properties)
             temp_list.append(sprite)
         return temp_list
+
+    def get_screenshot(self):
+        return arcade.get_image()
