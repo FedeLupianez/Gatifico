@@ -16,7 +16,7 @@ class Laboratory(View):
         super().__init__(background_url=backgroundUrl, tilemap_url=tileMapUrl)
         self.player = player
         self.callback = callback
-        self.keys_pressed: list[int] = []
+        self.keys_pressed: set[int] = set()
         self.window.set_mouse_visible(False)
         self.camera.zoom = Constants.Game.FOREST_ZOOM_CAMERA
         self.camera.position = self.player.sprite.position
@@ -151,13 +151,13 @@ class Laboratory(View):
                 self.callback(Constants.SignalCodes.PAUSE_GAME, self.change_to_menu)
                 return True
 
-        self.keys_pressed.append(symbol)
+        self.keys_pressed.add(symbol)
         self.update_inventory_view()
         return None
 
     def on_key_release(self, symbol: int, modifiers: int) -> bool | None:
         if symbol in self.keys_pressed:
-            self.keys_pressed.remove(symbol)
+            self.keys_pressed.discard(symbol)
         self.player.process_state(-symbol)
 
     def world_draw(self):
@@ -183,7 +183,7 @@ class Laboratory(View):
         last_position = player.center_x, player.center_y
 
         if self.keys_pressed:
-            self.player.process_state(self.keys_pressed[-1])
+            self.player.process_state(next(iter(self.keys_pressed)))
         self.player.update_position()
 
         player_moved = (player.center_x != last_position[0]) or (

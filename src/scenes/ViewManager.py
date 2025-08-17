@@ -26,7 +26,7 @@ class ViewManager:
         self.scenes = {
             "MENU": Menu,
             "TEST": Test,
-            "Laboratory": Laboratory,
+            "LABORATORY": Laboratory,
             "MIX_TABLE": MixTable,
             "SPLIT_TABLE": SplitTable,
             "CHEST": Chest,

@@ -31,7 +31,12 @@ class Player(StateMachine):
         )  # objeto sprite del personaje
 
         self.speed = Player.SPEED
-        self.actual_animation_frames: int = 4  # cantidad de frames de la animacion
+        self.actual_animation_frames: int = Player.ANIMATION_STATE_CONFIG[
+            Player.IDLE_FRONT
+        ]["frames"]  # cantidad de frames de la animacion
+        self.actual_animation_speed: float = Player.ANIMATION_STATE_CONFIG[
+            Player.IDLE_FRONT
+        ]["animation_speed"]
         self.frames: list[arcade.Texture] = []  # lista de texturas actual
 
         self.animations: dict[str, list[arcade.Texture]] = {
@@ -58,7 +63,6 @@ class Player(StateMachine):
 
         self.texture_index = 0  # indice actual de la textura
         self.animation_timer: float = 0.0  # timer de la animacion
-        self.actual_animation_speed: float = 0.1
         # Diccionario para el inventario
         self.inventory: dict[str, int] = {}
 
