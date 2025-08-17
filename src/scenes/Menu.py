@@ -1,5 +1,6 @@
 import arcade
 from Constants import Game, SignalCodes
+import Constants
 from scenes.View import View
 import DataManager
 
@@ -49,10 +50,10 @@ class Menu(View):
             arcade.key.M: "MIX_TABLE",
             arcade.key.C: ("CHEST", "chest_1", {"rubi": 4, "stone": 2}),
             arcade.key.S: "SPLIT_TABLE",
-            arcade.key.L: "Laboratory",
+            arcade.key.L: "LABORATORY",
         }
         result = data_to_send.get(symbol, None)
-        if result:
+        if result and Constants.Game.DEBUG_MODE:
             self.callback(SignalCodes.CHANGE_VIEW, result)
 
     def on_mouse_press(

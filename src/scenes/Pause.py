@@ -5,10 +5,11 @@ from .utils import apply_filter
 
 
 class Pause(View):
-    def __init__(self, previus_scene: View, background_image, callback):
+    def __init__(self, previus_scene: View, callback):
         background_url = ":resources:Background/Texture/TX Plant.png"
         super().__init__(background_url, tilemap_url=None)
         # Le pongo filtro oscuro al fondo
+        background_image = previus_scene.get_screenshot()
         self.background_image = arcade.texture.Texture.create_empty(
             "pause_bg", size=(background_image.width, background_image.height)
         )

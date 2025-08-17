@@ -112,9 +112,6 @@ class Laboratory(View):
             return True
         return False
 
-    def change_to_menu(self):
-        self.callback(Constants.SignalCodes.CHANGE_VIEW, "TEST")
-
     def open_chest(self, chest_id: str):
         new_scene = Chest(
             chestId=chest_id,
@@ -148,7 +145,11 @@ class Laboratory(View):
             case arcade.key.E:
                 self.handle_interactions()
             case arcade.key.ESCAPE:
-                self.callback(Constants.SignalCodes.PAUSE_GAME, self.change_to_menu)
+                # Si el jugador actualmente se está moviendo lo paro
+                if self.keys_pressed:
+                    self.player.process_state(-next(iter(self.keys_pressed)))
+                    self.keys_pressed.clear()
+                self.callback(Constants.SignalCodes.PAUSE_GAME)
                 return True
 
         self.keys_pressed.add(symbol)
@@ -200,6 +201,7 @@ class Laboratory(View):
         target_x = self.player.sprite.center_x
         target_y = self.player.sprite.center_y
 
+        # Le pongo el limite del mundo a la cámara
         target_x = max(self._half_w, min(target_x, self._map_width - self._half_w))
         target_y = max(self._half_h, min(target_y, self._map_height - self._half_h))
 

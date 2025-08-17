@@ -47,7 +47,7 @@ class ViewManager:
             self.window.close()
         if signal == Constants.SignalCodes.PAUSE_GAME:
             # Pausa el juego pasandole un callback de la funcion para obtener una screenshot
-            self.pause_game(self.current_scene.get_screenshot)
+            self.pause_game()
 
         print("Mensaje recibido : ", data)
         if signal == Constants.SignalCodes.CHANGE_VIEW:
@@ -67,10 +67,9 @@ class ViewManager:
                 self.current_scene = self.scenes[data](self.callback, self.player)
             self.window.show_view(self.current_scene)  # Hago que la nueva escena se vea
 
-    def pause_game(self, screenshot_function: Callable) -> None:
+    def pause_game(self) -> None:
         new_scene = Pause(
             previus_scene=self.current_scene,
-            background_image=self.current_scene.get_screenshot(),
             callback=self.callback,  # Le paso el callback del ViewManager para que pueda cerrar o cambiar a una escena
         )
         self.window.show_view(new_scene)
