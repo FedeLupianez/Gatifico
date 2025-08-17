@@ -1,14 +1,19 @@
-# En este archivo vamos a poder manejar la lógica detras del guardado de datos.
-# Por ejemplo, para guardar el nivel  items que tiene el usuario si se sale del juego
-# o al cambiar de escena, aula, etc.
-
 import json
 import os
-from Types import ChestsData, PlayerData
+from typing import Dict, Literal, TypedDict
 from arcade import TextureCacheManager
 
 BASE_DIR = os.path.dirname(__file__)
 DATAFILES_DIR = BASE_DIR + "/resources/Data/"
+
+
+ChestsData = Dict[str, Dict[str, int]]
+
+
+class PlayerData(TypedDict):
+    Inventory: Dict[str, int]
+    Position: Dict[Literal["center_x", "center_y"], float]
+
 
 test_chests: ChestsData = {
     "chest_1": {"rubi": 4, "stone": 3},
@@ -26,17 +31,17 @@ def loadData(filename: str) -> dict:
 game_data: dict = loadData("GameData.json")
 
 
-def storeGameData(playerData: PlayerData, actualScene) -> None:
+def storeGameData(player_data: PlayerData, actualScene) -> None:
     global game_data
-    print(playerData)
+    print(player_data)
     with open(DATAFILES_DIR + "GameData.json", "w") as file:
         data = {
             "player": {
                 "position": {
-                    "center_x": playerData["Position"]["center_x"],
-                    "center_y": playerData["Position"]["center_y"],
+                    "center_x": player_data["Position"]["center_x"],
+                    "center_y": player_data["Position"]["center_y"],
                 },
-                "inventory": playerData["Inventory"],
+                "inventory": player_data["Inventory"],
             },
             "scene": actualScene,
             "chests": test_chests,

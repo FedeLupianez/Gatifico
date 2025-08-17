@@ -1,12 +1,7 @@
-from typing import Dict, Literal
 import arcade
 from Constants import AssetsConstants, PlayerConfig
 from StateMachine import StateMachine
 from DataManager import loadData, texture_manager, game_data
-
-
-actionKeys = Literal["IDLE", "RUN", "WALK"]
-directionKeys = Literal["FRONT", "SIDE", "BACK"]
 
 
 class Player(StateMachine):
@@ -174,3 +169,6 @@ class Player(StateMachine):
 
     def get_inventory(self):
         return self.inventory
+
+    def get_items(self) -> list[tuple[str, int]]:
+        return list(self.inventory.items())

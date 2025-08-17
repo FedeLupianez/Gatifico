@@ -16,6 +16,7 @@ class View(arcade.View):
             tilemap_url=tilemap_url,
         )
         self.camera = Camera2D()
+        self.gui_camera = Camera2D()
 
     def CreateScene(
         self, background_url: str | None, tilemap_url: str | None = None
@@ -73,6 +74,3 @@ class View(arcade.View):
             sprite.__setattr__("props", obj.properties)
             temp_list.append(sprite)
         return temp_list
-
-    def get_screenshot(self):
-        return arcade.get_image()

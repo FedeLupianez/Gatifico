@@ -70,7 +70,7 @@ class ViewManager:
     def pause_game(self, screenshot_function: Callable) -> None:
         new_scene = Pause(
             previus_scene=self.current_scene,
-            background_image=screenshot_function(),
+            background_image=self.current_scene.get_screenshot(),
             callback=self.callback,  # Le paso el callback del ViewManager para que pueda cerrar o cambiar a una escena
         )
         self.window.show_view(new_scene)

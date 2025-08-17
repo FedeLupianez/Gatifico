@@ -7,7 +7,6 @@ from characters.Player import Player
 from items.Mineral import Mineral
 import DataManager
 from items.Item import Item
-from Types import PlayerData
 from .utils import add_containers_to_list
 from .Chest import Chest
 
@@ -42,7 +41,6 @@ class Test(View):
         self.callback = callback
 
         self.player = player  # Defino el personaje
-        self.gui_camera = arcade.Camera2D()
 
         self.keys_pressed: set = set()
         # Flag para actualizaciones selectivas del inventario
@@ -71,7 +69,7 @@ class Test(View):
 
     def setup_spritelists(self):
         # Listas de Sprites
-        self.player_sprites: arcade.SpriteList = arcade.SpriteList()
+        self.player_sprite: arcade.SpriteList = arcade.SpriteList()
         self.inventory_sprites: arcade.SpriteList = arcade.SpriteList()
         self.items_inventory: arcade.SpriteList = arcade.SpriteList()
         self.inventory_texts: list[arcade.Text] = []
@@ -96,7 +94,7 @@ class Test(View):
         self.player.sprite.center_y = player_data["position"]["center_y"]
         self.player.inventory = player_data["inventory"]
         self.player.setup()
-        self.player_sprites.append(self.player.sprite)
+        self.player_sprite.append(self.player.sprite)
         # Camara para seguir al jugador :
         self.camera.zoom = Constants.Game.FOREST_ZOOM_CAMERA
         self.camera.position = self.player.sprite.position
@@ -190,25 +188,29 @@ class Test(View):
                 temp_list.append(mineral)
         return temp_list
 
-    def on_draw(self) -> bool | None:
-        # Función que se llama cada vez que se dibuja la escena
-        self.clear()  # limpia la pantalla
+    def word_draw(self):
         self.camera.use()
         self.scene.draw(pixelated=True)  # dibuja la escena
-        self.player_sprites.draw(pixelated=True)  # dibuja el personaje
+        self.player_sprite.draw(pixelated=True)  # dibuja el personaje
         self.minerals_layer.draw(pixelated=True)
-
         if self._view_hitboxes:
             self.player.sprite.draw_hit_box(color=arcade.color.RED, line_thickness=2)
             for sprite in self.interact_objects:
                 sprite.draw_hit_box(color=arcade.color.GREEN, line_thickness=2)
 
+    def gui_draw(self):
         self.gui_camera.use()
         if self.inventory_dirty:
             self.inventory_sprites.draw(pixelated=True)
             self.items_inventory.draw(pixelated=True)
             for text in self.inventory_texts:
                 text.draw()
+
+    def on_draw(self) -> bool | None:
+        # Función que se llama cada vez que se dibuja la escena
+        self.clear()  # limpia la pantalla
+        self.word_draw()
+        self.gui_draw()
 
     def update_inventory_display(self) -> None:
         """Esta función se asegura de actualizar el inventario solo cuando hay cambios en este"""
@@ -311,7 +313,7 @@ class Test(View):
         return False
 
     def store_player_data(self) -> None:
-        playerData: PlayerData = {
+        playerData: DataManager.PlayerData = {
             "Position": {
                 "center_x": self.player.sprite.center_x,
                 "center_y": self.player.sprite.center_y,
@@ -421,9 +423,14 @@ class Test(View):
         del self.inventory_dirty
         del self.interact_list
 
-        del self.player_sprites
+        del self.player_sprite
         del self.inventory_sprites
         del self.items_inventory
         del self.inventory_texts
 
         self._nearby_objects_cache.clear()
+
+    def get_screenshot(self):
+        self.clear()
+        self.word_draw()
+        return arcade.get_image()
