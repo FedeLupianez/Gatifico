@@ -1,6 +1,7 @@
 import arcade
 import Constants
 from characters.Player import Player
+from scenes.Load_screen import Load_screen
 from scenes.Menu import Menu
 from scenes.Test import Test
 from scenes.MixTable import MixTable

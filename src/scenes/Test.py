@@ -1,6 +1,8 @@
 import arcade
 from typing import Optional, Dict, Any, Callable, Literal
 
+from pyglet.text import load
+
 from scenes.View import View
 import Constants
 from characters.Player import Player
@@ -9,6 +11,7 @@ import DataManager
 from items.Item import Item
 from .utils import add_containers_to_list
 from .Chest import Chest
+from .Load_screen import Load_screen
 
 import random
 
@@ -23,12 +26,12 @@ def get_minerals_resources() -> Dict[str, Any]:
     return _minerals_cache
 
 
-def is_near_to_sprite(
-    point_1: tuple[float, float], point_2: tuple[float, float], tolerance: float = 16.0
-) -> bool:
-    dx = point_1[0] - point_2[0]
-    dy = point_1[1] - point_2[1]
-    return (dx * dx + dy * dy) <= (tolerance * tolerance)
+# def is_near_to_sprite(
+#     point_1: tuple[float, float], point_2: tuple[float, float], tolerance: float = 16.0
+# ) -> bool:
+#     dx = point_1[0] - point_2[0]
+#     dy = point_1[1] - point_2[1]
+#     return (dx * dx + dy * dy) <= (tolerance * tolerance)
 
 
 class Test(View):
@@ -58,6 +61,13 @@ class Test(View):
         }
         self._view_hitboxes: bool = False
         self._setup_scene()
+        self.is_loaded = False
+
+    def on_show_view(self) -> None:
+        if not (self.is_loaded):
+            load_screen = Load_screen(self)
+            self.window.show_view(load_screen)
+            self.is_loaded = True
 
     def _setup_scene(self) -> None:
         """Configuración principal"""

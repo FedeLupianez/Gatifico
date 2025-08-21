@@ -44,7 +44,8 @@ class View(arcade.View):
             scene.add_sprite_list("BACKGROUND")
             scene["BACKGROUND"].append(background_image)
             return scene
-        raise FileNotFoundError("Faltan argumentos")
+        else:
+            return arcade.Scene()
 
     def load_object_layers(
         self, layerName: str, tileMap: arcade.TileMap
