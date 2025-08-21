@@ -148,7 +148,9 @@ class Player(StateMachine):
             Player.DOWN: arcade.key.S,
             Player.UP: arcade.key.W,
         }
-        self.process_state(-(states_keys[self.actual_state_id]))
+        new_key = states_keys.get(self.actual_state_id, None)
+        if new_key:
+            self.process_state(new_key)
 
     def update_position(self):
         """Actualiza la posición del personaje segun la velocidad actual"""
@@ -171,8 +173,11 @@ class Player(StateMachine):
         self.animation_timer += deltaTime
         if self.animation_timer > self.actual_animation_speed:
             self.animation_timer = 0
-            self.texture_index = (self.texture_index + 1) % self.actual_animation_frames
-            self.sprite.texture = self.frames[self.texture_index]
+            new_index = (self.texture_index + 1) % self.actual_animation_frames
+            new_texture = self.frames[new_index]
+            if self.sprite.texture != new_texture:
+                self.texture_index = new_index
+                self.sprite.texture = new_texture
 
     def add_to_inventory(self, item: str, cant: int) -> None:
         if item not in self.inventory:

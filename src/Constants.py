@@ -18,7 +18,7 @@ class Game:
 class PlayerConfig:
     # Valores del personaje principal :
     CHARACTER_SCALE = 0.5
-    PLAYER_SPEED = 2
+    PLAYER_SPEED = 0.5
     PLAYER_INVENTORY_POSITION = (550, 100)
 
 

@@ -122,6 +122,8 @@ class Laboratory(View):
 
     def process_object_interaction(self, obj: arcade.Sprite) -> bool:
         obj_name: str = obj.name.lower()
+        self.keys_pressed.clear()
+        self.player.stop_state()
         if obj_name == "door":
             self.callback(Constants.SignalCodes.PAUSE_GAME)
             return True

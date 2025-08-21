@@ -48,7 +48,7 @@
       "action": "RUN",
       "direction": "SIDE",
       "frames": 4,
-      "speed_x": -5,
+      "speed_x": -3,
       "speed_y": 0,
       "flip_x": false
    },
@@ -58,7 +58,7 @@
       "action": "RUN",
       "direction": "SIDE",
       "frames": 4,
-      "speed_x": 5,
+      "speed_x": 3,
       "speed_y": 0,
       "flip_x": true
    },
@@ -69,7 +69,7 @@
       "direction": "BACK",
       "frames": 4,
       "speed_x": 0,
-      "speed_y": 5,
+      "speed_y": 3,
       "flip_x": false
    },
 
@@ -79,7 +79,7 @@
       "direction": "FRONT",
       "frames": 4,
       "speed_x": 0,
-      "speed_y": -5,
+      "speed_y": -3,
       "flip_x": false
    }
 }
