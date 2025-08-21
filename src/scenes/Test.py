@@ -1,5 +1,5 @@
 import arcade
-from typing import Optional, Dict, Any, Callable, Literal
+from typing import Optional, Dict, Any, Callable
 
 
 from scenes.View import View
@@ -8,7 +8,7 @@ from characters.Player import Player
 from items.Mineral import Mineral
 import DataManager
 from items.Item import Item
-from .utils import add_containers_to_list
+from .utils import add_containers_to_list, is_in_box
 from .Chest import Chest
 from .Load_screen import Load_screen
 
@@ -25,19 +25,13 @@ def get_minerals_resources() -> Dict[str, Any]:
     return _minerals_cache
 
 
-# def is_near_to_sprite(
-#     point_1: tuple[float, float], point_2: tuple[float, float], tolerance: float = 16.0
-# ) -> bool:
-#     dx = point_1[0] - point_2[0]
-#     dy = point_1[1] - point_2[1]
-#     return (dx * dx + dy * dy) <= (tolerance * tolerance)
-
-
 class Test(View):
+    PLAYER_AREA_SIZE_X = 200
+    PLAYER_AREA_SIZE_Y = 200
+
     def __init__(self, callback: Callable, player: Player) -> None:
-        backgroundUrl = None
         tileMapUrl = ":resources:Maps/Tests.tmx"
-        super().__init__(background_url=backgroundUrl, tilemap_url=tileMapUrl)
+        super().__init__(background_url=None, tilemap_url=tileMapUrl)
         self.window.set_mouse_visible(False)
 
         self.callback = callback
@@ -51,12 +45,19 @@ class Test(View):
         self.last_inventory_hash = None
         self.mineral_active: Mineral | None
         self.mineral_interact_time: float = 0.0
-        self._chache_update_timer: float = 0.0
-        self._nearby_objects_cache: dict[
-            Literal["interact", "mineral"], list[arcade.Sprite]
-        ] = {
+        self.load_area = (
+            self.player.sprite.center_y - self.PLAYER_AREA_SIZE_Y,  # Top
+            self.player.sprite.center_y + self.PLAYER_AREA_SIZE_Y,  # Bottom
+            self.player.sprite.center_x + self.PLAYER_AREA_SIZE_X,  # Right
+            self.player.sprite.center_x - self.PLAYER_AREA_SIZE_X,  # Left
+        )
+        self._nearby_objects_cache: dict = {
             "interact": [],
             "mineral": [],
+            "sprite_lists": {
+                "interact": arcade.SpriteList(use_spatial_hash=True),
+                "mineral": arcade.SpriteList(use_spatial_hash=True),
+            },
         }
         self._view_hitboxes: bool = False
         self._setup_scene()
@@ -201,7 +202,7 @@ class Test(View):
         self.camera.use()
         self.scene.draw(pixelated=True)  # dibuja la escena
         self.player_sprite.draw(pixelated=True)  # dibuja el personaje
-        self.minerals_layer.draw(pixelated=True)
+        self._nearby_objects_cache["sprite_lists"]["mineral"].draw(pixelated=True)
         if self._view_hitboxes:
             self.player.sprite.draw_hit_box(color=arcade.color.RED, line_thickness=2)
             for sprite in self.interact_objects:
@@ -257,17 +258,15 @@ class Test(View):
             self.inventory_texts.append(new_text)
 
     def update_nearby_cache(self):
-        self._nearby_objects_cache["interact"] = (
-            self.interact_objects.get_nearby_sprites_gpu(
-                self.player.sprite.position, (100, 100)
-            )
-        )
-
         self._nearby_objects_cache["mineral"] = (
             self.minerals_layer.get_nearby_sprites_gpu(
-                self.player.sprite.position, (100, 100)
+                self.player.sprite.position,
+                (Test.PLAYER_AREA_SIZE_X, Test.PLAYER_AREA_SIZE_Y),
             )
         )
+        self._nearby_objects_cache["sprite_lists"]["mineral"].clear()
+        for mineral in self._nearby_objects_cache["mineral"]:
+            self._nearby_objects_cache["sprite_lists"]["mineral"].append(mineral)
 
     def change_to_menu(self) -> None:
         self.store_player_data()
@@ -375,11 +374,23 @@ class Test(View):
             player.center_y != lastPosition[1]
         )
 
-        self._chache_update_timer += delta_time
         if player_moved:
-            if self._chache_update_timer > 0.5:
-                self._chache_update_timer = 0
+            if not is_in_box(
+                self.player.sprite.center_x,
+                self.player.sprite.center_y,
+                top=self.load_area[0],
+                bottom=self.load_area[1],
+                right=self.load_area[2],
+                left=self.load_area[3],
+            ):
                 self.update_nearby_cache()
+
+                self.load_area = (
+                    self.player.sprite.center_y - self.PLAYER_AREA_SIZE_Y,  # Top
+                    self.player.sprite.center_y + self.PLAYER_AREA_SIZE_Y,  # Bottom
+                    self.player.sprite.center_x + self.PLAYER_AREA_SIZE_X,  # Right
+                    self.player.sprite.center_x - self.PLAYER_AREA_SIZE_X,  # Left
+                )
 
             # Detección de colisiones
             if self.check_collision():
@@ -410,13 +421,15 @@ class Test(View):
         if physical_collisions:
             return True
 
-        for obj in self._nearby_objects_cache["interact"]:
-            if arcade.check_for_collision(player, obj):
-                return True
+        if arcade.check_for_collision_with_lists(
+            player,
+            [
+                self.interact_objects,
+                self._nearby_objects_cache["sprite_lists"]["mineral"],
+            ],
+        ):
+            return True
 
-        for obj in self._nearby_objects_cache["mineral"]:
-            if arcade.check_for_collision(player, obj):
-                return True
         return False
 
     def clean_up(self) -> None:
