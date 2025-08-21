@@ -11,9 +11,8 @@ from .utils import add_containers_to_list
 
 class Laboratory(View):
     def __init__(self, callback: Callable, player: Player):
-        backgroundUrl = None
-        tileMapUrl = ":resources:Maps/Laboratory.tmx"
-        super().__init__(background_url=backgroundUrl, tilemap_url=tileMapUrl)
+        tileMapUrl = ":resources:Maps/laboratorio/Laboratory.tmx"
+        super().__init__(background_url=None, tilemap_url=tileMapUrl)
         self.player = player
         self.callback = callback
         self.keys_pressed: set[int] = set()
@@ -47,6 +46,8 @@ class Laboratory(View):
 
     def setup_player(self):
         self.player.setup()
+        self.player.sprite.center_x = 321
+        self.player.sprite.center_y = 60
         self.player_sprites.append(self.player.sprite)
 
     def setup_layers(self):
@@ -179,6 +180,9 @@ class Laboratory(View):
         self.clear()
         self.world_draw()
         self.gui_draw()
+
+    def on_mouse_motion(self, x: int, y: int, dx: int, dy: int) -> bool | None:
+        print(x, y)
 
     def on_update(self, delta_time: float):
         self.player.update_animation(delta_time)
