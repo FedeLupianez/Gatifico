@@ -141,6 +141,15 @@ class Player(StateMachine):
         self.update_spritelist()
         del antique_data
 
+    def stop_state(self) -> None:
+        states_keys = {
+            Player.LEFT: arcade.key.A,
+            Player.RIGHT: arcade.key.D,
+            Player.DOWN: arcade.key.S,
+            Player.UP: arcade.key.W,
+        }
+        self.process_state(-(states_keys[self.actual_state_id]))
+
     def update_position(self):
         """Actualiza la posición del personaje segun la velocidad actual"""
         self.sprite.center_x += self.sprite.change_x

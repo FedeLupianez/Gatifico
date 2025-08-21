@@ -1,7 +1,6 @@
 import arcade
 from typing import Optional, Dict, Any, Callable, Literal
 
-from pyglet.text import load
 
 from scenes.View import View
 import Constants
@@ -335,6 +334,8 @@ class Test(View):
     def process_object_interaction(self, interact_obj: arcade.Sprite) -> bool:
         """Procesa la interaccion con un objeto"""
         object_name = interact_obj.name.lower()
+        self.keys_pressed.clear()
+        self.player.stop_state()
         if object_name == "door":
             # Cambio de escena y guardo los datos actuales
             self.store_player_data()
