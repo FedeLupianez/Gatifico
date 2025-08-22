@@ -6,6 +6,8 @@ from scenes.View import View
 from characters.Player import Player
 import Constants
 from scenes.Chest import Chest
+from scenes.MixTable import MixTable
+from scenes.SplitTable import SplitTable
 from .utils import add_containers_to_list
 
 
@@ -121,6 +123,15 @@ class Laboratory(View):
         )
         self.window.show_view(new_scene)
 
+    def open_table(self, table_id: str):
+        new_scene: View | None = None
+        if table_id == "split_table":
+            new_scene = SplitTable(background_scene=self, player=self.player)
+        elif table_id == "mix_table":
+            new_scene = MixTable(background_scene=self, player=self.player)
+        if new_scene:
+            self.window.show_view(new_scene)
+
     def process_object_interaction(self, obj: arcade.Sprite) -> bool:
         obj_name: str = obj.name.lower()
         self.keys_pressed.clear()
@@ -130,6 +141,9 @@ class Laboratory(View):
             return True
         if "chest" in obj_name:
             self.open_chest(chest_id=obj_name)
+            return True
+        if "table" in obj_name:
+            self.open_table(table_id=obj_name)
             return True
 
         return False
@@ -144,16 +158,16 @@ class Laboratory(View):
         return False
 
     def on_key_press(self, symbol: int, modifiers: int) -> bool | None:
-        match symbol:
-            case arcade.key.E:
-                self.handle_interactions()
-            case arcade.key.ESCAPE:
-                # Si el jugador actualmente se está moviendo lo paro
-                if self.keys_pressed:
-                    self.player.process_state(-next(iter(self.keys_pressed)))
-                    self.keys_pressed.clear()
-                self.callback(Constants.SignalCodes.PAUSE_GAME)
-                return True
+        if symbol == arcade.key.E:
+            self.handle_interactions()
+
+        if symbol == arcade.key.ESCAPE:
+            # Si el jugador actualmente se está moviendo lo paro
+            if self.keys_pressed:
+                self.keys_pressed.clear()
+                self.player.process_state(-next(iter(self.keys_pressed)))
+            self.callback(Constants.SignalCodes.PAUSE_GAME)
+            return True
 
         self.keys_pressed.add(symbol)
         self.update_inventory_view()
@@ -181,16 +195,13 @@ class Laboratory(View):
         self.world_draw()
         self.gui_draw()
 
-    def on_mouse_motion(self, x: int, y: int, dx: int, dy: int) -> bool | None:
-        print(x, y)
-
     def on_update(self, delta_time: float):
         self.player.update_animation(delta_time)
         player = self.player.sprite
         last_position = player.center_x, player.center_y
 
-        if self.keys_pressed:
-            self.player.process_state(next(iter(self.keys_pressed)))
+        for key in self.keys_pressed:
+            self.player.process_state(key)
         self.player.update_position()
 
         player_moved = (player.center_x != last_position[0]) or (

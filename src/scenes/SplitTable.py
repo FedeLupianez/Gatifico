@@ -1,37 +1,41 @@
-from typing import Callable
 import arcade.gui
 from items.Container import Container
 from items.Item import Item
 import arcade
 from scenes.View import View
 import DataManager
-from Constants import SignalCodes
 from characters.Player import Player
-from scenes.utils import add_containers_to_list, del_references_list
-
-RSC = DataManager.loadData("SplitTableResources.json")
-# Centros de los contenedores
-INPUT_POSITION: tuple[int, int] = (150, 300)
-RESULT_INIT_POSITION: tuple[int, int] = (300, 300)
-SPLIT_ITEMS_POSITIONS: list[tuple[int, int]] = [(150, 300), (300, 300), (400, 300)]
-CONTAINER_SIZE = 50
-
-ITEMS_INIT: tuple[int, int] = (100, 100)
+from scenes.utils import add_containers_to_list, del_references_list, apply_filter
+from Constants import Game, Filter
 
 
 class SplitTable(View):
     RESOURCE = DataManager.loadData("SplitTableResources.json")
+    # Centros de los contenedores
+    INPUT_POSITION: tuple[int, int] = (150, 300)
+    RESULT_INIT_POSITION: tuple[int, int] = (300, 300)
+    SPLIT_ITEMS_POSITIONS: list[tuple[int, int]] = [(150, 300), (300, 300), (400, 300)]
+    CONTAINER_SIZE = 50
+
+    ITEMS_INIT: tuple[int, int] = (100, 100)
 
     def __init__(
         self,
-        callback: Callable[[int, str], None],
+        background_scene: View,
         player: Player,
     ) -> None:
-        background_url = ":resources:Background/Texture/TX Plant.png"
-        super().__init__(background_url, None)
+        super().__init__(None, None)
         self.window.set_mouse_visible(True)
 
-        self.callback = callback
+        background_image = background_scene.get_screenshot()
+
+        self.background_image = arcade.texture.Texture.create_empty(
+            "table_bg", size=(background_image.width, background_image.height)
+        )
+
+        self.background_image.image = apply_filter(background_image, Filter.DARK)
+        self.background_scene = background_scene
+
         self.player = player
         self.items: dict = player.get_inventory() or {"rubi": 4, "stone": 3, "water": 5}
         self.next_item_id: int = 0
@@ -49,7 +53,6 @@ class SplitTable(View):
         self.setup_ui()
 
     def _setup_lists(self) -> None:
-        self.background_sprites = arcade.SpriteList()
         self.item_sprites = arcade.SpriteList()
         self.container_sprites = arcade.SpriteList()
         self.item_texts: list[arcade.Text] = []
@@ -58,18 +61,19 @@ class SplitTable(View):
 
     def _setup_containers(self) -> None:
         positions = [
-            (ITEMS_INIT[0] + 75 * i, ITEMS_INIT[1]) for i in range(len(self.items))
+            (SplitTable.ITEMS_INIT[0] + 75 * i, SplitTable.ITEMS_INIT[1])
+            for i in range(len(self.items))
         ]
         add_containers_to_list(
             point_list=positions,
             list_to_add=self.container_sprites,
-            container_size=CONTAINER_SIZE,
+            container_size=SplitTable.CONTAINER_SIZE,
         )
         self.input_container = Container(
-            width=CONTAINER_SIZE,
-            height=CONTAINER_SIZE,
-            center_x=INPUT_POSITION[0],
-            center_y=INPUT_POSITION[1],
+            width=SplitTable.CONTAINER_SIZE,
+            height=SplitTable.CONTAINER_SIZE,
+            center_x=SplitTable.INPUT_POSITION[0],
+            center_y=SplitTable.INPUT_POSITION[1],
         )
         self.input_container.id = len(self.container_sprites)
         self.container_sprites.append(self.input_container)
@@ -87,9 +91,11 @@ class SplitTable(View):
             self.item_sprites.append(new_item)
 
     def setup_ui(self) -> None:
-        input_x, input_y = INPUT_POSITION
+        input_x, input_y = SplitTable.INPUT_POSITION
         self.mixButton = arcade.gui.UIFlatButton(
-            x=input_x + CONTAINER_SIZE, y=input_y - CONTAINER_SIZE * 2, text="Separar"
+            x=input_x + SplitTable.CONTAINER_SIZE,
+            y=input_y - SplitTable.CONTAINER_SIZE * 2,
+            text="Separar",
         )
 
         @self.mixButton.event("on_click")
@@ -155,23 +161,23 @@ class SplitTable(View):
     def create_result_containers(self, containers_cant: int) -> None:
         # Creo los contenedores faltantes :
         if len(self.result_containers) < containers_cant:
-            print("creando contenedores de resulado")
-
             for _ in range(containers_cant):
                 last_container: Container | None = None
                 if len(self.result_containers) > 0:
                     last_container = self.result_containers[-1]
                 center_x = 0
                 if last_container:
-                    center_x = last_container.center_x + CONTAINER_SIZE + 25
+                    center_x = last_container.center_x + SplitTable.CONTAINER_SIZE + 25
                 else:
-                    center_x = INPUT_POSITION[0] + CONTAINER_SIZE + 25
+                    center_x = (
+                        SplitTable.INPUT_POSITION[0] + SplitTable.CONTAINER_SIZE + 25
+                    )
 
                 new_container = Container(
-                    width=CONTAINER_SIZE,
-                    height=CONTAINER_SIZE,
+                    width=SplitTable.CONTAINER_SIZE,
+                    height=SplitTable.CONTAINER_SIZE,
                     center_x=center_x,
-                    center_y=INPUT_POSITION[1],
+                    center_y=SplitTable.INPUT_POSITION[1],
                 )
                 new_container.id = len(self.container_sprites)
 
@@ -227,10 +233,27 @@ class SplitTable(View):
         self._sync_item_text()
         self._update_text_position()
 
+    def draw_background(self) -> None:
+        if self.background_image:
+            arcade.draw_texture_rect(
+                self.background_image,
+                rect=arcade.rect.Rect(
+                    left=0,
+                    right=0,
+                    top=0,
+                    bottom=0,
+                    width=Game.SCREEN_WIDTH,
+                    height=Game.SCREEN_HEIGHT,
+                    x=Game.SCREEN_CENTER_X,
+                    y=Game.SCREEN_CENTER_Y,
+                ),
+                pixelated=True,
+            )
+
     def on_draw(self) -> None:
         self.clear()
         self.camera.use()
-        self.background_sprites.draw(pixelated=True)
+        self.draw_background()
         self.container_sprites.draw(pixelated=True)
         self.item_sprites.draw(pixelated=True)
         for text in self.item_texts:
@@ -238,8 +261,10 @@ class SplitTable(View):
         self.UIManager.draw()
 
     def on_key_press(self, symbol: int, modifiers: int) -> bool | None:
-        if symbol == arcade.key.SPACE:
-            self.callback(SignalCodes.CHANGE_VIEW, "MENU")
+        if symbol == arcade.key.ESCAPE:
+            self.clean_up()
+            self.window.show_view(self.background_scene)
+            del self.background_scene
 
     def on_mouse_press(
         self, x: int, y: int, button: int, modifiers: int
@@ -307,8 +332,7 @@ class SplitTable(View):
             self.item_to_move.change_position(x, y)
 
     def clean_up(self) -> None:
-        del_references_list(self.background_sprites)
-        del self.background_sprites
+        del self.background_image
         del_references_list(self.container_sprites)
         del self.container_sprites
         del_references_list(self.item_sprites)
@@ -316,7 +340,5 @@ class SplitTable(View):
         del self.item_texts
         del self.item_to_move
         del self.is_mouse_active
-        del self.callback
-        del self.next_item_id
         del self.result_containers
         del self.UIManager

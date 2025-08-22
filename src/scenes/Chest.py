@@ -15,8 +15,7 @@ ITEMS_INIT = (550, 300)
 
 class Chest(View):
     def __init__(self, chestId: str, player: Player, previusScene: View) -> None:
-        backgroundUrl = ":resources:Background/Texture/TX Plant.png"
-        super().__init__(background_url=backgroundUrl, tilemap_url=None)
+        super().__init__(background_url=None, tilemap_url=None)
         background_image = previusScene.get_screenshot()
 
         # Le pongo filtro oscuro al fondo
