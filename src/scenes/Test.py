@@ -10,7 +10,6 @@ import DataManager
 from items.Item import Item
 from .utils import add_containers_to_list, is_in_box
 from .Chest import Chest
-from .Load_screen import Load_screen
 
 import random
 
@@ -262,7 +261,7 @@ class Test(View):
             self._nearby_objects_cache["sprite_lists"]["mineral"].append(mineral)
 
     def change_to_menu(self) -> None:
-        self.store_data()
+        DataManager.store_actual_data(self.player, "TEST")
         self.callback(Constants.SignalCodes.CHANGE_VIEW, "MENU")
 
     def open_chest(self, chest_id: str) -> None:
@@ -275,7 +274,7 @@ class Test(View):
 
     def on_key_press(self, symbol: int, modifiers: int) -> bool | None:
         if symbol == arcade.key.SPACE and Constants.Game.DEBUG_MODE:
-            self.store_data()
+            DataManager.store_actual_data(self.player, "TEST")
             self.callback(Constants.SignalCodes.CHANGE_VIEW, "MENU")
             return True
 
@@ -283,7 +282,7 @@ class Test(View):
             return self.handleInteractions()
 
         if symbol == arcade.key.ESCAPE:
-            self.store_data()
+            DataManager.store_actual_data(self.player, "TEST")
             self.keys_pressed.clear()
             self.player.stop_state()
             self.callback(Constants.SignalCodes.PAUSE_GAME, "Pause Game")
@@ -315,16 +314,6 @@ class Test(View):
 
         return False
 
-    def store_data(self) -> None:
-        playerData: DataManager.PlayerData = {
-            "Position": {
-                "center_x": self.player.sprite.center_x,
-                "center_y": self.player.sprite.center_y,
-            },
-            "Inventory": self.player.inventory,
-        }
-        DataManager.store_actual_data(playerData, "TEST")
-
     def process_object_interaction(self, interact_obj: arcade.Sprite) -> bool:
         """Procesa la interaccion con un objeto"""
         object_name = interact_obj.name.lower()
@@ -332,7 +321,7 @@ class Test(View):
         self.player.stop_state()
         if object_name == "door":
             # Cambio de escena y guardo los datos actuales
-            self.store_data()
+            DataManager.store_actual_data(self.player, "TEST")
             self.callback(Constants.SignalCodes.PAUSE_GAME, "Pause Game")
             return True
         if "chest" in object_name:
@@ -370,6 +359,13 @@ class Test(View):
             player.center_y != lastPosition[1]
         )
 
+        cam_lerp = 0.25 if (player_moved) else 0.06
+        self.camera.position = arcade.math.lerp_2d(
+            self.camera.position, self.player.sprite.position, cam_lerp
+        )
+
+        self.update_inventory_display()
+
         if player_moved:
             if not is_in_box(
                 self.player.sprite.center_x,
@@ -391,13 +387,6 @@ class Test(View):
             # Detección de colisiones
             if self.check_collision():
                 self.player.sprite.center_x, self.player.sprite.center_y = lastPosition
-
-        self.update_inventory_display()
-
-        cam_lerp = 0.25 if (player_moved) else 0.06
-        self.camera.position = arcade.math.lerp_2d(
-            self.camera.position, self.player.sprite.position, cam_lerp
-        )
 
         if self.mineral_interact_time > 0 and self.mineral_active:
             self.mineral_active.update_flash(delta_time)

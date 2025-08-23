@@ -26,25 +26,25 @@ game_data: dict = loadData("Actual_Scene_Data.json")
 chests_data: dict = loadData("Chests_Data.json")
 
 
-def store_actual_data(player_data: PlayerData, actualScene) -> None:
+def store_actual_data(player, actualScene) -> None:
     global game_data
-    print(player_data)
-    with open(DATAFILES_DIR + "Actual_Scene_Data.json", "w") as file:
-        data = {
-            "player": {
-                "position": {
-                    "center_x": player_data["Position"]["center_x"],
-                    "center_y": player_data["Position"]["center_y"],
-                },
-                "inventory": player_data["Inventory"],
+    data = {
+        "player": {
+            "position": {
+                "center_x": player.sprite.center_x,
+                "center_y": player.sprite.center_y,
             },
-            "scene": actualScene,
-        }
-        game_data = data
+            "inventory": player.inventory,
+        },
+        "scene": actualScene,
+    }
+    print(data)
+    game_data = data
+    with open(DATAFILES_DIR + "Actual_Scene_Data.json", "w") as file:
         json.dump(data, file)
 
 
-def store_chest_data(new_data: ChestsData, chest_id: int):
+def store_chest_data(new_data: ChestsData, chest_id: str):
     global chests_data
     chests_data[chest_id] = new_data
     with open(DATAFILES_DIR + "Chests_Data.json", "w") as file:

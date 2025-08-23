@@ -287,6 +287,7 @@ class Chest(View):
             if item:
                 new_player_inventory[item.name] = item.quantity
         self.player.inventory = new_player_inventory
+        print(self.player.inventory)
         DataManager.store_chest_data(self.content, self.id)
 
     def clean_up(self):

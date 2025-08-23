@@ -31,15 +31,8 @@ class Main(arcade.Window):
         self.ViewManager.update_camera_view()
 
     def on_close(self):
-        player_data: DataManager.PlayerData = {
-            "Position": {
-                "center_x": self.player.sprite.center_x,
-                "center_y": self.player.sprite.center_y,
-            },
-            "Inventory": self.player.inventory,
-        }
         DataManager.store_actual_data(
-            player_data, actualScene=self.ViewManager.current_scene_id
+            self.player, actualScene=self.ViewManager.current_scene_id
         )
         self.close()
 

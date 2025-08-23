@@ -200,12 +200,12 @@
     <property name="sprite_path" value="src/assets/Interact/Door.png"/>
    </properties>
   </object>
-  <object id="41" name="chest_3" type="chest" x="616.841" y="151.977" width="45" height="45"/>
-  <object id="42" name="chest_2" type="chest" x="553.5" y="152" width="45" height="45"/>
-  <object id="43" name="chest_1" type="chest" x="490" y="151.5" width="45" height="45"/>
-  <object id="44" name="chest_4" type="chest" x="489.75" y="86.5" width="45" height="45"/>
-  <object id="45" name="chest_5" type="chest" x="553.5" y="86.5" width="45" height="45"/>
-  <object id="46" name="chest_6" type="chest" x="617.75" y="86.5" width="45" height="45"/>
+  <object id="41" name="chest_4" type="chest" x="616.841" y="151.977" width="45" height="45"/>
+  <object id="42" name="chest_5" type="chest" x="553.5" y="152" width="45" height="45"/>
+  <object id="43" name="chest_6" type="chest" x="490" y="151.5" width="45" height="45"/>
+  <object id="44" name="chest_7" type="chest" x="489.75" y="86.5" width="45" height="45"/>
+  <object id="45" name="chest_8" type="chest" x="553.5" y="86.5" width="45" height="45"/>
+  <object id="46" name="chest_9" type="chest" x="617.75" y="86.5" width="45" height="45"/>
   <object id="47" name="cartel_1" type="cartel" x="993.5" y="64.75" width="30" height="38.25"/>
   <object id="48" name="cartel_2" type="cartel" x="1025.5" y="64.75" width="29.25" height="38.25"/>
   <object id="49" name="cartel_3" type="cartel" x="1057.63" y="64.875" width="29.25" height="38.25"/>
