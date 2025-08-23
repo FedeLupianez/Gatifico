@@ -60,12 +60,14 @@ class Menu(View):
         self, x: int, y: int, button: int, modifiers: int
     ) -> bool | None:
         if self.start_button.collides_with_point((x, y)):
-            print("Iniciando juego")
-            self.callback(SignalCodes.CHANGE_VIEW, DataManager.game_data["scene"])
+            self.callback(
+                SignalCodes.CHANGE_VIEW,
+                DataManager.game_data["scene"],
+                load_screen=True,
+            )
             return
 
         if self.exit_button.collides_with_point((x, y)):
-            print("Saliendo ...")
             self.callback(SignalCodes.CLOSE_WINDOW, "Close window")
 
     def clean_up(self):

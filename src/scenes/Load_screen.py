@@ -13,7 +13,7 @@ class Load_screen(View):
             font_size=24,
             color=arcade.color.WHITE,
         )
-        self.limit_time = 4
+        self.limit_time = time
         self.update_time = 1
         self.current_time = 0
 

@@ -61,13 +61,6 @@ class Test(View):
         }
         self._view_hitboxes: bool = False
         self._setup_scene()
-        self.is_loaded = False
-
-    def on_show_view(self) -> None:
-        if not (self.is_loaded):
-            load_screen = Load_screen(self)
-            self.window.show_view(load_screen)
-            self.is_loaded = True
 
     def _setup_scene(self) -> None:
         """Configuración principal"""
@@ -291,6 +284,8 @@ class Test(View):
 
         if symbol == arcade.key.ESCAPE:
             self.store_player_data()
+            self.keys_pressed.clear()
+            self.player.stop_state()
             self.callback(Constants.SignalCodes.PAUSE_GAME, "Pause Game")
             return True
 

@@ -8,6 +8,7 @@ import Constants
 from scenes.Chest import Chest
 from scenes.MixTable import MixTable
 from scenes.SplitTable import SplitTable
+import DataManager
 from .utils import add_containers_to_list
 
 
@@ -137,6 +138,7 @@ class Laboratory(View):
         self.keys_pressed.clear()
         self.player.stop_state()
         if obj_name == "door":
+            self.store_player_data()
             self.callback(Constants.SignalCodes.PAUSE_GAME)
             return True
         if "chest" in obj_name:
@@ -163,9 +165,9 @@ class Laboratory(View):
 
         if symbol == arcade.key.ESCAPE:
             # Si el jugador actualmente se está moviendo lo paro
-            if self.keys_pressed:
-                self.keys_pressed.clear()
-                self.player.process_state(-next(iter(self.keys_pressed)))
+            self.store_player_data()
+            self.keys_pressed.clear()
+            self.player.stop_state()
             self.callback(Constants.SignalCodes.PAUSE_GAME)
             return True
 
@@ -225,6 +227,16 @@ class Laboratory(View):
         self.camera.position = arcade.math.lerp_2d(
             self.camera.position, (target_x, target_y), cam_lerp
         )
+
+    def store_player_data(self) -> None:
+        playerData: DataManager.PlayerData = {
+            "Position": {
+                "center_x": self.player.sprite.center_x,
+                "center_y": self.player.sprite.center_y,
+            },
+            "Inventory": self.player.inventory,
+        }
+        DataManager.storeGameData(playerData, "LABORATORY")
 
     def clean_up(self) -> None:
         del self.player

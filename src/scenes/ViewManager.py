@@ -4,10 +4,6 @@ from characters.Player import Player
 from scenes.Load_screen import Load_screen
 from scenes.Menu import Menu
 from scenes.Test import Test
-from scenes.MixTable import MixTable
-from scenes.SplitTable import SplitTable
-from scenes.Chest import Chest
-from typing import Callable
 from scenes.Pause import Pause
 from scenes.Laboratory import Laboratory
 import gc
@@ -28,15 +24,12 @@ class ViewManager:
             "MENU": Menu,
             "TEST": Test,
             "LABORATORY": Laboratory,
-            "MIX_TABLE": MixTable,
-            "SPLIT_TABLE": SplitTable,
-            "CHEST": Chest,
         }
         self.window.show_view(
             self.current_scene
         )  # Pongo que se vea la view por default apenas se crea el manager, o sea el menu
 
-    def callback(self, signal: int, data=None):
+    def callback(self, signal: int, data=None, **kwargs):
         """
         Función de la clase padre para recibir las señales
         signal (int) : Codigo de señal
@@ -66,7 +59,14 @@ class ViewManager:
                 self.current_scene = self.scenes[data](self.callback)
             else:
                 self.current_scene = self.scenes[data](self.callback, self.player)
-            self.window.show_view(self.current_scene)  # Hago que la nueva escena se vea
+
+            if "load_screen" in kwargs:
+                load_scene = Load_screen(self.current_scene)
+                self.window.show_view(load_scene)
+            else:
+                self.window.show_view(
+                    self.current_scene
+                )  # Hago que la nueva escena se vea
 
     def pause_game(self) -> None:
         new_scene = Pause(
