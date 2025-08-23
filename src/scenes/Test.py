@@ -262,12 +262,12 @@ class Test(View):
             self._nearby_objects_cache["sprite_lists"]["mineral"].append(mineral)
 
     def change_to_menu(self) -> None:
-        self.store_player_data()
+        self.store_data()
         self.callback(Constants.SignalCodes.CHANGE_VIEW, "MENU")
 
-    def open_chest(self, chestId: str) -> None:
+    def open_chest(self, chest_id: str) -> None:
         new_scene = Chest(
-            chestId=chestId,
+            chest_id=chest_id,
             player=self.player,
             previusScene=self,
         )
@@ -275,7 +275,7 @@ class Test(View):
 
     def on_key_press(self, symbol: int, modifiers: int) -> bool | None:
         if symbol == arcade.key.SPACE and Constants.Game.DEBUG_MODE:
-            self.store_player_data()
+            self.store_data()
             self.callback(Constants.SignalCodes.CHANGE_VIEW, "MENU")
             return True
 
@@ -283,7 +283,7 @@ class Test(View):
             return self.handleInteractions()
 
         if symbol == arcade.key.ESCAPE:
-            self.store_player_data()
+            self.store_data()
             self.keys_pressed.clear()
             self.player.stop_state()
             self.callback(Constants.SignalCodes.PAUSE_GAME, "Pause Game")
@@ -315,7 +315,7 @@ class Test(View):
 
         return False
 
-    def store_player_data(self) -> None:
+    def store_data(self) -> None:
         playerData: DataManager.PlayerData = {
             "Position": {
                 "center_x": self.player.sprite.center_x,
@@ -323,7 +323,7 @@ class Test(View):
             },
             "Inventory": self.player.inventory,
         }
-        DataManager.storeGameData(playerData, "TEST")
+        DataManager.store_actual_data(playerData, "TEST")
 
     def process_object_interaction(self, interact_obj: arcade.Sprite) -> bool:
         """Procesa la interaccion con un objeto"""
@@ -332,15 +332,16 @@ class Test(View):
         self.player.stop_state()
         if object_name == "door":
             # Cambio de escena y guardo los datos actuales
-            self.store_player_data()
+            self.store_data()
             self.callback(Constants.SignalCodes.PAUSE_GAME, "Pause Game")
             return True
         if "chest" in object_name:
-            self.open_chest(chestId=object_name)
+            self.open_chest(chest_id=object_name)
             return True
         return False
 
     def process_mineral_interaction(self, mineral: Mineral) -> bool:
+        mineral.setup()
         mineral.state_machine.process_state(arcade.key.E)
         self.player.add_to_inventory(mineral.mineral, 1)
 

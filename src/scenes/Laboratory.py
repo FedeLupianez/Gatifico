@@ -19,7 +19,6 @@ class Laboratory(View):
         self.player = player
         self.callback = callback
         self.keys_pressed: set[int] = set()
-        self.window.set_mouse_visible(False)
         self.camera.zoom = Constants.Game.FOREST_ZOOM_CAMERA
         self.camera.position = self.player.sprite.position
 
@@ -40,6 +39,9 @@ class Laboratory(View):
         self.setup_inventory_containers()
         self.update_inventory_items(self.player.get_items())
         self.update_inventory_texts(self.player.get_items())
+
+    def on_show_view(self) -> None:
+        self.window.set_mouse_visible(True)
 
     def setup_spritelists(self):
         self.player_sprites = arcade.SpriteList()
@@ -118,7 +120,7 @@ class Laboratory(View):
 
     def open_chest(self, chest_id: str):
         new_scene = Chest(
-            chestId=chest_id,
+            chest_id=chest_id,
             player=self.player,
             previusScene=self,
         )
@@ -138,7 +140,7 @@ class Laboratory(View):
         self.keys_pressed.clear()
         self.player.stop_state()
         if obj_name == "door":
-            self.store_player_data()
+            self.store_data()
             self.callback(Constants.SignalCodes.PAUSE_GAME)
             return True
         if "chest" in obj_name:
@@ -165,7 +167,7 @@ class Laboratory(View):
 
         if symbol == arcade.key.ESCAPE:
             # Si el jugador actualmente se está moviendo lo paro
-            self.store_player_data()
+            self.store_data()
             self.keys_pressed.clear()
             self.player.stop_state()
             self.callback(Constants.SignalCodes.PAUSE_GAME)
@@ -228,7 +230,7 @@ class Laboratory(View):
             self.camera.position, (target_x, target_y), cam_lerp
         )
 
-    def store_player_data(self) -> None:
+    def store_data(self) -> None:
         playerData: DataManager.PlayerData = {
             "Position": {
                 "center_x": self.player.sprite.center_x,
@@ -236,7 +238,8 @@ class Laboratory(View):
             },
             "Inventory": self.player.inventory,
         }
-        DataManager.storeGameData(playerData, "LABORATORY")
+        DataManager.store_actual_data(playerData, "LABORATORY")
+        del playerData
 
     def clean_up(self) -> None:
         del self.player

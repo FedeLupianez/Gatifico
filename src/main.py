@@ -5,6 +5,7 @@ from scenes.ViewManager import ViewManager
 from characters.Player import Player
 import os
 import Constants
+import DataManager
 
 BASE_DIR = os.path.dirname(
     os.path.abspath(__file__)
@@ -28,6 +29,19 @@ class Main(arcade.Window):
 
     def on_resize(self, width: int, height: int):
         self.ViewManager.update_camera_view()
+
+    def on_close(self):
+        player_data: DataManager.PlayerData = {
+            "Position": {
+                "center_x": self.player.sprite.center_x,
+                "center_y": self.player.sprite.center_y,
+            },
+            "Inventory": self.player.inventory,
+        }
+        DataManager.store_actual_data(
+            player_data, actualScene=self.ViewManager.current_scene_id
+        )
+        self.close()
 
 
 if __name__ == "__main__":

@@ -61,7 +61,6 @@ class Mineral(arcade.Sprite):
         self.is_flashing: bool = False
         self.flash_timer: float = 0.0
         self.original_texture = self.texture
-        self.setup()
 
     def handle_state(self, key: int, actual_state: str, next_state: str) -> str:
         """

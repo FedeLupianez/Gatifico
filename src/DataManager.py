@@ -3,6 +3,7 @@ import os
 from typing import Dict, Literal, TypedDict
 from arcade import TextureCacheManager
 
+
 BASE_DIR = os.path.dirname(__file__)
 DATAFILES_DIR = BASE_DIR + "/resources/Data/"
 
@@ -15,26 +16,20 @@ class PlayerData(TypedDict):
     Position: Dict[Literal["center_x", "center_y"], float]
 
 
-test_chests: ChestsData = {
-    "chest_1": {"rubi": 4, "stone": 3},
-    "chest_2": {},
-    "chest_3": {},
-}
-
-
 # Función para leer un archivo json
 def loadData(filename: str) -> dict:
     with open(DATAFILES_DIR + filename, "r") as file:
         return json.load(file)
 
 
-game_data: dict = loadData("GameData.json")
+game_data: dict = loadData("Actual_Scene_Data.json")
+chests_data: dict = loadData("Chests_Data.json")
 
 
-def storeGameData(player_data: PlayerData, actualScene) -> None:
+def store_actual_data(player_data: PlayerData, actualScene) -> None:
     global game_data
     print(player_data)
-    with open(DATAFILES_DIR + "GameData.json", "w") as file:
+    with open(DATAFILES_DIR + "Actual_Scene_Data.json", "w") as file:
         data = {
             "player": {
                 "position": {
@@ -44,10 +39,16 @@ def storeGameData(player_data: PlayerData, actualScene) -> None:
                 "inventory": player_data["Inventory"],
             },
             "scene": actualScene,
-            "chests": test_chests,
         }
         game_data = data
         json.dump(data, file)
+
+
+def store_chest_data(new_data: ChestsData, chest_id: int):
+    global chests_data
+    chests_data[chest_id] = new_data
+    with open(DATAFILES_DIR + "Chests_Data.json", "w") as file:
+        json.dump(chests_data, file)
 
 
 texture_manager = TextureCacheManager()

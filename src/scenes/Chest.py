@@ -1,20 +1,20 @@
 import arcade
 import Constants
+import DataManager
 from characters.Player import Player
 from .View import View
 
 from items.Container import Container
 from items.Item import Item
 from .utils import add_containers_to_list, apply_filter
-
-from DataManager import test_chests
+from DataManager import chests_data
 
 CONTAINER_SIZE = 50
 ITEMS_INIT = (550, 300)
 
 
 class Chest(View):
-    def __init__(self, chestId: str, player: Player, previusScene: View) -> None:
+    def __init__(self, chest_id: str, player: Player, previusScene: View) -> None:
         super().__init__(background_url=None, tilemap_url=None)
         background_image = previusScene.get_screenshot()
 
@@ -32,11 +32,12 @@ class Chest(View):
         self.container_player_sprites = arcade.SpriteList()
         self.item_texts: list[arcade.Text] = []
         self.next_item_id: int = 0
-        self.actual_chest: str = chestId
+        self.id: str = chest_id
         self.player = player
         self.is_mouse_active = False
         self.item_to_move: Item | None = None
         self.previus_scene = previusScene
+        self.content = chests_data.get(self.id, {})
 
         self.player_container_index = 0
         self._setup()
@@ -115,9 +116,7 @@ class Chest(View):
         return text_sprite
 
     def _generate_item_sprites(self):
-        for index, (item, quantity) in enumerate(
-            test_chests[self.actual_chest].items()
-        ):
+        for index, (item, quantity) in enumerate(self.content.items()):
             container: Container = self.container_sprites[index]
             new_item = Item(name=item, quantity=quantity, scale=2)
             new_item.id = self.next_item_id
@@ -280,7 +279,7 @@ class Chest(View):
             if item:
                 new_chest_inventory[item.name] = item.quantity
 
-        test_chests[self.actual_chest] = new_chest_inventory
+        self.content = new_chest_inventory
         # Ahora voy a actualizar el inventario del jugador
         new_player_inventory = {}
         for container in self.container_player_sprites:
@@ -288,6 +287,7 @@ class Chest(View):
             if item:
                 new_player_inventory[item.name] = item.quantity
         self.player.inventory = new_player_inventory
+        DataManager.store_chest_data(self.content, self.id)
 
     def clean_up(self):
         # Limpio todas las listas de sprites
