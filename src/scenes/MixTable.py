@@ -13,11 +13,14 @@ Combinations: Dict[str, Dict[str, str]] = DataManager.loadData("CombinationsTest
 
 
 # centros de los contenedores
-ITEMS_POSITIONS: list[tuple[int, int]] = [(100, 100), (175, 100), (250, 100)]
-MIXING_ITEMS_POSITIONS: list[tuple[int, int]] = [(300, 300), (400, 300)]
+MIXING_Y = 450
+MIXING_ITEMS_POSITIONS: list[tuple[float, float]] = [
+    (565.0, MIXING_Y),
+    (640.0, MIXING_Y),
+]
 CONTAINER_SIZE = 50
 
-ITEMS_INIT: tuple[int, int] = (100, 100)
+ITEMS_INIT: tuple[int, int] = (400, 250)
 
 
 class MixTable(View):
@@ -43,6 +46,27 @@ class MixTable(View):
         self.item_sprites = arcade.SpriteList()
         self.container_sprites: arcade.SpriteList = arcade.SpriteList()
         self.item_texts: list[arcade.Text] = []
+
+        self.rect_table = arcade.rect.Rect(
+            left=Game.SCREEN_CENTER_X - (Game.SCREEN_CENTER_X / 3),
+            right=Game.SCREEN_CENTER_X + (Game.SCREEN_CENTER_X / 3),
+            top=Game.SCREEN_CENTER_Y + (Game.SCREEN_CENTER_Y / 2),
+            bottom=Game.SCREEN_CENTER_Y - (Game.SCREEN_CENTER_Y / 2),
+            width=Game.SCREEN_CENTER_X + (Game.SCREEN_CENTER_X / 3),
+            height=Game.SCREEN_CENTER_Y,
+            x=Game.SCREEN_CENTER_X,
+            y=Game.SCREEN_CENTER_Y,
+        )
+        self.background_rect = arcade.rect.Rect(
+            left=0,
+            right=0,
+            top=0,
+            bottom=0,
+            width=Game.SCREEN_WIDTH,
+            height=Game.SCREEN_HEIGHT,
+            x=Game.SCREEN_CENTER_X,
+            y=Game.SCREEN_CENTER_Y,
+        )
 
         # cosas de la UI
         self.UIManager = arcade.gui.UIManager(self.window)
@@ -84,6 +108,21 @@ class MixTable(View):
         positions = [
             (ITEMS_INIT[0] + 75 * i, ITEMS_INIT[1]) for i in range(len(self.items))
         ]
+        # Centrar los containers con la pantalla :
+        # centro de la pantalla
+        cant_containers = len(positions)
+        screen_center_x = self.window.width / 2
+        mid_container = int(cant_containers / 2)
+        positions[mid_container] = (screen_center_x, ITEMS_INIT[1])
+
+        for i in range(mid_container - 1, -1, -1):
+            last_pos = positions[i + 1]
+            positions[i] = (last_pos[0] - 75, ITEMS_INIT[1])
+
+        for i in range(mid_container + 1, cant_containers):
+            last_pos = positions[i - 1]
+            positions[i] = (last_pos[0] + 75, ITEMS_INIT[1])
+        print(positions)
 
         add_containers_to_list(
             point_list=positions,
@@ -211,18 +250,13 @@ class MixTable(View):
         if self.background_image:
             arcade.draw_texture_rect(
                 self.background_image,
-                rect=arcade.rect.Rect(
-                    left=0,
-                    right=0,
-                    top=0,
-                    bottom=0,
-                    width=Game.SCREEN_WIDTH,
-                    height=Game.SCREEN_HEIGHT,
-                    x=Game.SCREEN_CENTER_X,
-                    y=Game.SCREEN_CENTER_Y,
-                ),
+                rect=self.background_rect,
                 pixelated=True,
             )
+        arcade.draw_rect_filled(
+            rect=self.rect_table,
+            color=arcade.color.PALE_BROWN,
+        )
 
     def on_draw(self):
         self.clear()  # limpia la pantalla

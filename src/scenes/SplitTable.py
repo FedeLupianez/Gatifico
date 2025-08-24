@@ -12,12 +12,11 @@ from Constants import Game, Filter
 class SplitTable(View):
     RESOURCE = DataManager.loadData("SplitTableResources.json")
     # Centros de los contenedores
-    INPUT_POSITION: tuple[int, int] = (150, 300)
-    RESULT_INIT_POSITION: tuple[int, int] = (300, 300)
-    SPLIT_ITEMS_POSITIONS: list[tuple[int, int]] = [(150, 300), (300, 300), (400, 300)]
+    INPUT_POSITION: tuple[int, int] = (350, 450)
+    RESULT_INIT_POSITION: tuple[int, int] = (450, 450)
     CONTAINER_SIZE = 50
 
-    ITEMS_INIT: tuple[int, int] = (100, 100)
+    ITEMS_INIT: tuple[int, int] = (100, 250)
 
     def __init__(
         self,
@@ -35,6 +34,26 @@ class SplitTable(View):
 
         self.background_image.image = apply_filter(background_image, Filter.DARK)
         self.background_scene = background_scene
+        self.background_rect = arcade.rect.Rect(
+            left=0,
+            right=0,
+            top=0,
+            bottom=0,
+            width=Game.SCREEN_WIDTH,
+            height=Game.SCREEN_HEIGHT,
+            x=Game.SCREEN_CENTER_X,
+            y=Game.SCREEN_CENTER_Y,
+        )
+        self.rect_table = arcade.rect.Rect(
+            left=Game.SCREEN_CENTER_X - (Game.SCREEN_CENTER_X / 3),
+            right=Game.SCREEN_CENTER_X + (Game.SCREEN_CENTER_X / 3),
+            top=Game.SCREEN_CENTER_Y + (Game.SCREEN_CENTER_Y / 2),
+            bottom=Game.SCREEN_CENTER_Y - (Game.SCREEN_CENTER_Y / 2),
+            width=Game.SCREEN_CENTER_X + (Game.SCREEN_CENTER_X / 3),
+            height=Game.SCREEN_CENTER_Y,
+            x=Game.SCREEN_CENTER_X,
+            y=Game.SCREEN_CENTER_Y,
+        )
 
         self.player = player
         self.items: dict = player.get_inventory() or {"rubi": 4, "stone": 3, "water": 5}
@@ -64,6 +83,22 @@ class SplitTable(View):
             (SplitTable.ITEMS_INIT[0] + 75 * i, SplitTable.ITEMS_INIT[1])
             for i in range(len(self.items))
         ]
+
+        # Centrar los containers con la pantalla :
+        # centro de la pantalla
+        cant_containers = len(positions)
+        screen_center_x = self.window.width / 2
+        mid_container = int(cant_containers / 2)
+        positions[mid_container] = (screen_center_x, SplitTable.ITEMS_INIT[1])
+
+        for i in range(mid_container - 1, -1, -1):
+            last_pos = positions[i + 1]
+            positions[i] = (last_pos[0] - 75, SplitTable.ITEMS_INIT[1])
+
+        for i in range(mid_container + 1, cant_containers):
+            last_pos = positions[i - 1]
+            positions[i] = (last_pos[0] + 75, SplitTable.ITEMS_INIT[1])
+
         add_containers_to_list(
             point_list=positions,
             list_to_add=self.container_sprites,
@@ -237,18 +272,13 @@ class SplitTable(View):
         if self.background_image:
             arcade.draw_texture_rect(
                 self.background_image,
-                rect=arcade.rect.Rect(
-                    left=0,
-                    right=0,
-                    top=0,
-                    bottom=0,
-                    width=Game.SCREEN_WIDTH,
-                    height=Game.SCREEN_HEIGHT,
-                    x=Game.SCREEN_CENTER_X,
-                    y=Game.SCREEN_CENTER_Y,
-                ),
+                rect=self.background_rect,
                 pixelated=True,
             )
+        arcade.draw_rect_filled(
+            rect=self.rect_table,
+            color=arcade.color.PALE_BROWN,
+        )
 
     def on_draw(self) -> None:
         self.clear()
