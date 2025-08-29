@@ -92,10 +92,8 @@ class Test(View):
 
     def setup_player(self) -> None:
         player_data = DataManager.game_data["player"]
-        self.player.sprite.center_x = player_data["position"]["center_x"]
-        self.player.sprite.center_y = player_data["position"]["center_y"]
         self.player.inventory = player_data["inventory"]
-        self.player.setup()
+        self.player.setup((900, 700))
         self.player_sprite.append(self.player.sprite)
         # Camara para seguir al jugador :
         self.camera.zoom = Constants.Game.FOREST_ZOOM_CAMERA
@@ -322,7 +320,7 @@ class Test(View):
         if object_name == "door":
             # Cambio de escena y guardo los datos actuales
             DataManager.store_actual_data(self.player, "TEST")
-            self.callback(Constants.SignalCodes.PAUSE_GAME, "Pause Game")
+            self.callback(Constants.SignalCodes.CHANGE_VIEW, "LABORATORY")
             return True
         if "chest" in object_name:
             self.open_chest(chest_id=object_name)

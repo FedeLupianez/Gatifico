@@ -122,7 +122,6 @@ class MixTable(View):
         for i in range(mid_container + 1, cant_containers):
             last_pos = positions[i - 1]
             positions[i] = (last_pos[0] + 75, ITEMS_INIT[1])
-        print(positions)
 
         add_containers_to_list(
             point_list=positions,

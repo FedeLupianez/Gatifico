@@ -50,9 +50,7 @@ class Laboratory(View):
         self.inventory_texts: list[arcade.Text] = []
 
     def setup_player(self):
-        self.player.setup()
-        self.player.sprite.center_x = 321
-        self.player.sprite.center_y = 60
+        self.player.setup((330, 45))
         self.player_sprites.append(self.player.sprite)
 
     def setup_layers(self):
@@ -141,7 +139,7 @@ class Laboratory(View):
         self.player.stop_state()
         if obj_name == "door":
             DataManager.store_actual_data(self.player, "LABORATORY")
-            self.callback(Constants.SignalCodes.PAUSE_GAME)
+            self.callback(Constants.SignalCodes.CHANGE_VIEW, "TEST")
             return True
         if "chest" in obj_name:
             self.open_chest(chest_id=obj_name)
@@ -164,6 +162,7 @@ class Laboratory(View):
     def on_key_press(self, symbol: int, modifiers: int) -> bool | None:
         if symbol == arcade.key.E:
             self.handle_interactions()
+            return True
 
         if symbol == arcade.key.ESCAPE:
             # Si el jugador actualmente se está moviendo lo paro

@@ -48,8 +48,8 @@ class ViewManager:
             self.current_scene_id = data
 
             # Garbage collector, lo fuerzo para que limpie la memoria
-            gc.collect()
             self.current_scene.clean_up()
+            gc.collect()
             del self.current_scene  # Libero los recursos ocupados anteriormente
 
             if not data:
