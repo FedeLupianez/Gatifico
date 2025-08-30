@@ -123,7 +123,7 @@ class Player(StateMachine):
                 # Si no es ninguna de las otras teclas retorna el estado actual
                 return self.actual_state_id
 
-    def setup(self):
+    def setup(self, position: tuple[int, int] | None = None):
         """Función para configurar la maquina de estados del personaje"""
         self.add_state(Player.IDLE_FRONT, self.genericStateHandler)
         self.add_state(Player.IDLE_BACK, self.genericStateHandler)
@@ -135,8 +135,12 @@ class Player(StateMachine):
         self.add_state(Player.UP, self.genericStateHandler)
 
         antique_data = game_data["player"]
-        self.sprite.center_x = antique_data["position"]["center_x"]
-        self.sprite.center_y = antique_data["position"]["center_y"]
+        self.sprite.center_x = (
+            position[0] if position else antique_data["position"]["center_x"]
+        )
+        self.sprite.center_y = (
+            position[1] if position else antique_data["position"]["center_y"]
+        )
         self.inventory = antique_data["inventory"]
         self.update_spritelist()
         del antique_data

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="21" height="18" tilewidth="20" tileheight="20" infinite="0" nextlayerid="5" nextobjectid="9">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="21" height="18" tilewidth="20" tileheight="20" infinite="0" nextlayerid="5" nextobjectid="10">
  <tileset firstgid="1" source="lab_estatico.tsx"/>
  <tileset firstgid="5" source="casa_estatico_3.tsx"/>
  <tileset firstgid="9" source="casa_2_piso.tsx"/>
@@ -91,5 +91,6 @@
   <object id="6" name="mix_table" type="table" x="84.875" y="304.75" width="50.375" height="35.625"/>
   <object id="7" name="split_table" type="table" x="164.82" y="224.748" width="49.875" height="35.3523"/>
   <object id="8" name="tele" type="interact" x="302.909" y="122.909" width="54.1818" height="33.4545"/>
+  <object id="9" name="door" type="door" x="300" y="340" width="60" height="20"/>
  </objectgroup>
 </map>
