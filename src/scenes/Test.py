@@ -1,5 +1,5 @@
 import arcade
-from typing import Optional, Dict, Any, Callable
+from typing import Dict, Any, Callable
 
 
 from scenes.View import View, Object
@@ -13,20 +13,11 @@ from .Chest import Chest
 
 import random
 
-_minerals_cache: Optional[Dict[str, Any]] = None
-
-
-def get_minerals_resources() -> Dict[str, Any]:
-    """Hago un Lazy loading de los recursos de los minerales con caché"""
-    global _minerals_cache
-    if _minerals_cache is None:
-        _minerals_cache = DataManager.loadData("Minerals.json")
-    return _minerals_cache
-
 
 class Test(View):
     PLAYER_AREA_SIZE_X = 200
     PLAYER_AREA_SIZE_Y = 200
+    _minerals_resources: Dict[str, Any] = DataManager.loadData("Minerals.json")
 
     def __init__(self, callback: Callable, player: Player) -> None:
         tileMapUrl = ":resources:Maps/Tests.tmx"
@@ -44,19 +35,16 @@ class Test(View):
         self.last_inventory_hash = None
         self.mineral_active: Mineral | None
         self.mineral_interact_time: float = 0.0
+
         self.load_area = (
             self.player.sprite.center_y - self.PLAYER_AREA_SIZE_Y,  # Top
             self.player.sprite.center_y + self.PLAYER_AREA_SIZE_Y,  # Bottom
             self.player.sprite.center_x + self.PLAYER_AREA_SIZE_X,  # Right
             self.player.sprite.center_x - self.PLAYER_AREA_SIZE_X,  # Left
         )
-        self._nearby_objects_cache: dict = {
-            "interact": [],
-            "mineral": [],
-            "sprite_lists": {
-                "interact": arcade.SpriteList(use_spatial_hash=True, lazy=True),
-                "mineral": arcade.SpriteList(use_spatial_hash=True, lazy=True),
-            },
+        self._nearby_objects_cache: dict[str, arcade.SpriteList] = {
+            "interact": arcade.SpriteList(use_spatial_hash=True, lazy=True),
+            "mineral": arcade.SpriteList(use_spatial_hash=True, lazy=True),
         }
         self._view_hitboxes: bool = False
         self._setup_scene()
@@ -123,8 +111,7 @@ class Test(View):
             return arcade.SpriteList()
 
         temp_layer = self.tilemap.object_lists["Minerales"]
-        temp_list = arcade.SpriteList(use_spatial_hash=True)
-        mineral_resources = get_minerals_resources()
+        temp_list = arcade.SpriteList(use_spatial_hash=True, lazy=True)
 
         for obj in temp_layer:
             if not obj.name or not obj.properties:
@@ -134,7 +121,7 @@ class Test(View):
                 temp_list.append(mineral)
             except ValueError as e:
                 print(e)
-        temp_list.extend(self.load_random_minerals(mineral_resources))
+        temp_list.extend(self.load_random_minerals(Test._minerals_resources))
         return temp_list
 
     def create_mineral_from_object(self, obj: Any) -> Mineral:
@@ -155,7 +142,7 @@ class Test(View):
             size_type=size,
             center_x=center_x,
             center_y=center_y,
-            mineral_attr=get_minerals_resources(),
+            mineral_attr=Test._minerals_resources,
         )
 
     def load_random_minerals(self, mineral_resources: Dict) -> arcade.SpriteList:
@@ -168,7 +155,7 @@ class Test(View):
         collision_attemps = 0
 
         # en este loop creo 10 minerales con atributos random
-        for _ in range(10):
+        for _ in range(random.randint(1, 15)):
             mineral = Mineral(
                 mineral=random.choice(names),
                 size_type=random.choice(sizes),
@@ -180,23 +167,31 @@ class Test(View):
             while collision_attemps < max_collision_attemps:
                 collisions = mineral.collides_with_list(self.collision_objects)
                 if not collisions:
+                    temp_list.append(mineral)
                     break
-                mineral.center_x = random.randint(50, Constants.Game.SCREEN_WIDTH - 50)
-                mineral.center_y = random.randint(50, Constants.Game.SCREEN_HEIGHT - 50)
-                collision_attemps += 1
-            if collision_attemps < 10:
-                temp_list.append(mineral)
+                else:
+                    mineral.center_x = random.randint(
+                        0, Constants.Game.SCREEN_WIDTH - 50
+                    )
+                    mineral.center_y = random.randint(
+                        50, Constants.Game.SCREEN_HEIGHT - 50
+                    )
+                    collision_attemps += 1
         return temp_list
 
     def word_draw(self):
         self.camera.use()
         self.scene.draw(pixelated=True)  # dibuja la escena
         self.player_sprite.draw(pixelated=True)  # dibuja el personaje
-        self._nearby_objects_cache["sprite_lists"]["mineral"].draw(pixelated=True)
+        self._nearby_objects_cache["mineral"].draw(pixelated=True)
         if self._view_hitboxes:
+            self.interact_objects.draw_hit_boxes(
+                color=arcade.color.RED, line_thickness=2
+            )
+            self._nearby_objects_cache["mineral"].draw_hit_boxes(
+                color=arcade.color.RED, line_thickness=2
+            )
             self.player.sprite.draw_hit_box(color=arcade.color.RED, line_thickness=2)
-            for sprite in self.interact_objects:
-                sprite.draw_hit_box(color=arcade.color.GREEN, line_thickness=2)
 
     def gui_draw(self):
         self.gui_camera.use()
@@ -248,15 +243,20 @@ class Test(View):
             self.inventory_texts.append(new_text)
 
     def update_nearby_cache(self):
-        self._nearby_objects_cache["mineral"] = (
-            self.minerals_layer.get_nearby_sprites_gpu(
-                self.player.sprite.position,
-                (Test.PLAYER_AREA_SIZE_X, Test.PLAYER_AREA_SIZE_Y),
-            )
+        result = self.minerals_layer.get_nearby_sprites_gpu(
+            self.player.sprite.position,
+            (Test.PLAYER_AREA_SIZE_X, Test.PLAYER_AREA_SIZE_Y),
         )
-        self._nearby_objects_cache["sprite_lists"]["mineral"].clear()
-        for mineral in self._nearby_objects_cache["mineral"]:
-            self._nearby_objects_cache["sprite_lists"]["mineral"].append(mineral)
+        self._nearby_objects_cache["mineral"].clear()
+        for mineral in result:
+            self._nearby_objects_cache["mineral"].append(mineral)
+        result = self.interact_objects.get_nearby_sprites_gpu(
+            self.player.sprite.position,
+            (Test.PLAYER_AREA_SIZE_X, Test.PLAYER_AREA_SIZE_Y),
+        )
+        self._nearby_objects_cache["interact"].clear()
+        for interact in result:
+            self._nearby_objects_cache["interact"].append(interact)
 
     def change_to_menu(self) -> None:
         DataManager.store_actual_data(self.player, "TEST")
@@ -388,7 +388,7 @@ class Test(View):
                 )
 
             # Detección de colisiones
-            if self.check_collision():
+            if self.is_colliding():
                 self.player.sprite.center_x, self.player.sprite.center_y = lastPosition
 
         if self.mineral_interact_time > 0 and self.mineral_active:
@@ -398,7 +398,7 @@ class Test(View):
             if self.mineral_interact_time <= 0:
                 self.mineral_active = None
 
-    def check_collision(self) -> bool:
+    def is_colliding(self) -> bool:
         """Función para detectar si hay colisiones"""
         player = self.player.sprite
 
@@ -412,8 +412,8 @@ class Test(View):
         if arcade.check_for_collision_with_lists(
             player,
             [
-                self.interact_objects,
-                self._nearby_objects_cache["sprite_lists"]["mineral"],
+                self._nearby_objects_cache["mineral"],
+                self._nearby_objects_cache["interact"],
             ],
         ):
             return True

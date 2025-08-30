@@ -2,7 +2,7 @@ from typing import Callable
 import arcade
 from items.Container import Container
 from items.Item import Item
-from scenes.View import View
+from scenes.View import View, Object
 from characters.Player import Player
 import Constants
 from scenes.Chest import Chest
@@ -126,14 +126,16 @@ class Laboratory(View):
 
     def open_table(self, table_id: str):
         new_scene: View | None = None
-        if table_id == "split_table":
-            new_scene = SplitTable(background_scene=self, player=self.player)
-        elif table_id == "mix_table":
-            new_scene = MixTable(background_scene=self, player=self.player)
+        match table_id:
+            case "split_table":
+                new_scene = SplitTable(background_scene=self, player=self.player)
+            case "mix_table":
+                new_scene = MixTable(background_scene=self, player=self.player)
+
         if new_scene:
             self.window.show_view(new_scene)
 
-    def process_object_interaction(self, obj: arcade.Sprite) -> bool:
+    def process_object_interaction(self, obj: Object) -> bool:
         obj_name: str = obj.name.lower()
         self.keys_pressed.clear()
         self.player.stop_state()

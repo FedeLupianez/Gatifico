@@ -20,6 +20,7 @@ class Item(arcade.Sprite):
         self.name = name
         self.quantity = quantity
         self.container_id: int = -1
+        self.price = Item.MineralsResources[name]["item"].get("touches", 0)
 
     def change_position(self, center_x: float, center_y: float) -> None:
         self.center_x = center_x

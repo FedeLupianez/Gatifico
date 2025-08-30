@@ -3,6 +3,25 @@ import Constants
 from arcade.camera import Camera2D
 
 
+class Object(arcade.SpriteSolidColor):
+    def __init__(
+        self,
+        width: int,
+        height: int,
+        center_x: float,
+        center_y: float,
+        name,
+        obj_type,
+        props,
+    ) -> None:
+        super().__init__(
+            width=width, height=height, center_x=center_x, center_y=center_y
+        )
+        self.name = name
+        self.type = obj_type
+        self.props = props
+
+
 class View(arcade.View):
     def __init__(self, background_url: str | None, tilemap_url: str | None) -> None:
         super().__init__()
@@ -58,20 +77,24 @@ class View(arcade.View):
             # Por ejemplo, un rectángulo sólido con las dimensiones del objeto
             # Obtengo el ancho y alto del objeto :
             shape = obj.shape
-            if len(shape) != 4:
+            if len(shape) < 4:
                 raise ValueError(f"Forma del objeto {obj.name} invalida")
-            top_left, top_right, _, bottom_left = shape[:4]
+            assert isinstance(shape, list)
+            top_left, top_right, _, bottom_left = shape
 
             width: float = top_right[0] - top_left[0]
             height: float = top_left[1] - bottom_left[1]
             center_x: float = top_left[0] + (width) / 2
             center_y: float = bottom_left[1] + (height) / 2
 
-            sprite = arcade.SpriteSolidColor(
-                int(width), int(height), center_x=center_x, center_y=center_y
+            sprite = Object(
+                int(width),
+                int(height),
+                center_x=center_x,
+                center_y=center_y,
+                name=obj.name,
+                obj_type=obj.type,
+                props=obj.properties,
             )
-            sprite.__setattr__("name", obj.name)
-            sprite.__setattr__("type", obj.type)
-            sprite.__setattr__("props", obj.properties)
             temp_list.append(sprite)
         return temp_list
