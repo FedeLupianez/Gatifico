@@ -2,7 +2,7 @@ import arcade
 from typing import Optional, Dict, Any, Callable
 
 
-from scenes.View import View
+from scenes.View import View, Object
 import Constants
 from characters.Player import Player
 from items.Mineral import Mineral
@@ -54,8 +54,8 @@ class Test(View):
             "interact": [],
             "mineral": [],
             "sprite_lists": {
-                "interact": arcade.SpriteList(use_spatial_hash=True),
-                "mineral": arcade.SpriteList(use_spatial_hash=True),
+                "interact": arcade.SpriteList(use_spatial_hash=True, lazy=True),
+                "mineral": arcade.SpriteList(use_spatial_hash=True, lazy=True),
             },
         }
         self._view_hitboxes: bool = False
@@ -312,19 +312,24 @@ class Test(View):
 
         return False
 
-    def process_object_interaction(self, interact_obj: arcade.Sprite) -> bool:
+    def process_object_interaction(self, interact_obj: Object) -> bool:
         """Procesa la interaccion con un objeto"""
         object_name = interact_obj.name.lower()
         self.keys_pressed.clear()
         self.player.stop_state()
-        if object_name == "door":
-            # Cambio de escena y guardo los datos actuales
-            DataManager.store_actual_data(self.player, "TEST")
-            self.callback(Constants.SignalCodes.CHANGE_VIEW, "LABORATORY")
-            return True
         if "chest" in object_name:
             self.open_chest(chest_id=object_name)
             return True
+
+        match object_name:
+            case "door":
+                # Cambio de escena y guardo los datos actuales
+                DataManager.store_actual_data(self.player, "TEST")
+                self.callback(Constants.SignalCodes.CHANGE_VIEW, "LABORATORY")
+                return True
+            case "comerce":
+                # Cambiar a la escena de compra
+                return True
         return False
 
     def process_mineral_interaction(self, mineral: Mineral) -> bool:
