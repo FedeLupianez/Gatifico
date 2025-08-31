@@ -33,8 +33,6 @@ class Test(View):
         self.inventory_dirty = True
         # Hash para detectar cambios en el inventario
         self.last_inventory_hash = None
-        self.mineral_active: Mineral | None
-        self.mineral_interact_time: float = 0.0
 
         self.load_area = (
             self.player.sprite.center_y - self.PLAYER_AREA_SIZE_Y,  # Top
@@ -337,8 +335,6 @@ class Test(View):
 
         closest_obj = arcade.get_closest_sprite(self.player.sprite, self.minerals_layer)
         if closest_obj and closest_obj[1] <= 50:
-            self.mineral_interact_time = 0.6
-            self.mineral_active = closest_obj[0]
             return self.process_mineral_interaction(closest_obj[0])
         del closest_obj
 
@@ -422,12 +418,6 @@ class Test(View):
             if self.player_collides():
                 self.player.sprite.center_x, self.player.sprite.center_y = lastPosition
 
-        if self.mineral_interact_time > 0 and self.mineral_active:
-            self.mineral_active.update_flash(delta_time)
-            self.mineral_interact_time -= delta_time
-
-            if self.mineral_interact_time <= 0:
-                self.mineral_active = None
         if self._update_nearby:
             self.update_nearby_cache()
 

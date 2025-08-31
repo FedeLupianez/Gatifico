@@ -58,8 +58,6 @@ class Mineral(arcade.Sprite):
         self.actual_touches = 0
 
         self.should_removed: bool = False
-        self.is_flashing: bool = False
-        self.flash_timer: float = 0.0
         self.original_texture = self.texture
 
     def handle_state(self, key: int, actual_state: str, next_state: str) -> str:
@@ -76,7 +74,6 @@ class Mineral(arcade.Sprite):
         self.update_sprite(new_texture_path)
         if key != arcade.key.E:
             return self.state_machine.actual_state_id
-        self.start_flashing()
         self.actual_touches += 1
         if self.actual_touches >= self.touches:
             self.actual_touches = 0
@@ -114,31 +111,4 @@ class Mineral(arcade.Sprite):
         self.state_machine.process_state(key)
 
     def update_sprite(self, newPath: str):
-        if not self.is_flashing:
-            self.texture = texture_manager.load_or_get_texture(newPath)
-
-    def start_flashing(self):
-        """
-        Inicia el efecto de parpadeo
-        """
-        if self.is_flashing:
-            return
-
-        self.original_texture = self.texture
-        white_texture = create_white_texture(str(self.original_texture._file_path))
-        if white_texture:
-            self.white_texture = white_texture
-            self.is_flashing = True
-            self.texture = self.white_texture
-            self.flash_timer = 0.3
-
-    def update_flash(self, delta_time) -> None:
-        """
-        Actualiza el efecto de parpadeo
-        """
-        if self.is_flashing:
-            self.flash_timer -= delta_time
-            if self.flash_timer <= 0:
-                self.texture = self.original_texture
-                self.is_flashing = False
-                self.flash_timer = 0.0
+        self.texture = texture_manager.load_or_get_texture(newPath)
