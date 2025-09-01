@@ -29,6 +29,7 @@ class View(arcade.View):
         if tilemap_url:
             self.tilemap = arcade.load_tilemap(tilemap_url)
             self.tilemap.use_spatial_hash = True
+            self.tilemap._lazy = False
 
         self.scene = self.CreateScene(
             background_url=background_url,
@@ -55,8 +56,8 @@ class View(arcade.View):
             background_image.width = Constants.Game.SCREEN_WIDTH
             background_image.height = Constants.Game.SCREEN_HEIGHT
             # Centro la imagen
-            background_image.center_x = Constants.Game.SCREEN_WIDTH / 2
-            background_image.center_y = Constants.Game.SCREEN_HEIGHT / 2
+            background_image.center_x = Constants.Game.SCREEN_WIDTH * 0.5
+            background_image.center_y = Constants.Game.SCREEN_HEIGHT * 0.5
             # Creo una lista de sprites dentro de la scene donde se van
             # a almacenar todos los sprites que vayan en el fondo
             scene = arcade.Scene()
@@ -69,7 +70,7 @@ class View(arcade.View):
     def load_object_layers(
         self, layerName: str, tileMap: arcade.TileMap
     ) -> arcade.SpriteList:
-        temp_list = arcade.SpriteList(use_spatial_hash=True)
+        temp_list = arcade.SpriteList(use_spatial_hash=True, lazy=False)
         temp_layer = tileMap.object_lists[layerName]
 
         for obj in temp_layer:
@@ -84,8 +85,8 @@ class View(arcade.View):
 
             width: float = top_right[0] - top_left[0]
             height: float = top_left[1] - bottom_left[1]
-            center_x: float = top_left[0] + (width) / 2
-            center_y: float = bottom_left[1] + (height) / 2
+            center_x: float = top_left[0] + (width) * 0.5
+            center_y: float = bottom_left[1] + (height) * 0.5
 
             sprite = Object(
                 int(width),

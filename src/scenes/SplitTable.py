@@ -47,8 +47,8 @@ class SplitTable(View):
         self.rect_table = arcade.rect.Rect(
             left=Game.SCREEN_CENTER_X - (Game.SCREEN_CENTER_X / 3),
             right=Game.SCREEN_CENTER_X + (Game.SCREEN_CENTER_X / 3),
-            top=Game.SCREEN_CENTER_Y + (Game.SCREEN_CENTER_Y / 2),
-            bottom=Game.SCREEN_CENTER_Y - (Game.SCREEN_CENTER_Y / 2),
+            top=Game.SCREEN_CENTER_Y + (Game.SCREEN_CENTER_Y * 0.5),
+            bottom=Game.SCREEN_CENTER_Y - (Game.SCREEN_CENTER_Y * 0.5),
             width=Game.SCREEN_CENTER_X + (Game.SCREEN_CENTER_X / 3),
             height=Game.SCREEN_CENTER_Y,
             x=Game.SCREEN_CENTER_X,
@@ -87,8 +87,8 @@ class SplitTable(View):
         # Centrar los containers con la pantalla :
         # centro de la pantalla
         cant_containers = len(positions)
-        screen_center_x = self.window.width / 2
-        mid_container = int(cant_containers / 2)
+        screen_center_x = self.window.width * 0.5
+        mid_container = int(cant_containers * 0.5)
         positions[mid_container] = (screen_center_x, SplitTable.ITEMS_INIT[1])
 
         for i in range(mid_container - 1, -1, -1):
@@ -145,7 +145,7 @@ class SplitTable(View):
             text=content,
             font_size=fontSize,
             x=item.center_x,
-            y=item.center_y - ((item.height / 2) + 15),
+            y=item.center_y - ((item.height * 0.5) + 15),
             anchor_x="center",
             anchor_y="baseline",
         )
@@ -191,7 +191,7 @@ class SplitTable(View):
             if not (actual_text):
                 return
             actual_text.x = item.center_x
-            actual_text.y = item.center_y - (item.height / 2 + 15)
+            actual_text.y = item.center_y - (item.height * 0.5 + 15)
 
     def create_result_containers(self, containers_cant: int) -> None:
         # Creo los contenedores faltantes :

@@ -18,6 +18,8 @@ class Player(StateMachine):
     INITIAL_INDEX = AssetsConstants.INITIAL_INDEX
     SCALE = PlayerConfig.CHARACTER_SCALE
     SPEED = PlayerConfig.PLAYER_SPEED
+    HITBOX_WIDTH = 27
+    HITBOX_HEIGHT = 30
 
     def __init__(self):
         super().__init__(Player.IDLE_FRONT)
@@ -39,7 +41,12 @@ class Player(StateMachine):
         ]["animation_speed"]
         self.frames: list[arcade.Texture] = []  # lista de texturas actual
         # Acomodo la hitbox para que sea cuadrada
-        self.sprite.hit_box._points = (-20, -20), (20, -20), (20, 20), (-20, 20)
+        self.sprite.hit_box._points = (
+            (-self.HITBOX_WIDTH, -self.HITBOX_HEIGHT),
+            (self.HITBOX_WIDTH, -self.HITBOX_HEIGHT),
+            (self.HITBOX_WIDTH, self.HITBOX_HEIGHT),
+            (-self.HITBOX_WIDTH, self.HITBOX_HEIGHT),
+        )
         self.animations: dict[str, list[arcade.Texture]] = {
             Player.IDLE_SIDE_LEFT: [],
             Player.IDLE_SIDE_RIGHT: [],

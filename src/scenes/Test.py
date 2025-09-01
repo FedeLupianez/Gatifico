@@ -11,6 +11,7 @@ from .utils import add_containers_to_list
 from .Chest import Chest
 
 import random
+from functools import lru_cache
 
 
 class Test(View):
@@ -37,9 +38,11 @@ class Test(View):
         self._actual_area: dict[str, arcade.SpriteList] = {
             "collisions": arcade.SpriteList(use_spatial_hash=True, lazy=True),
             "interact": arcade.SpriteList(use_spatial_hash=True, lazy=True),
-            "mineral": arcade.SpriteList(),
-            "map": arcade.SpriteList(),
+            "mineral": arcade.SpriteList(use_spatial_hash=True, lazy=True),
+            "map": arcade.SpriteList(use_spatial_hash=True, lazy=True),
         }
+        self.last_area_key = None
+        self._cached_keys = []
         self._view_hitboxes: bool = False
         self._setup_scene()
 
@@ -94,8 +97,7 @@ class Test(View):
         # Capas de colisiones :
         self.collision_objects = self.load_object_layers("Colisiones", self.tilemap)
         self.interact_objects = self.load_object_layers("Interactuables", self.tilemap)
-        for sprite in self.interact_objects:
-            self.assign_sprite_area(sprite, "interact")
+        self.batch_assign_sprites(self.interact_objects, "interact")
         self.load_mineral_layer()
         # Variable para precomputar las listas de colisiones
         self._collision_list = arcade.SpriteList()
@@ -108,15 +110,24 @@ class Test(View):
             self.areas[key] = {"mineral": [], "interact": [], "map": []}
         self.areas[key][sprite_type].append(sprite)
 
+    def batch_assign_sprites(self, sprite_list: arcade.SpriteList, sprite_type: str):
+        for sprite in sprite_list:
+            self.assign_sprite_area(sprite, sprite_type)
+
     def assign_tilemap_chunks(self) -> None:
         for layer, sprite_list in self.tilemap.sprite_lists.items():
+            sprites_by_chunk = {}
             for sprite in sprite_list:
-                chunk_x = abs(sprite.center_x // self.CHUNK_SIZE_X)
-                chunk_y = abs(sprite.center_y // self.CHUNK_SIZE_Y)
-                key = (chunk_x, chunk_y)
+                key = self.get_chunk_key(sprite.center_x, sprite.center_y)
+
+                if key not in sprites_by_chunk:
+                    sprites_by_chunk[key] = []
+                sprites_by_chunk[key].append(sprite)
+
+            for key, sprite_list in sprites_by_chunk.items():
                 if key not in self.areas:
                     self.areas[key] = {"mineral": [], "interact": [], "map": []}
-                self.areas[key]["map"].append(sprite)
+                self.areas[key]["map"].extend(sprite_list)
 
     def load_mineral_layer(self) -> None:
         if "Minerales" not in self.tilemap.object_lists:
@@ -124,14 +135,16 @@ class Test(View):
 
         temp_layer = self.tilemap.object_lists["Minerales"]
 
+        minerals_to_create = []
         for obj in temp_layer:
-            if not obj.name or not obj.properties:
-                continue
-            try:
-                mineral = self.create_mineral_from_object(obj)
-                self.assign_sprite_area(mineral, "mineral")
-            except ValueError as e:
-                print(e)
+            if obj.name and obj.properties:
+                try:
+                    mineral = self.create_mineral_from_object(obj)
+                    minerals_to_create.append(mineral)
+                except ValueError as e:
+                    print(e)
+        for mineral in minerals_to_create:
+            self.assign_sprite_area(mineral, "mineral")
         self.load_random_minerals(Test._minerals_resources)
 
     def create_mineral_from_object(self, obj: Any) -> Mineral:
@@ -141,10 +154,8 @@ class Test(View):
             raise ValueError(f"Forma del objeto {obj.name} invalida")
 
         top_left, top_right, *_, bottom_left = shape[:4]
-        width: float = top_right[0] - top_left[0]
-        height: float = top_left[1] - bottom_left[1]
-        center_x: float = top_left[0] + (width) / 2
-        center_y: float = bottom_left[1] + (height) / 2
+        center_x: float = (top_left[0] + top_right[0]) * 0.5
+        center_y: float = (top_left[1] + bottom_left[1]) * 0.5
         size = str(obj.properties.get("size", "mid"))
 
         return Mineral(
@@ -161,15 +172,26 @@ class Test(View):
         # Pongo un límite en los intentos de crear
         # el mineral para evitar loops infinitos
         max_collision_attemps = 10
+        mineral_count = random.randint(1, 15)
+        random_data = [
+            {
+                "name": random.choice(names),
+                "size": random.choice(sizes),
+                "x": random.randint(50, Constants.Game.SCREEN_WIDTH - 50),
+                "y": random.randint(50, Constants.Game.SCREEN_HEIGHT - 50),
+            }
+            for _ in range(mineral_count)
+        ]
 
         # en este loop creo 10 minerales con atributos random
-        for _ in range(random.randint(1, 15)):
+        for i in range(mineral_count):
+            data = random_data[i]
             collision_attemps = 0
             mineral = Mineral(
-                mineral=random.choice(names),
-                size_type=random.choice(sizes),
-                center_x=random.randint(0, Constants.Game.SCREEN_WIDTH),
-                center_y=random.randint(0, Constants.Game.SCREEN_HEIGHT),
+                mineral=data["name"],
+                size_type=data["size"],
+                center_x=data["x"],
+                center_y=data["y"],
                 mineral_attr=mineral_resources,
             )
 
@@ -189,32 +211,46 @@ class Test(View):
 
     def world_draw(self):
         self.camera.use()
-        # self.scene.draw(pixelated=True)  # dibuja la escena
-        self._actual_area["map"].draw(pixelated=True)
+
+        if self._actual_area["map"]:
+            self._actual_area["map"].draw(pixelated=True)
+
         self.player_sprite.draw(pixelated=True)  # dibuja el personaje
-        self._actual_area["mineral"].draw(pixelated=True)
+
+        if self._actual_area["mineral"]:
+            self._actual_area["mineral"].draw(pixelated=True)
+
         if self._view_hitboxes:
-            self._actual_area["interact"].draw_hit_boxes(
-                color=arcade.color.BLUE, line_thickness=2
-            )
-            self._actual_area["mineral"].draw_hit_boxes(
-                color=arcade.color.GREEN, line_thickness=2
-            )
-            self.player.sprite.draw_hit_box(color=arcade.color.RED, line_thickness=2)
+            self.draw_hit_boxes()
+
+    def draw_hit_boxes(self):
+        self._actual_area["interact"].draw_hit_boxes(
+            color=arcade.color.BLUE, line_thickness=2
+        )
+        self._actual_area["mineral"].draw_hit_boxes(
+            color=arcade.color.GREEN, line_thickness=2
+        )
+        self.player.sprite.draw_hit_box(color=arcade.color.RED, line_thickness=2)
 
     def gui_draw(self):
+        if not self.inventory_dirty:
+            return
         self.gui_camera.use()
-        if self.inventory_dirty:
-            self.inventory_sprites.draw(pixelated=True)
-            self.items_inventory.draw(pixelated=True)
-            for text in self.inventory_texts:
-                text.draw()
+        self.inventory_sprites.draw(pixelated=True)
+        self.items_inventory.draw(pixelated=True)
+        for text in self.inventory_texts:
+            text.draw()
 
     def on_draw(self) -> bool | None:
         # Función que se llama cada vez que se dibuja la escena
         self.clear()  # limpia la pantalla
         self.world_draw()
         self.gui_draw()
+
+    def update_inventory(self):
+        self.update_inventory_sprites()
+        self.update_inventory_texts()
+        self.inventory_dirty = True
 
     def update_inventory_display(self) -> None:
         """Esta función se asegura de actualizar el inventario solo cuando hay cambios en este"""
@@ -224,8 +260,7 @@ class Test(View):
         if self.last_inventory_hash == current_hash:
             return
         self.last_inventory_hash = current_hash
-        self.update_inventory_sprites()
-        self.update_inventory_texts()
+        self.update_inventory()
 
     def update_inventory_sprites(self):
         self.items_inventory.clear()
@@ -245,30 +280,56 @@ class Test(View):
                 text=f"{item} x {quantity}",
                 font_size=9,
                 x=container.center_x,
-                y=container.center_y - (container.height / 2 + 10),
+                y=container.center_y - (container.height * 0.5 + 10),
                 anchor_x="center",
                 anchor_y="baseline",
             )
             self.inventory_texts.append(new_text)
 
+    @lru_cache(maxsize=100)
+    def get_chunk_key(self, x: float, y: float) -> tuple[int, int]:
+        return (int(abs(x // self.CHUNK_SIZE_X)), int(abs(y // self.CHUNK_SIZE_Y)))
+
+    def get_active_keys(self):
+        player_key = self.get_chunk_key(
+            self.player.sprite.center_x, self.player.sprite.center_y
+        )
+        if player_key == self.last_area_key:
+            return self._cached_keys
+        col, row = player_key
+        nearby_keys = [
+            (col + dx, row + dy)
+            for dx in range(-1, 2)
+            for dy in range(-1, 2)
+            if (col + dx, row + dy) in self.areas
+        ]
+        self.last_area_key = player_key
+        self._cached_keys = nearby_keys
+        return nearby_keys
+
     def update_actual_area(self):
         active_keys = self.get_active_keys()
+        if active_keys == self.last_area_key:
+            return
+
         # Limpio el area actual
         self._collision_list.clear()
-        self._actual_area["mineral"].clear()
-        self._actual_area["interact"].clear()
-        self._actual_area["map"].clear()
+        for area_list in self._actual_area.values():
+            area_list.clear()
 
+        minerals, interacts, map_tiles = [], [], []
         for key in active_keys:
-            for mineral in self.areas[key]["mineral"]:
-                self._actual_area["mineral"].append(mineral)
-            for mineral in self.areas[key]["interact"]:
-                self._actual_area["interact"].append(mineral)
-            for mineral in self.areas[key]["map"]:
-                self._actual_area["map"].append(mineral)
+            area = self.areas.get(key)
+            if area:
+                minerals.extend(area["mineral"])
+                interacts.extend(area["interact"])
+                map_tiles.extend(area["map"])
+        self._actual_area["mineral"].extend(minerals)
+        self._actual_area["interact"].extend(interacts)
+        self._actual_area["map"].extend(map_tiles)
 
-        self._collision_list.extend(self._actual_area["mineral"])
-        self._collision_list.extend(self.interact_objects)
+        self._collision_list.extend(minerals)
+        self._collision_list.extend(interacts)
         self._collision_list.extend(self.walls)
         self._collision_list.extend(self.background_objects)
 
@@ -304,17 +365,22 @@ class Test(View):
                 if Constants.Game.DEBUG_MODE:
                     self.callback(Constants.SignalCodes.CHANGE_VIEW, "MIX_TABLE")
                     return True
-            case arcade.key.T:
+            case arcade.key.H:
                 if Constants.Game.DEBUG_MODE:
-                    self._view_hitboxes = True
+                    self._view_hitboxes = not self._view_hitboxes
                     return True
+            case arcade.key.T:
+                arcade.print_timings()
+            case arcade.key.Z:
+                if Constants.Game.DEBUG_MODE:
+                    self.camera.zoom = 1
 
         self.keys_pressed.add(symbol)
         return None
 
     def handleInteractions(self):
         closest_obj = arcade.get_closest_sprite(
-            self.player.sprite, self.interact_objects
+            self.player.sprite, self._actual_area["interact"]
         )
         if closest_obj and closest_obj[1] <= 50:
             return self.process_object_interaction(closest_obj[0])
@@ -370,34 +436,26 @@ class Test(View):
         self.keys_pressed.discard(symbol)
         self.player.process_state(-symbol)
 
-    def get_active_keys(self):
-        col = int(self.player.sprite.center_x // self.CHUNK_SIZE_X)
-        row = int(self.player.sprite.center_y // self.CHUNK_SIZE_Y)
-        nearby_keys = []
-        for dx in range(-1, 2):
-            for dy in range(-1, 2):
-                key = (col + dx, row + dy)
-                if key in self.areas:
-                    nearby_keys.append(key)
-        return nearby_keys
-
     def on_update(self, delta_time: float) -> bool | None:
         self.player.update_animation(delta_time)
         player = self.player.sprite
-        lastPosition = player.center_x, player.center_y
+        lastPosition = (player.center_x, player.center_y)
 
-        for key in self.keys_pressed:
-            self.player.process_state(key)
+        if self.keys_pressed:
+            for key in self.keys_pressed:
+                self.player.process_state(key)
 
         self.player.update_position()
 
-        player_moved = (player.center_x != lastPosition[0]) or (
-            player.center_y != lastPosition[1]
+        player_moved = (
+            abs(player.center_x - lastPosition[0]) > 0
+            or abs(player.center_y - lastPosition[1]) > 0
         )
-        cam_lerp = 0.25 if (player_moved) else 0.06
-        self.camera.position = arcade.math.lerp_2d(
-            self.camera.position, self.player.sprite.position, cam_lerp
-        )
+        if player_moved or self.camera.position != self.player.sprite.position:
+            cam_lerp = 0.25 if (player_moved) else 0.06
+            self.camera.position = arcade.math.lerp_2d(
+                self.camera.position, self.player.sprite.position, cam_lerp
+            )
 
         self.update_inventory_display()
 
@@ -409,16 +467,23 @@ class Test(View):
 
     def player_collides(self) -> bool:
         """Función para detectar si hay colisiones"""
-        player = self.player.sprite
         if not self._collision_list:
             return False
 
-        if arcade.check_for_collision_with_list(player, self._collision_list):
-            return True
-
-        return False
+        return (
+            len(
+                arcade.check_for_collision_with_list(
+                    self.player.sprite, self._collision_list
+                )
+            )
+            > 0
+        )
 
     def clean_up(self) -> None:
+        for area_list in self._actual_area.values():
+            area_list.clear()
+
+        self.get_chunk_key.cache_clear()
         del self.player
         del self.camera
         del self.interact_objects

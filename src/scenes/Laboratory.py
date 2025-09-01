@@ -25,8 +25,8 @@ class Laboratory(View):
         # constantes para precalcular las operacions para actualizar la camara
         self._screen_width = self.camera.viewport_width
         self._screen_height = self.camera.viewport_height
-        self._half_w = (self._screen_width / self.camera.zoom) / 2
-        self._half_h = (self._screen_height / self.camera.zoom) / 2
+        self._half_w = (self._screen_width / self.camera.zoom) * 0.5
+        self._half_h = (self._screen_height / self.camera.zoom) * 0.5
 
         self._map_width = self.tilemap.width * self.tilemap.tile_width
         self._map_height = self.tilemap.height * self.tilemap.tile_height
@@ -96,7 +96,7 @@ class Laboratory(View):
                 text=f"{item} x {quantity}",
                 font_size=9,
                 x=container.center_x,
-                y=container.center_y - (container.height / 2 + 10),
+                y=container.center_y - (container.height * 0.5 + 10),
                 anchor_x="center",
                 anchor_y="baseline",
             )
