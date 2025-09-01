@@ -1,7 +1,6 @@
 import arcade
 from typing import Dict, Any, Callable
 
-
 from scenes.View import View, Object
 import Constants
 from characters.Player import Player
@@ -15,13 +14,14 @@ import random
 
 
 class Test(View):
-    CHUNK_SIZE = 100
     _minerals_resources: Dict[str, Any] = DataManager.loadData("Minerals.json")
 
     def __init__(self, callback: Callable, player: Player) -> None:
         tileMapUrl = ":resources:Maps/Tests.tmx"
         super().__init__(background_url=None, tilemap_url=tileMapUrl)
         self.window.set_mouse_visible(False)
+        self.CHUNK_SIZE_X = self.window.width // 7
+        self.CHUNK_SIZE_Y = self.window.height // 7
 
         self.callback = callback
 
@@ -34,10 +34,11 @@ class Test(View):
         self.last_inventory_hash = None
 
         self.areas: dict[tuple, dict[str, list]] = {}
-        self._nearby_objects_cache: dict[str, arcade.SpriteList] = {
+        self._actual_area: dict[str, arcade.SpriteList] = {
             "collisions": arcade.SpriteList(use_spatial_hash=True, lazy=True),
             "interact": arcade.SpriteList(use_spatial_hash=True, lazy=True),
             "mineral": arcade.SpriteList(),
+            "map": arcade.SpriteList(),
         }
         self._view_hitboxes: bool = False
         self._setup_scene()
@@ -49,6 +50,7 @@ class Test(View):
         self.setup_player()
         self.update_inventory_sprites()
         self.update_inventory_texts()
+        self.assign_tilemap_chunks()
 
     def setup_spritelists(self):
         # Listas de Sprites
@@ -99,13 +101,22 @@ class Test(View):
         self._collision_list = arcade.SpriteList()
 
     def assign_sprite_area(self, sprite: arcade.Sprite, sprite_type: str):
-        col = abs(sprite.center_x // self.CHUNK_SIZE)
-        row = abs(sprite.center_y // self.CHUNK_SIZE)
+        col = abs(sprite.center_x // self.CHUNK_SIZE_X)
+        row = abs(sprite.center_y // self.CHUNK_SIZE_Y)
         key = (col, row)
         if key not in self.areas:
-            self.areas[key] = {"mineral": [], "interact": []}
-
+            self.areas[key] = {"mineral": [], "interact": [], "map": []}
         self.areas[key][sprite_type].append(sprite)
+
+    def assign_tilemap_chunks(self) -> None:
+        for layer, sprite_list in self.tilemap.sprite_lists.items():
+            for sprite in sprite_list:
+                chunk_x = abs(sprite.center_x // self.CHUNK_SIZE_X)
+                chunk_y = abs(sprite.center_y // self.CHUNK_SIZE_Y)
+                key = (chunk_x, chunk_y)
+                if key not in self.areas:
+                    self.areas[key] = {"mineral": [], "interact": [], "map": []}
+                self.areas[key]["map"].append(sprite)
 
     def load_mineral_layer(self) -> None:
         if "Minerales" not in self.tilemap.object_lists:
@@ -178,14 +189,15 @@ class Test(View):
 
     def world_draw(self):
         self.camera.use()
-        self.scene.draw(pixelated=True)  # dibuja la escena
+        # self.scene.draw(pixelated=True)  # dibuja la escena
+        self._actual_area["map"].draw(pixelated=True)
         self.player_sprite.draw(pixelated=True)  # dibuja el personaje
-        self._nearby_objects_cache["mineral"].draw(pixelated=True)
+        self._actual_area["mineral"].draw(pixelated=True)
         if self._view_hitboxes:
-            self._nearby_objects_cache["interact"].draw_hit_boxes(
+            self._actual_area["interact"].draw_hit_boxes(
                 color=arcade.color.BLUE, line_thickness=2
             )
-            self._nearby_objects_cache["mineral"].draw_hit_boxes(
+            self._actual_area["mineral"].draw_hit_boxes(
                 color=arcade.color.GREEN, line_thickness=2
             )
             self.player.sprite.draw_hit_box(color=arcade.color.RED, line_thickness=2)
@@ -239,18 +251,23 @@ class Test(View):
             )
             self.inventory_texts.append(new_text)
 
-    def update_nearby_cache(self):
+    def update_actual_area(self):
         active_keys = self.get_active_keys()
+        # Limpio el area actual
         self._collision_list.clear()
-        self._nearby_objects_cache["mineral"].clear()
+        self._actual_area["mineral"].clear()
+        self._actual_area["interact"].clear()
+        self._actual_area["map"].clear()
+
         for key in active_keys:
             for mineral in self.areas[key]["mineral"]:
-                self._nearby_objects_cache["mineral"].append(mineral)
-        self._nearby_objects_cache["interact"].clear()
-        for key in active_keys:
+                self._actual_area["mineral"].append(mineral)
             for mineral in self.areas[key]["interact"]:
-                self._nearby_objects_cache["interact"].append(mineral)
-        self._collision_list.extend(self._nearby_objects_cache["mineral"])
+                self._actual_area["interact"].append(mineral)
+            for mineral in self.areas[key]["map"]:
+                self._actual_area["map"].append(mineral)
+
+        self._collision_list.extend(self._actual_area["mineral"])
         self._collision_list.extend(self.interact_objects)
         self._collision_list.extend(self.walls)
         self._collision_list.extend(self.background_objects)
@@ -303,7 +320,7 @@ class Test(View):
             return self.process_object_interaction(closest_obj[0])
 
         closest_obj = arcade.get_closest_sprite(
-            self.player.sprite, self._nearby_objects_cache["mineral"]
+            self.player.sprite, self._actual_area["mineral"]
         )
         if closest_obj and closest_obj[1] <= 50:
             return self.process_mineral_interaction(closest_obj[0])
@@ -342,8 +359,8 @@ class Test(View):
         if mineral.should_removed:
             self.areas[
                 (
-                    int(mineral.center_x // self.CHUNK_SIZE),
-                    int(mineral.center_y // self.CHUNK_SIZE),
+                    int(mineral.center_x // self.CHUNK_SIZE_X),
+                    int(mineral.center_y // self.CHUNK_SIZE_Y),
                 )
             ]["mineral"].remove(mineral)
             mineral.remove_from_sprite_lists()
@@ -354,8 +371,8 @@ class Test(View):
         self.player.process_state(-symbol)
 
     def get_active_keys(self):
-        col = int(self.player.sprite.center_x // self.CHUNK_SIZE)
-        row = int(self.player.sprite.center_y // self.CHUNK_SIZE)
+        col = int(self.player.sprite.center_x // self.CHUNK_SIZE_X)
+        row = int(self.player.sprite.center_y // self.CHUNK_SIZE_Y)
         nearby_keys = []
         for dx in range(-1, 2):
             for dy in range(-1, 2):
@@ -385,7 +402,7 @@ class Test(View):
         self.update_inventory_display()
 
         if player_moved:
-            self.update_nearby_cache()
+            self.update_actual_area()
             # Detección de colisiones
             if self.player_collides():
                 self.player.sprite.center_x, self.player.sprite.center_y = lastPosition
@@ -419,7 +436,7 @@ class Test(View):
         del self.items_inventory
         del self.inventory_texts
 
-        self._nearby_objects_cache.clear()
+        self._actual_area.clear()
 
     def get_screenshot(self):
         self.clear()
