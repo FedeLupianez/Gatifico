@@ -41,7 +41,10 @@ class Test(View):
             "collisions": arcade.SpriteList(use_spatial_hash=True, lazy=True),
             "interact": arcade.SpriteList(use_spatial_hash=True, lazy=True),
             "mineral": arcade.SpriteList(use_spatial_hash=True, lazy=True),
-            "map": arcade.SpriteList(use_spatial_hash=True, lazy=True),
+            "floor": arcade.SpriteList(use_spatial_hash=True, lazy=True),
+            "trees": arcade.SpriteList(use_spatial_hash=True, lazy=True),
+            "copes": arcade.SpriteList(use_spatial_hash=True, lazy=True),
+            "objects": arcade.SpriteList(use_spatial_hash=True, lazy=True),
         }
         self.last_area_key = None
         self._cached_keys = []
@@ -95,9 +98,9 @@ class Test(View):
             raise ValueError("TileMap no puede set None")
 
         # Capas de vista :
-        self.floor = self.scene["Piso"]
+        self.floor = self.scene["Floor"]
         self.walls = self.scene["Paredes"]
-        self.background_objects = self.scene["Objetos"]
+        self.background_objects = self.scene["Objects"]
         # Capas de colisiones :
         self.collision_objects = self.load_object_layers("Colisiones", self.tilemap)
         self.interact_objects = self.load_object_layers("Interactuables", self.tilemap)
@@ -111,7 +114,14 @@ class Test(View):
         row = abs(sprite.center_y // self.CHUNK_SIZE_Y)
         key = (col, row)
         if key not in self.areas:
-            self.areas[key] = {"mineral": [], "interact": [], "map": []}
+            self.areas[key] = {
+                "mineral": [],
+                "interact": [],
+                "floor": [],
+                "trees": [],
+                "copes": [],
+                "objects": [],
+            }
         self.areas[key][sprite_type].append(sprite)
 
     def batch_assign_sprites(self, sprite_list: arcade.SpriteList, sprite_type: str):
@@ -120,6 +130,8 @@ class Test(View):
 
     def assign_tilemap_chunks(self) -> None:
         for layer, sprite_list in self.tilemap.sprite_lists.items():
+            if layer == "Paredes" or layer == "Colisiones" or layer == "Interactuables":
+                continue
             sprites_by_chunk = {}
             for sprite in sprite_list:
                 key = self.get_chunk_key(sprite.center_x, sprite.center_y)
@@ -130,8 +142,15 @@ class Test(View):
 
             for key, sprite_list in sprites_by_chunk.items():
                 if key not in self.areas:
-                    self.areas[key] = {"mineral": [], "interact": [], "map": []}
-                self.areas[key]["map"].extend(sprite_list)
+                    self.areas[key] = {
+                        "mineral": [],
+                        "interact": [],
+                        "floor": [],
+                        "trees": [],
+                        "copes": [],
+                        "objects": [],
+                    }
+                self.areas[key][layer.lower()].extend(sprite_list)
 
     def load_mineral_layer(self) -> None:
         if "Minerales" not in self.tilemap.object_lists:
@@ -216,10 +235,19 @@ class Test(View):
     def world_draw(self):
         self.camera.use()
 
-        if self._actual_area["map"]:
-            self._actual_area["map"].draw(pixelated=True)
+        if self._actual_area["floor"]:
+            self._actual_area["floor"].draw(pixelated=True)
+
+        if self._actual_area["trees"]:
+            self._actual_area["trees"].draw(pixelated=True)
 
         self.characters_sprites.draw(pixelated=True)  # dibuja el personaje
+
+        if self._actual_area["copes"]:
+            self._actual_area["copes"].draw(pixelated=True)
+
+        if self._actual_area["objects"]:
+            self._actual_area["objects"].draw(pixelated=True)
 
         if self._actual_area["mineral"]:
             self._actual_area["mineral"].draw(pixelated=True)
@@ -321,19 +349,27 @@ class Test(View):
         for area_list in self._actual_area.values():
             area_list.clear()
 
-        minerals, interacts, map_tiles = [], [], []
+        minerals, interacts, map_tiles, trees, copes, objects = [], [], [], [], [], []
         for key in active_keys:
             area = self.areas.get(key)
             if area:
                 minerals.extend(area["mineral"])
                 interacts.extend(area["interact"])
-                map_tiles.extend(area["map"])
+                map_tiles.extend(area["floor"])
+                trees.extend(area["trees"])
+                copes.extend(area["copes"])
+                objects.extend(area["objects"])
+
         self._actual_area["mineral"].extend(minerals)
         self._actual_area["interact"].extend(interacts)
-        self._actual_area["map"].extend(map_tiles)
+        self._actual_area["floor"].extend(map_tiles)
+        self._actual_area["objects"].extend(objects)
+        self._actual_area["trees"].extend(trees)
+        self._actual_area["copes"].extend(copes)
 
         self._collision_list.extend(minerals)
         self._collision_list.extend(interacts)
+        self._collision_list.extend(trees)
         self._collision_list.extend(self.walls)
         self._collision_list.extend(self.background_objects)
 
@@ -456,8 +492,8 @@ class Test(View):
                 self.player.process_state(key)
 
         self.player.update_position()
-        for enemy in self.enemies:
-            enemy.update(delta_time)
+        # for enemy in self.enemies:
+        #     enemy.update(delta_time)
 
         player_moved = (
             abs(player.center_x - lastPosition[0]) > 0
