@@ -1,6 +1,7 @@
 import arcade
 from typing import Dict, Any, Callable
 
+from characters.Enemy import Enemy
 from scenes.View import View, Object
 import Constants
 from characters.Player import Player
@@ -21,12 +22,13 @@ class Test(View):
         tileMapUrl = ":resources:Maps/Tests.tmx"
         super().__init__(background_url=None, tilemap_url=tileMapUrl)
         self.window.set_mouse_visible(False)
-        self.CHUNK_SIZE_X = self.window.width // 7
-        self.CHUNK_SIZE_Y = self.window.height // 7
+        self.CHUNK_SIZE_X = self.camera.viewport.width // 7
+        self.CHUNK_SIZE_Y = self.camera.viewport.height // 7
 
         self.callback = callback
 
         self.player = player  # Defino el personaje
+        self.enemies: list[Enemy] = [Enemy(500, 500)]
 
         self.keys_pressed: set = set()
         # Flag para actualizaciones selectivas del inventario
@@ -54,10 +56,11 @@ class Test(View):
         self.update_inventory_sprites()
         self.update_inventory_texts()
         self.assign_tilemap_chunks()
+        self.update_actual_area()
 
     def setup_spritelists(self):
         # Listas de Sprites
-        self.player_sprite: arcade.SpriteList = arcade.SpriteList()
+        self.characters_sprites: arcade.SpriteList = arcade.SpriteList()
         self.inventory_sprites: arcade.SpriteList = arcade.SpriteList()
         self.items_inventory: arcade.SpriteList = arcade.SpriteList()
         self.inventory_texts: list[arcade.Text] = []
@@ -80,7 +83,8 @@ class Test(View):
         player_data = DataManager.game_data["player"]
         self.player.inventory = player_data["inventory"]
         self.player.setup((900, 600))
-        self.player_sprite.append(self.player.sprite)
+        self.characters_sprites.append(self.player.sprite)
+        self.characters_sprites.append(self.enemies[0])
         # Camara para seguir al jugador :
         self.camera.zoom = Constants.Game.FOREST_ZOOM_CAMERA
         self.camera.position = self.player.sprite.position
@@ -215,7 +219,7 @@ class Test(View):
         if self._actual_area["map"]:
             self._actual_area["map"].draw(pixelated=True)
 
-        self.player_sprite.draw(pixelated=True)  # dibuja el personaje
+        self.characters_sprites.draw(pixelated=True)  # dibuja el personaje
 
         if self._actual_area["mineral"]:
             self._actual_area["mineral"].draw(pixelated=True)
@@ -373,7 +377,13 @@ class Test(View):
                 arcade.print_timings()
             case arcade.key.Z:
                 if Constants.Game.DEBUG_MODE:
-                    self.camera.zoom = 1
+                    self.camera.zoom = (
+                        Constants.Game.FOREST_ZOOM_CAMERA
+                        if (self.camera.zoom == 1)
+                        else 1
+                    )
+            case arcade.key.X:
+                self.player.attack(self.enemies[0])
 
         self.keys_pressed.add(symbol)
         return None
@@ -446,6 +456,8 @@ class Test(View):
                 self.player.process_state(key)
 
         self.player.update_position()
+        for enemy in self.enemies:
+            enemy.update(delta_time)
 
         player_moved = (
             abs(player.center_x - lastPosition[0]) > 0
@@ -496,7 +508,7 @@ class Test(View):
         del self.keys_pressed
         del self.inventory_dirty
 
-        del self.player_sprite
+        del self.characters_sprites
         del self.inventory_sprites
         del self.items_inventory
         del self.inventory_texts

@@ -1,6 +1,5 @@
 
-# A Coloquio Juego
-Este es un juego que trata de un gatito estudiante el cual no 
+# Gatifico
 
 ## ¿Cómo activar y desactivar el entorno?
 Primero hay que crear el entorno lo que se hace con este comando :

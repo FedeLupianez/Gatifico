@@ -2,6 +2,7 @@ import arcade
 from Constants import AssetsConstants, PlayerConfig
 from StateMachine import StateMachine
 from DataManager import loadData, texture_manager, game_data
+from characters.Enemy import Enemy
 
 
 class Player(StateMachine):
@@ -73,6 +74,7 @@ class Player(StateMachine):
         self.animation_timer: float = 0.0  # timer de la animacion
         # Diccionario para el inventario
         self.inventory: dict[str, int] = {}
+        self.coins: int = 0
 
     def genericStateHandler(self, event: int):
         """Función genérica para todos los estados del personaje, ya que casi todos hacen lo mismo"""
@@ -202,3 +204,12 @@ class Player(StateMachine):
 
     def get_items(self) -> list[tuple[str, int]]:
         return list(self.inventory.items())
+
+    def pay(self, price: int):
+        if (self.coins - price) < 0:
+            raise ValueError("No hay suficiente dinero")
+        self.coins -= price
+
+    def attack(self, enemy: Enemy):
+        print(f"atacando a {enemy}")
+        enemy.hurt()
