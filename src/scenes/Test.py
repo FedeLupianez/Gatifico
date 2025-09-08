@@ -358,10 +358,15 @@ class Test(View):
             self.player.sprite.center_x, self.player.sprite.center_y
         )
         nearby_chunks = self.chunk_manager.get_nearby_chunks(center_key=player_key)
+        self._collision_list.clear()
         for key in nearby_chunks:
             chunk = self.chunk_manager.get_chunk(key)
             for list_name, sprite_list in active_chunk_lists.items():
-                sprite_list.extend(chunk.sprites.get(list_name, []))
+                sprites = chunk.sprites.get(list_name, [])
+                sprite_list.extend(sprites)
+                if list_name == "floor":
+                    continue
+                self._collision_list.extend(sprites)
         self._actual_area = active_chunk_lists
 
     def change_to_menu(self) -> None:
