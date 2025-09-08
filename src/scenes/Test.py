@@ -10,9 +10,55 @@ import DataManager
 from items.Item import Item
 from .utils import add_containers_to_list
 from .Chest import Chest
+from dataclasses import dataclass, field
+from time import time
 
 import random
 from functools import lru_cache
+
+
+@dataclass
+class Chunk:
+    sprites: Dict[str, list] = field(
+        default_factory=lambda: {
+            "mineral": [],
+            "interact": [],
+            "floor": [],
+            "trees": [],
+            "copes": [],
+            "objects": [],
+        }
+    )
+    is_loaded: bool = False
+    last_accessed: float = field(default_factory=time)
+
+
+class Chunk_Manager:
+    def __init__(self, chunk_size_x: int, chunk_size_y: int) -> None:
+        self.chunk_size_x = chunk_size_x
+        self.chunk_size_y = chunk_size_y
+        self.chunks: Dict[tuple[int, int], Chunk] = {}
+        self.max_loaded_chunks = 15
+
+    @lru_cache(maxsize=100)
+    def get_chunk_key(self, x: float, y: float) -> tuple[int, int]:
+        return (int(x // self.chunk_size_x), int(y // self.chunk_size_y))
+
+    def get_chunk(self, key: tuple[int, int]) -> Chunk:
+        if key not in self.chunks:
+            self.chunks[key] = Chunk()
+        chunk = self.chunks[key]
+        chunk.last_accessed = time()
+        return chunk
+
+    def get_nearby_chunks(self, center_key: tuple[int, int]):
+        col, row = center_key
+        return [
+            (col + dx, row + dy)
+            for dx in range(-1, 2)
+            for dy in range(-1, 2)
+            if (col + dx, row + dy) in self.chunks
+        ]
 
 
 class Test(View):
@@ -22,8 +68,9 @@ class Test(View):
         tileMapUrl = ":resources:Maps/Tests.tmx"
         super().__init__(background_url=None, tilemap_url=tileMapUrl)
         self.window.set_mouse_visible(False)
-        self.CHUNK_SIZE_X = self.camera.viewport.width // 7
-        self.CHUNK_SIZE_Y = self.camera.viewport.height // 7
+        self.chunk_manager = Chunk_Manager(
+            int(self.camera.viewport.width // 7), int(self.camera.viewport.height // 7)
+        )
 
         self.callback = callback
 
@@ -59,7 +106,7 @@ class Test(View):
         self.update_inventory_sprites()
         self.update_inventory_texts()
         self.assign_tilemap_chunks()
-        self.update_actual_area()
+        self.update_actual_chunk()
 
     def setup_spritelists(self):
         # Listas de Sprites
@@ -109,48 +156,28 @@ class Test(View):
         # Variable para precomputar las listas de colisiones
         self._collision_list = arcade.SpriteList()
 
-    def assign_sprite_area(self, sprite: arcade.Sprite, sprite_type: str):
-        col = abs(sprite.center_x // self.CHUNK_SIZE_X)
-        row = abs(sprite.center_y // self.CHUNK_SIZE_Y)
-        key = (col, row)
-        if key not in self.areas:
-            self.areas[key] = {
-                "mineral": [],
-                "interact": [],
-                "floor": [],
-                "trees": [],
-                "copes": [],
-                "objects": [],
-            }
-        self.areas[key][sprite_type].append(sprite)
+    def assign_sprite_chunk(self, sprite: arcade.Sprite, sprite_type: str):
+        chunk_key = self.chunk_manager.get_chunk_key(sprite.center_x, sprite.center_y)
+        chunk = self.chunk_manager.get_chunk(chunk_key)
+        if sprite_type in chunk.sprites:
+            chunk.sprites[sprite_type].append(sprite)
 
     def batch_assign_sprites(self, sprite_list: arcade.SpriteList, sprite_type: str):
         for sprite in sprite_list:
-            self.assign_sprite_area(sprite, sprite_type)
+            self.assign_sprite_chunk(sprite, sprite_type)
 
     def assign_tilemap_chunks(self) -> None:
         for layer, sprite_list in self.tilemap.sprite_lists.items():
-            if layer == "Paredes" or layer == "Colisiones" or layer == "Interactuables":
+            if layer.capitalize() in ["Paredes", "Colisiones", "Interactuables"]:
                 continue
-            sprites_by_chunk = {}
+
+            layer_key = layer.lower()
             for sprite in sprite_list:
-                key = self.get_chunk_key(sprite.center_x, sprite.center_y)
+                key = self.chunk_manager.get_chunk_key(sprite.center_x, sprite.center_y)
 
-                if key not in sprites_by_chunk:
-                    sprites_by_chunk[key] = []
-                sprites_by_chunk[key].append(sprite)
-
-            for key, sprite_list in sprites_by_chunk.items():
-                if key not in self.areas:
-                    self.areas[key] = {
-                        "mineral": [],
-                        "interact": [],
-                        "floor": [],
-                        "trees": [],
-                        "copes": [],
-                        "objects": [],
-                    }
-                self.areas[key][layer.lower()].extend(sprite_list)
+                chunk = self.chunk_manager.get_chunk(key)
+                if layer_key in chunk.sprites:
+                    chunk.sprites[layer_key].append(sprite)
 
     def load_mineral_layer(self) -> None:
         if "Minerales" not in self.tilemap.object_lists:
@@ -167,7 +194,7 @@ class Test(View):
                 except ValueError as e:
                     print(e)
         for mineral in minerals_to_create:
-            self.assign_sprite_area(mineral, "mineral")
+            self.assign_sprite_chunk(mineral, "mineral")
         self.load_random_minerals(Test._minerals_resources)
 
     def create_mineral_from_object(self, obj: Any) -> Mineral:
@@ -221,7 +248,7 @@ class Test(View):
             while collision_attemps < max_collision_attemps:
                 collisions = mineral.collides_with_list(self.collision_objects)
                 if not collisions:
-                    self.assign_sprite_area(mineral, "mineral")
+                    self.assign_sprite_chunk(mineral, "mineral")
                     break
                 else:
                     mineral.center_x = random.randint(
@@ -318,60 +345,24 @@ class Test(View):
             )
             self.inventory_texts.append(new_text)
 
-    @lru_cache(maxsize=100)
-    def get_chunk_key(self, x: float, y: float) -> tuple[int, int]:
-        return (int(abs(x // self.CHUNK_SIZE_X)), int(abs(y // self.CHUNK_SIZE_Y)))
-
-    def get_active_keys(self):
-        player_key = self.get_chunk_key(
+    def update_actual_chunk(self):
+        active_chunk_lists = {
+            "mineral": arcade.SpriteList(),
+            "interact": arcade.SpriteList(),
+            "floor": arcade.SpriteList(),
+            "trees": arcade.SpriteList(),
+            "copes": arcade.SpriteList(),
+            "objects": arcade.SpriteList(),
+        }
+        player_key = self.chunk_manager.get_chunk_key(
             self.player.sprite.center_x, self.player.sprite.center_y
         )
-        if player_key == self.last_area_key:
-            return self._cached_keys
-        col, row = player_key
-        nearby_keys = [
-            (col + dx, row + dy)
-            for dx in range(-1, 2)
-            for dy in range(-1, 2)
-            if (col + dx, row + dy) in self.areas
-        ]
-        self.last_area_key = player_key
-        self._cached_keys = nearby_keys
-        return nearby_keys
-
-    def update_actual_area(self):
-        active_keys = self.get_active_keys()
-        if active_keys == self.last_area_key:
-            return
-
-        # Limpio el area actual
-        self._collision_list.clear()
-        for area_list in self._actual_area.values():
-            area_list.clear()
-
-        minerals, interacts, map_tiles, trees, copes, objects = [], [], [], [], [], []
-        for key in active_keys:
-            area = self.areas.get(key)
-            if area:
-                minerals.extend(area["mineral"])
-                interacts.extend(area["interact"])
-                map_tiles.extend(area["floor"])
-                trees.extend(area["trees"])
-                copes.extend(area["copes"])
-                objects.extend(area["objects"])
-
-        self._actual_area["mineral"].extend(minerals)
-        self._actual_area["interact"].extend(interacts)
-        self._actual_area["floor"].extend(map_tiles)
-        self._actual_area["objects"].extend(objects)
-        self._actual_area["trees"].extend(trees)
-        self._actual_area["copes"].extend(copes)
-
-        self._collision_list.extend(minerals)
-        self._collision_list.extend(interacts)
-        self._collision_list.extend(trees)
-        self._collision_list.extend(self.walls)
-        self._collision_list.extend(self.background_objects)
+        nearby_chunks = self.chunk_manager.get_nearby_chunks(center_key=player_key)
+        for key in nearby_chunks:
+            chunk = self.chunk_manager.get_chunk(key)
+            for list_name, sprite_list in active_chunk_lists.items():
+                sprite_list.extend(chunk.sprites.get(list_name, []))
+        self._actual_area = active_chunk_lists
 
     def change_to_menu(self) -> None:
         DataManager.store_actual_data(self.player, "TEST")
@@ -418,7 +409,7 @@ class Test(View):
                         if (self.camera.zoom == 1)
                         else 1
                     )
-            case arcade.key.X:
+            case arcade.key.F:
                 self.player.attack(self.enemies[0])
 
         self.keys_pressed.add(symbol)
@@ -469,12 +460,6 @@ class Test(View):
         self.last_inventory_hash = None
 
         if mineral.should_removed:
-            self.areas[
-                (
-                    int(mineral.center_x // self.CHUNK_SIZE_X),
-                    int(mineral.center_y // self.CHUNK_SIZE_Y),
-                )
-            ]["mineral"].remove(mineral)
             mineral.remove_from_sprite_lists()
         return True
 
@@ -492,8 +477,8 @@ class Test(View):
                 self.player.process_state(key)
 
         self.player.update_position()
-        # for enemy in self.enemies:
-        #     enemy.update(delta_time)
+        for enemy in self.enemies:
+            enemy.update(delta_time, player.position)
 
         player_moved = (
             abs(player.center_x - lastPosition[0]) > 0
@@ -508,7 +493,7 @@ class Test(View):
         self.update_inventory_display()
 
         if player_moved:
-            self.update_actual_area()
+            self.update_actual_chunk()
             # Detección de colisiones
             if self.player_collides():
                 self.player.sprite.center_x, self.player.sprite.center_y = lastPosition
@@ -531,7 +516,8 @@ class Test(View):
         for area_list in self._actual_area.values():
             area_list.clear()
 
-        self.get_chunk_key.cache_clear()
+        self.chunk_manager.get_chunk_key.cache_clear()
+        del self.chunk_manager
         del self.player
         del self.camera
         del self.interact_objects
