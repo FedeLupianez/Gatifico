@@ -212,4 +212,4 @@ class Player(StateMachine):
 
     def attack(self, enemy: Enemy):
         print(f"atacando a {enemy}")
-        enemy.hurt()
+        enemy.hurt(damage=10)
