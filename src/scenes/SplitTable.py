@@ -1,4 +1,5 @@
 import arcade.gui
+from typing import Callable
 from items.Container import Container
 from items.Item import Item
 import arcade
@@ -160,25 +161,32 @@ class SplitTable(View):
         sprite.change_position(container.center_x, container.center_y)
         sprite.change_container(container.id)
 
-    def _find_item_with_attr(
-        self,
-        attr: str,
-        value_to_find: int | str,
-        list_to_find: list | arcade.SpriteList,
-        actualIndex: int = 0,
-    ) -> Item | None:
-        if actualIndex == len(list_to_find):
-            return None
-        item = list_to_find[actualIndex]
-        if (getattr(item, attr)) == value_to_find:
-            return item
-        return self._find_item_with_attr(
-            attr, value_to_find, list_to_find, actualIndex + 1
-        )
+    def _find_element(self, list_to_find, attr: str, target):
+        """
+        Función para buscar un elemento de una lista que cumpla con un requisito
+        Args:
+            func (Callable): Función que devuelve True si el elemento cumple con el requisito
+            list_to_find (list): Lista de elementos donde buscar
+        """
+        result = list(filter(self.item_contains_attr(attr, target), list_to_find))
+        if not result:
+            return
+        return result[0]
+
+    def item_contains_attr(self, attr: str, target):
+        def is_item(sprite):
+            if hasattr(sprite, attr):
+                return getattr(sprite, attr) == target
+            else:
+                return False
+
+        return is_item
 
     def _sync_item_text(self) -> None:
         for text_sprite in self.item_texts:
-            item = self._find_item_with_attr("id", text_sprite.id, self.item_sprites)
+            item = self._find_element(
+                self.item_sprites, attr="id", target=text_sprite.id
+            )
             if not item:
                 continue
             expected = f"{item.name} x {item.quantity}"
@@ -187,7 +195,7 @@ class SplitTable(View):
 
     def _update_text_position(self) -> None:
         for item in self.item_sprites:
-            actual_text = self._find_item_with_attr("id", item.id, self.item_texts)
+            actual_text = self._find_element(self.item_texts, attr="id", target=item.id)
             if not (actual_text):
                 return
             actual_text.x = item.center_x
@@ -220,8 +228,8 @@ class SplitTable(View):
                 self.container_sprites.append(self.result_containers[-1])
 
     def load_result(self) -> None:
-        input_item: Item | None = self._find_item_with_attr(
-            "container_id", self.input_container.id, self.item_sprites
+        input_item: Item | None = self._find_element(
+            self.item_sprites, attr="container_id", target=self.input_container.id
         )
         if not input_item:
             return
@@ -234,7 +242,9 @@ class SplitTable(View):
         self.create_result_containers(len(result))
 
         actual_items: list[Item | None] = [
-            self._find_item_with_attr("container_id", container.id, self.item_sprites)
+            self._find_element(
+                self.item_sprites, attr="container_id", target=container.id
+            )
             for container in self.result_containers
         ]
         actual_names: list[str] = [item.name for item in actual_items if item]
@@ -260,9 +270,26 @@ class SplitTable(View):
         if input_item.quantity == 0:
             self.item_sprites.remove(input_item)
             self.item_texts.remove(
-                self._find_item_with_attr("id", input_item.id, self.item_texts)
+                self._find_element(self.item_texts, attr="id", target=input_item.id)
             )
             self.input_container.item_placed = False
+
+    def save_results(self) -> None:
+        # Guardo los items generados por el jugador
+        # Veo si hay items en las casillas de resultados
+        new_inventory: dict[str, int] = {}
+
+        for container in self.container_sprites:
+            item = self._find_element(
+                self.item_sprites, attr="container_id", target=container.id
+            )
+            if not item:
+                continue
+            if not new_inventory.get(item.name):
+                new_inventory[item.name] = item.quantity
+            else:
+                new_inventory[item.name] += item.quantity
+        self.player.inventory = new_inventory
 
     def on_update(self, delta_time: float) -> bool | None:
         self._sync_item_text()
@@ -292,6 +319,7 @@ class SplitTable(View):
 
     def on_key_press(self, symbol: int, modifiers: int) -> bool | None:
         if symbol == arcade.key.ESCAPE:
+            self.save_results()
             self.clean_up()
             self.window.show_view(self.background_scene)
             del self.background_scene
@@ -337,13 +365,13 @@ class SplitTable(View):
             old_container.item_placed = False
             new_container.item_placed = True
         else:
-            item: Item | None = self._find_item_with_attr(
-                "container_id", new_container.id, self.item_sprites
+            item: Item | None = self._find_element(
+                self.item_sprites, attr="container_id", target=new_container.id
             )
             if not (item):
                 return
             if item.name == self.item_to_move.name:
-                text = self._find_item_with_attr("id", item.id, self.item_texts)
+                text = self._find_element(self.item_texts, attr="id", target=item.id)
                 if not text:
                     return
                 self._move_sprite_to_container(self.item_to_move, new_container)
@@ -352,7 +380,6 @@ class SplitTable(View):
                 self.item_to_move.quantity += item.quantity
                 self.item_sprites.remove(item)
                 self.item_texts.remove(text)
-
             self._reset_sprite_position(self.item_to_move)
         self.item_to_move = None
 

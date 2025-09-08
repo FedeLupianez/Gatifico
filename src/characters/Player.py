@@ -74,6 +74,7 @@ class Player(StateMachine):
         self.animation_timer: float = 0.0  # timer de la animacion
         # Diccionario para el inventario
         self.inventory: dict[str, int] = {}
+        self.max_inventory: int = 64
         self.coins: int = 0
 
     def genericStateHandler(self, event: int):
@@ -197,6 +198,8 @@ class Player(StateMachine):
         if item not in self.inventory:
             self.inventory[item] = cant
         else:
+            if self.inventory[item] >= self.max_inventory:
+                return
             self.inventory[item] += cant
 
     def get_inventory(self):
