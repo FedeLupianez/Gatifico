@@ -264,6 +264,7 @@ class Test(View):
 
         if self._actual_area["floor"]:
             self._actual_area["floor"].draw(pixelated=True)
+        self.walls.draw(pixelated=True)
 
         if self._actual_area["trees"]:
             self._actual_area["trees"].draw(pixelated=True)
@@ -359,12 +360,13 @@ class Test(View):
         )
         nearby_chunks = self.chunk_manager.get_nearby_chunks(center_key=player_key)
         self._collision_list.clear()
+        self._collision_list.extend(self.walls)
         for key in nearby_chunks:
             chunk = self.chunk_manager.get_chunk(key)
             for list_name, sprite_list in active_chunk_lists.items():
                 sprites = chunk.sprites.get(list_name, [])
                 sprite_list.extend(sprites)
-                if list_name == "floor":
+                if list_name in ["floor", "copes"]:
                     continue
                 self._collision_list.extend(sprites)
         self._actual_area = active_chunk_lists
