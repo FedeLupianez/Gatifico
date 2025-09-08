@@ -109,26 +109,26 @@ class Player(StateMachine):
         # Si la tecla es negativa significa que se soltó una tecla
         if key < 0:
             match abs(key):
-                case arcade.key.W:
+                case arcade.key.W | arcade.key.UP:
                     return Player.IDLE_BACK
-                case arcade.key.S:
+                case arcade.key.S | arcade.key.DOWN:
                     return Player.IDLE_FRONT
-                case arcade.key.A:
+                case arcade.key.A | arcade.key.LEFT:
                     return Player.IDLE_SIDE_LEFT
-                case arcade.key.D:
+                case arcade.key.D | arcade.key.RIGHT:
                     return Player.IDLE_SIDE_RIGHT
                 case _:
                     return self.actual_state_id
 
         # Si es que presionó una tecla, se cambia al estado correspondiente
         match key:
-            case arcade.key.W:
+            case arcade.key.W | arcade.key.UP:
                 return Player.UP
-            case arcade.key.A:
+            case arcade.key.A | arcade.key.LEFT:
                 return Player.LEFT
-            case arcade.key.S:
+            case arcade.key.S | arcade.key.DOWN:
                 return Player.DOWN
-            case arcade.key.D:
+            case arcade.key.D | arcade.key.RIGHT:
                 return Player.RIGHT
             case _:
                 # Si no es ninguna de las otras teclas retorna el estado actual
