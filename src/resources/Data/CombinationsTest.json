@@ -1,9 +1,9 @@
 {
-  "stone":{
+  "azufre":{
     "rubi":"rubi"
   },
 
   "rubi":{
-    "stone":"rubi"
+    "piedra":"rubi"
   }
 }

@@ -1,6 +1,14 @@
 {
-  "stone": {
+  "piedra": {
     "rubi": 1,
-    "stone": 1
+    "azufre": 1
+  },
+   "piedra_rubi": {
+    "rubi": 1,
+    "azufre": 1
+  },
+   "azufre": {
+    "rubi": 1,
+    "azufre": 1
   }
 }

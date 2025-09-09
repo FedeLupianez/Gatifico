@@ -270,27 +270,27 @@
 </data>
  </layer>
  <objectgroup id="9" name="Minerales">
-  <object id="127" name="stone" type="mineral" x="1096.17" y="222" width="58" height="38">
+  <object id="127" name="piedra" type="mineral" x="1096.17" y="222" width="58" height="38">
    <properties>
     <property name="size" value="big"/>
    </properties>
   </object>
-  <object id="128" name="stone" type="mineral" x="1189.5" y="261.667" width="31.6666" height="24">
+  <object id="128" name="piedra_rubi" type="mineral" x="1189.5" y="261.667" width="31.6666" height="24">
    <properties>
     <property name="size" value="small"/>
    </properties>
   </object>
-  <object id="129" name="stone" type="mineral" x="1146.17" y="144.666" width="60.3333" height="36">
+  <object id="129" name="piedra" type="mineral" x="1146.17" y="144.666" width="60.3333" height="36">
    <properties>
     <property name="size" value="big"/>
    </properties>
   </object>
-  <object id="130" name="stone" type="mineral" x="1208.83" y="204" width="32.6666" height="25.3334">
+  <object id="130" name="piedra" type="mineral" x="1208.83" y="204" width="32.6666" height="25.3334">
    <properties>
     <property name="size" value="small"/>
    </properties>
   </object>
-  <object id="131" name="stone" type="mineral" x="1111.17" y="302" width="40.3333" height="24.3333">
+  <object id="131" name="azufre" type="mineral" x="1111.17" y="302" width="40.3333" height="24.3333">
    <properties>
     <property name="size" value="mid"/>
    </properties>
