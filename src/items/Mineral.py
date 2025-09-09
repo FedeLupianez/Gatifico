@@ -1,7 +1,8 @@
 import arcade
 from StateMachine import StateMachine
-from .utils import create_white_texture
 from DataManager import texture_manager
+from typing import Dict, Any
+from DataManager import loadData
 
 
 class Mineral(arcade.Sprite):
@@ -14,7 +15,6 @@ class Mineral(arcade.Sprite):
     SMALL_STATE = "SMALL"
     KILL_STATE = "KILL"
     __slots__ = [
-        "attributes",
         "mineral",
         "size_type",
         "touches",
@@ -27,20 +27,21 @@ class Mineral(arcade.Sprite):
         "state_machine",
     ]
 
+    _resources: Dict[str, Any] = loadData("Minerals.json")
+
     def __init__(
         self,
         mineral: str,
         size_type: str,
         center_x: float,
         center_y: float,
-        mineral_attr: dict,
     ):
-        self.attributes: dict = mineral_attr
         super().__init__(
-            path_or_texture=self.attributes[mineral][size_type]["path"],
+            path_or_texture=Mineral._resources[mineral][size_type]["path"],
             center_x=center_x,
             center_y=center_y,
         )
+        self.chunk_key: tuple[int, int] = (-1, -1)
 
         initial_state = ""
         if size_type.lower() == Mineral.BIG_SIZE:
@@ -54,7 +55,7 @@ class Mineral(arcade.Sprite):
         self.mineral = mineral
         self.size_type = size_type
 
-        self.touches = self.attributes[mineral][size_type]["touches"]
+        self.touches = Mineral._resources[mineral][size_type]["touches"]
         self.actual_touches = 0
 
         self.should_removed: bool = False
@@ -77,7 +78,7 @@ class Mineral(arcade.Sprite):
             next_state (str) -> es el estado que va a tomar la función como siguiente
         """
         self.size_type = actual_state.lower()
-        data = self.attributes[self.mineral][self.size_type]
+        data = Mineral._resources[self.mineral][self.size_type]
         new_texture_path = data["path"]
         self.update_sprite(new_texture_path)
         if key != arcade.key.E:

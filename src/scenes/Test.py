@@ -62,8 +62,6 @@ class Chunk_Manager:
 
 
 class Test(View):
-    _minerals_resources: Dict[str, Any] = DataManager.loadData("Minerals.json")
-
     def __init__(self, callback: Callable, player: Player) -> None:
         tileMapUrl = ":resources:Maps/Tests.tmx"
         super().__init__(background_url=None, tilemap_url=tileMapUrl)
@@ -158,6 +156,8 @@ class Test(View):
 
     def assign_sprite_chunk(self, sprite: arcade.Sprite, sprite_type: str):
         chunk_key = self.chunk_manager.get_chunk_key(sprite.center_x, sprite.center_y)
+        if hasattr(sprite, "chunk_key"):
+            sprite.chunk_key = chunk_key
         chunk = self.chunk_manager.get_chunk(chunk_key)
         if sprite_type in chunk.sprites:
             chunk.sprites[sprite_type].append(sprite)
@@ -190,19 +190,19 @@ class Test(View):
             if obj.name and obj.properties:
                 try:
                     mineral = self.create_mineral_from_object(obj)
+                    mineral.chunk_key = self.chunk_manager.get_chunk_key(
+                        mineral.center_x, mineral.center_y
+                    )
                     minerals_to_create.append(mineral)
                 except ValueError as e:
                     print(e)
         for mineral in minerals_to_create:
             self.assign_sprite_chunk(mineral, "mineral")
-        self.load_random_minerals(Test._minerals_resources)
+        self.load_random_minerals()
 
     def create_mineral_from_object(self, obj: Any) -> Mineral:
         """Función para crear un minerl a partir de un objeto de Tilemap"""
         shape = obj.shape
-        if len(shape) != 4:
-            raise ValueError(f"Forma del objeto {obj.name} invalida")
-
         top_left, top_right, *_, bottom_left = shape[:4]
         center_x: float = (top_left[0] + top_right[0]) * 0.5
         center_y: float = (top_left[1] + bottom_left[1]) * 0.5
@@ -213,11 +213,10 @@ class Test(View):
             size_type=size,
             center_x=center_x,
             center_y=center_y,
-            mineral_attr=Test._minerals_resources,
         )
 
-    def load_random_minerals(self, mineral_resources: Dict) -> None:
-        names = list(list(mineral_resources.keys()))
+    def load_random_minerals(self) -> None:
+        names = list(list(Mineral._resources.keys()))
         sizes = ["big", "mid", "small"]
         # Pongo un límite en los intentos de crear
         # el mineral para evitar loops infinitos
@@ -242,7 +241,6 @@ class Test(View):
                 size_type=data["size"],
                 center_x=data["x"],
                 center_y=data["y"],
-                mineral_attr=mineral_resources,
             )
 
             while collision_attemps < max_collision_attemps:
@@ -459,6 +457,8 @@ class Test(View):
         return False
 
     def process_mineral_interaction(self, mineral: Mineral) -> bool:
+        if len(self.player.inventory) >= 4:
+            return True
         mineral.setup()
         mineral.state_machine.process_state(arcade.key.E)
         self.player.add_to_inventory(mineral.mineral, 1)
@@ -468,6 +468,9 @@ class Test(View):
 
         if mineral.should_removed:
             mineral.remove_from_sprite_lists()
+            self.chunk_manager.chunks[mineral.chunk_key].sprites["mineral"].remove(
+                mineral
+            )
         return True
 
     def on_key_release(self, symbol: int, modifiers: int) -> bool | None:
