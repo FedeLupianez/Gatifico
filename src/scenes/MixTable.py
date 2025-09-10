@@ -92,14 +92,16 @@ class MixTable(View):
         self.item_to_move: Item | None = None
         self.result_place: Container
 
-    def _find_element(self, func: Callable, list_to_find):
+    def _find_element(self, list_to_find, attr: str, target):
         """
         Función para buscar un elemento de una lista que cumpla con un requisito
         Args:
             func (Callable): Función que devuelve True si el elemento cumple con el requisito
             list_to_find (list): Lista de elementos donde buscar
         """
-        result = list(filter(func, list_to_find))
+        result = list(
+            filter(self.item_contains_attr(attr=attr, target=target), list_to_find)
+        )
         if result:
             return result[0]
 
@@ -182,7 +184,8 @@ class MixTable(View):
     def _update_texts_position(self) -> None:
         for item in self.item_sprites:
             actual_text = self._find_element(
-                func=self.item_contains_attr("id", item.id),
+                attr="id",
+                target=item.id,
                 list_to_find=self.item_texts,
             )
             if not (actual_text):
@@ -195,7 +198,8 @@ class MixTable(View):
     def _sync_item_text(self) -> None:
         for text_sprite in self.item_texts:
             item = self._find_element(
-                func=self.item_contains_attr("id", text_sprite.id),
+                attr="id",
+                target=text_sprite.id,
                 list_to_find=self.item_sprites,
             )
             if not item:
@@ -208,11 +212,13 @@ class MixTable(View):
         input_1, input_2 = self.container_sprites[-3:-1]
 
         item_1 = self._find_element(
-            func=self.item_contains_attr("container_id", input_1.id),
+            attr="container_id",
+            target=input_1.id,
             list_to_find=self.item_sprites,
         )
         item_2 = self._find_element(
-            func=self.item_contains_attr("container_id", input_2.id),
+            attr="container_id",
+            target=input_2.id,
             list_to_find=self.item_sprites,
         )
 
@@ -224,7 +230,8 @@ class MixTable(View):
             return
 
         old_result = self._find_element(
-            func=self.item_contains_attr("container_id", self.result_place.id),
+            attr="container_id",
+            target=self.result_place.id,
             list_to_find=self.item_sprites,
         )
         if not old_result:
@@ -244,12 +251,28 @@ class MixTable(View):
             item.quantity -= 1
             if item.quantity == 0:
                 item_text = self._find_element(
-                    func=self.item_contains_attr("id", item.id),
-                    list_to_find=self.item_texts,
+                    list_to_find=self.item_texts, attr="id", target=item.id
                 )
                 self.item_texts.remove(item_text)
                 self.item_sprites.remove(item)
                 container.item_placed = False
+
+    def save_result(self) -> None:
+        # Guardo los items generados por el jugador
+        # Veo si hay items en las casillas de resultados
+        new_inventory: dict[str, int] = {}
+
+        for container in self.container_sprites:
+            item = self._find_element(
+                self.item_sprites, attr="container_id", target=container.id
+            )
+            if not item:
+                continue
+            if not new_inventory.get(item.name):
+                new_inventory[item.name] = item.quantity
+            else:
+                new_inventory[item.name] += item.quantity
+        self.player.inventory = new_inventory
 
     def _reset_sprite_position(self, sprite: Item) -> None:
         original_container = self.container_sprites[sprite.container_id]
@@ -293,6 +316,7 @@ class MixTable(View):
 
     def on_key_press(self, symbol: int, modifiers: int) -> bool | None:
         if symbol == arcade.key.ESCAPE:
+            self.save_result()
             self.clean_up()
             self.window.show_view(self.background_scene)
             del self.background_scene
@@ -317,31 +341,11 @@ class MixTable(View):
         collisions: list[Container] = arcade.check_for_collision_with_list(
             self.item_to_move, self.container_sprites
         )
-        other_items = arcade.check_for_collision_with_list(
-            self.item_to_move, self.item_sprites
-        )
 
         if not collisions:
             self._reset_sprite_position(self.item_to_move)
             self.item_to_move = None
             return
-
-        if other_items:
-            if other_items[-1].name != self.item_to_move.name:
-                self._reset_sprite_position(self.item_to_move)
-                self.item_to_move = None
-                return
-            else:
-                self.item_to_move.quantity += other_items[-1].quantity
-                self.item_sprites.remove(other_items[-1])
-                text = self._find_element(
-                    func=self.item_contains_attr("id", other_items[-1].id),
-                    list_to_find=self.item_texts,
-                )
-                self.item_texts.remove(text)
-                self.item_to_move.container_id = other_items[-1].container_id
-                self.item_to_move = None
-                return
 
         new_container: Container = collisions[0]
         old_container: Container = self.container_sprites[
@@ -359,8 +363,31 @@ class MixTable(View):
             self._move_sprite_to_container(self.item_to_move, new_container)
             old_container.item_placed = False
             new_container.item_placed = True
+            self.item_to_move = None
+            return
 
-        self.item_to_move = None  # Pongo que no hay nngún sprite qe mover
+        other_item = self._find_element(
+            self.item_sprites, attr="container_id", target=new_container.id
+        )
+
+        if other_item:
+            if other_item.name != self.item_to_move.name:
+                self._reset_sprite_position(self.item_to_move)
+                self.item_to_move = None
+                return
+            else:
+                self.item_to_move.quantity += other_item.quantity
+                self.item_sprites.remove(other_item)
+                text = self._find_element(
+                    list_to_find=self.item_texts, attr="id", target=other_item.id
+                )
+                self.item_texts.remove(text)
+                self.item_to_move.change_container(
+                    newContainerId=other_item.container_id
+                )
+                self._move_sprite_to_container(self.item_to_move, new_container)
+                self.item_to_move = None
+                return
 
     def on_mouse_motion(self, x: int, y: int, dx: int, dy: int) -> bool | None:
         if self.item_to_move:
