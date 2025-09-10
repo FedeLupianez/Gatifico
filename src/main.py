@@ -10,9 +10,6 @@ import DataManager
 BASE_DIR = os.path.dirname(
     os.path.abspath(__file__)
 )  # Encuentra la ruta al archivo main.py
-arcade.resources.add_resource_handle(
-    "resources", os.path.join(BASE_DIR, "resources")
-)  # Agrega la carpeta resources a los recursos de arcade
 
 
 class Main(arcade.Window):

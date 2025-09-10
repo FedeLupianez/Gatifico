@@ -14,7 +14,7 @@ from .utils import add_containers_to_list
 
 class Laboratory(View):
     def __init__(self, callback: Callable, player: Player):
-        tileMapUrl = ":resources:Maps/laboratorio/Laboratory.tmx"
+        tileMapUrl = "src/resources/Maps/laboratorio/Laboratory.tmx"
         super().__init__(background_url=None, tilemap_url=tileMapUrl)
         self.player = player
         self.callback = callback
@@ -38,7 +38,7 @@ class Laboratory(View):
         self.setup_layers()
         self.setup_inventory_containers()
         self.update_inventory_items(self.player.get_items())
-        self.update_inventory_texts(self.player.get_items())
+        self.update_inventory_texts()
 
     def on_show_view(self) -> None:
         self.window.set_mouse_visible(False)
@@ -73,7 +73,9 @@ class Laboratory(View):
         add_containers_to_list(
             positions, self.inventory_containers, container_size=CONTAINER_SIZE
         )
-        inventory_sprite = arcade.Sprite(":resources:UI/inventory_tools.png", scale=3)
+        inventory_sprite = arcade.Sprite(
+            "src/resources/UI/inventory_tools.png", scale=3
+        )
         inventory_sprite.center_x = ITEMS_INIT[0] + 75
         inventory_sprite.center_y = ITEMS_INIT[1]
         self.inventory_containers.append(inventory_sprite)
@@ -88,12 +90,12 @@ class Laboratory(View):
             new_item.change_position(container.center_x, container.center_y)
             self.inventory_items.append(new_item)
 
-    def update_inventory_texts(self, player_items: list) -> None:
+    def update_inventory_texts(self) -> None:
         self.inventory_texts.clear()
-        for index, (item, quantity) in enumerate(player_items):
+        for index, item in enumerate(self.inventory_items):
             container: Container = self.inventory_containers[index]
             new_text = arcade.Text(
-                text=f"{item} x {quantity}",
+                text=str(item.quantity),
                 font_size=9,
                 x=container.center_x,
                 y=container.center_y - (container.height * 0.5 + 10),
@@ -107,7 +109,7 @@ class Laboratory(View):
         if self.last_inventory_hash == current_hash:
             player_items = self.player.get_items()
             self.update_inventory_items(player_items)
-            self.update_inventory_texts(player_items)
+            self.update_inventory_texts()
         self.last_inventory_hash = current_hash
 
     def check_collision(self) -> bool:

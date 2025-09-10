@@ -1,6 +1,6 @@
 {
    "IDLE_FRONT": {
-      "path": ":resources:Player/gatifico_normal_frente/sprite_gat_nor_frente_{}.png",
+      "path": "src/resources/Player/gatifico_normal_frente/sprite_gat_nor_frente_{}.png",
       "action": "IDLE",
       "direction": "FRONT",
       "frames": 2,
@@ -11,7 +11,7 @@
    },
 
    "IDLE_BACK": {
-      "path": ":resources:Player/gatifico_normal_atras/sprite_gat_nor_atras_{}.png",
+      "path": "src/resources/Player/gatifico_normal_atras/sprite_gat_nor_atras_{}.png",
       "action": "IDLE",
       "direction": "BACK",
       "frames": 2,
@@ -22,7 +22,7 @@
    },
 
    "IDLE_SIDE_LEFT": {
-      "path": ":resources:Player/gatifico_normal_lado/sprite_gat_nor_lado_{}.png",
+      "path": "src/resources/Player/gatifico_normal_lado/sprite_gat_nor_lado_{}.png",
       "action": "IDLE",
       "direction": "SIDE",
       "frames": 2,
@@ -33,7 +33,7 @@
    },
 
    "IDLE_SIDE_RIGHT": {
-      "path": ":resources:Player/gatifico_normal_lado/sprite_gat_nor_lado_{}.png",
+      "path": "src/resources/Player/gatifico_normal_lado/sprite_gat_nor_lado_{}.png",
       "action": "IDLE",
       "direction": "SIDE",
       "frames": 2,
@@ -44,7 +44,7 @@
    },
 
    "LEFT": {
-      "path": ":resources:Player/gatifico_caminando_lado/sprite_gat_cam_lado_{}.png",
+      "path": "src/resources/Player/gatifico_caminando_lado/sprite_gat_cam_lado_{}.png",
       "action": "RUN",
       "direction": "SIDE",
       "frames": 4,
@@ -54,7 +54,7 @@
    },
 
    "RIGHT": {
-      "path": ":resources:Player/gatifico_caminando_lado/sprite_gat_cam_lado_{}.png",
+      "path": "src/resources/Player/gatifico_caminando_lado/sprite_gat_cam_lado_{}.png",
       "action": "RUN",
       "direction": "SIDE",
       "frames": 4,
@@ -64,7 +64,7 @@
    },
 
    "UP": {
-      "path": ":resources:Player/gatifico_caminando_atras/sprite_gat_cam_atras_{}.png",
+      "path": "src/resources/Player/gatifico_caminando_atras/sprite_gat_cam_atras_{}.png",
       "action": "RUN",
       "direction": "BACK",
       "frames": 4,
@@ -74,7 +74,7 @@
    },
 
    "DOWN": {
-      "path": ":resources:Player/gatifico_caminando_frente/sprite_gat_cam_frente_{}.png",
+      "path": "src/resources/Player/gatifico_caminando_frente/sprite_gat_cam_frente_{}.png",
       "action": "RUN",
       "direction": "FRONT",
       "frames": 4,

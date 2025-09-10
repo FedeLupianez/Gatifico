@@ -6,7 +6,7 @@ from .utils import apply_filter
 
 class Pause(View):
     def __init__(self, previus_scene: View, callback):
-        background_url = ":resources:Background/Texture/TX Plant.png"
+        background_url = "src/resources/Background/Texture/TX Plant.png"
         super().__init__(background_url, tilemap_url=None)
         # Le pongo filtro oscuro al fondo
         background_image = previus_scene.get_screenshot()
@@ -26,10 +26,10 @@ class Pause(View):
 
     def setup_buttons(self) -> None:
         self.resume_button = arcade.Sprite(
-            ":resources:UI/PlayButton.png", scale=self.buttons_scale
+            "src/resources/UI/PlayButton.png", scale=self.buttons_scale
         )
         self.exit_button = arcade.Sprite(
-            ":resources:UI/ExitButton.png", scale=self.buttons_scale
+            "src/resources/UI/ExitButton.png", scale=self.buttons_scale
         )
         self.resume_button.center_x = Game.SCREEN_CENTER_X
         self.exit_button.center_x = Game.SCREEN_CENTER_X

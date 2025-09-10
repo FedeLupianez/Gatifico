@@ -1,43 +1,43 @@
 {
    "piedra": {
-      "big": {"path": ":resources:Minerals/piedra/piedra_big.png", "touches": 3},
-      "mid": {"path": ":resources:Minerals/piedra/piedra_mid.png", "touches": 2},
-      "small": {"path": ":resources:Minerals/piedra/piedra_small.png", "touches": 1},
-      "item": {"path": ":resources:Minerals/Rock/Rock_Item.png"}
+      "big": {"path": "src/resources/Minerals/piedra/piedra_big.png", "touches": 3},
+      "mid": {"path": "src/resources/Minerals/piedra/piedra_mid.png", "touches": 2},
+      "small": {"path": "src/resources/Minerals/piedra/piedra_small.png", "touches": 1},
+      "item": {"path": "src/resources/Minerals/Rock/Rock_Item.png"}
    },
 
    "rubi":{
-      "big": {"path": ":resources:Minerals/piedra_rubi/piedra_rubi_big.png", "touches": 3},
-      "mid": {"path": ":resources:Minerals/piedra_rubi/piedra_rubi_mid.png", "touches": 2},
-      "small": {"path": ":resources:Minerals/piedra_rubi/piedra_rubi_small.png", "touches": 1},
-      "item": {"path": ":resources:Minerals/Rubi/Rubi_Item.png"}
+      "big": {"path": "src/resources/Minerals/piedra_rubi/piedra_rubi_big.png", "touches": 3},
+      "mid": {"path": "src/resources/Minerals/piedra_rubi/piedra_rubi_mid.png", "touches": 2},
+      "small": {"path": "src/resources/Minerals/piedra_rubi/piedra_rubi_small.png", "touches": 1},
+      "item": {"path": "src/resources/Minerals/Rubi/Rubi_Item.png"}
    },
 
    "azufre":{
-      "big": {"path": ":resources:Minerals/azufre/azufre_big.png", "touches": 3},
-      "mid": {"path": ":resources:Minerals/azufre/azufre_mid.png", "touches": 2},
-      "small": {"path": ":resources:Minerals/azufre/azufre_small.png", "touches": 1},
-      "item": {"path": ":resources:Minerals/Azufre_test/azufre_item.png"}
+      "big": {"path": "src/resources/Minerals/azufre/azufre_big.png", "touches": 3},
+      "mid": {"path": "src/resources/Minerals/azufre/azufre_mid.png", "touches": 2},
+      "small": {"path": "src/resources/Minerals/azufre/azufre_small.png", "touches": 1},
+      "item": {"path": "src/resources/Minerals/Azufre_test/azufre_item.png"}
    },
 
    "piedra_cuarzo":{
-      "big": {"path": ":resources:Minerals/piedra_cuarzo/piedra_cuarzo_big.png", "touches": 3},
-      "mid": {"path": ":resources:Minerals/piedra_cuarzo/piedra_cuarzo_mid.png", "touches": 2},
-      "small": {"path": ":resources:Minerals/piedra_cuarzo/piedra_cuarzo_small.png", "touches": 1},
-      "item": {"path": ":resources:Minerals/piedra_cuarzo/piedra_cuarzo_small.png"}
+      "big": {"path": "src/resources/Minerals/piedra_cuarzo/piedra_cuarzo_big.png", "touches": 3},
+      "mid": {"path": "src/resources/Minerals/piedra_cuarzo/piedra_cuarzo_mid.png", "touches": 2},
+      "small": {"path": "src/resources/Minerals/piedra_cuarzo/piedra_cuarzo_small.png", "touches": 1},
+      "item": {"path": "src/resources/Minerals/piedra_cuarzo/piedra_cuarzo_small.png"}
    },
 
    "piedra_rubi":{
-      "big": {"path": ":resources:Minerals/piedra_rubi/piedra_rubi_big.png", "touches": 3},
-      "mid": {"path": ":resources:Minerals/piedra_rubi/piedra_rubi_mid.png", "touches": 2},
-      "small": {"path": ":resources:Minerals/piedra_rubi/piedra_rubi_small.png", "touches": 1},
-      "item": {"path": ":resources:Minerals/piedra_rubi/piedra_rubi_small.png"}
+      "big": {"path": "src/resources/Minerals/piedra_rubi/piedra_rubi_big.png", "touches": 3},
+      "mid": {"path": "src/resources/Minerals/piedra_rubi/piedra_rubi_mid.png", "touches": 2},
+      "small": {"path": "src/resources/Minerals/piedra_rubi/piedra_rubi_small.png", "touches": 1},
+      "item": {"path": "src/resources/Minerals/piedra_rubi/piedra_rubi_small.png"}
    },
 
    "cuarzo":{
-      "big": {"path": ":resources:Minerals/cuarzo/cuarzo_big.png", "touches": 3},
-      "mid": {"path": ":resources:Minerals/cuarzo/cuarzo_mid.png", "touches": 2},
-      "small": {"path": ":resources:Minerals/cuarzo/cuarzo_small.png", "touches": 1},
-      "item": {"path": ":resources:Minerals/cuarzo/cuarzo_small.png"}
+      "big": {"path": "src/resources/Minerals/cuarzo/cuarzo_big.png", "touches": 3},
+      "mid": {"path": "src/resources/Minerals/cuarzo/cuarzo_mid.png", "touches": 2},
+      "small": {"path": "src/resources/Minerals/cuarzo/cuarzo_small.png", "touches": 1},
+      "item": {"path": "src/resources/Minerals/cuarzo/cuarzo_small.png"}
    }
 }

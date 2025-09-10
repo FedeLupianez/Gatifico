@@ -4,13 +4,13 @@ import Constants
 from scenes.View import View
 import DataManager
 
-Start_button_path: str = ":resources:UI/PlayButton.png"
-Exit_button_path: str = ":resources:UI/ExitButton.png"
+Start_button_path: str = "src/resources/UI/PlayButton.png"
+Exit_button_path: str = "src/resources/UI/ExitButton.png"
 
 
 class Menu(View):
     def __init__(self, callback):
-        background_url = ":resources:UI/MenuBackground.jpg"
+        background_url = "src/resources/UI/MenuBackground.jpg"
         super().__init__(background_url=background_url, tilemap_url=None)
 
         self.window.set_mouse_visible(True)

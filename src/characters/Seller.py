@@ -3,7 +3,7 @@ from .Player import Player
 
 
 class Seller(arcade.Sprite):
-    Texture_path = ":resources:Seller/"
+    Texture_path = "src/resources/Seller/"
 
     def __init__(self, items: dict[str, dict[str, int]]) -> None:
         # super().__init__(Seller.Texture_path, scale=1)

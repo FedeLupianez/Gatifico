@@ -1,3 +1,4 @@
+from PIL.Image import new
 import arcade
 from typing import Dict, Any, Callable
 
@@ -63,7 +64,7 @@ class Chunk_Manager:
 
 class Test(View):
     def __init__(self, callback: Callable, player: Player) -> None:
-        tileMapUrl = ":resources:Maps/Tests.tmx"
+        tileMapUrl = "src/resources/Maps/Tests.tmx"
         super().__init__(background_url=None, tilemap_url=tileMapUrl)
         self.window.set_mouse_visible(False)
         self.chunk_manager = Chunk_Manager(
@@ -122,7 +123,9 @@ class Test(View):
         add_containers_to_list(
             positions, self.inventory_sprites, container_size=CONTAINER_SIZE
         )
-        inventory_sprite = arcade.Sprite(":resources:UI/inventory_tools.png", scale=3)
+        inventory_sprite = arcade.Sprite(
+            "src/resources/UI/inventory_tools.png", scale=3
+        )
         inventory_sprite.center_x = ITEMS_INIT[0] + 75
         inventory_sprite.center_y = ITEMS_INIT[1]
         self.inventory_sprites.append(inventory_sprite)
@@ -332,10 +335,10 @@ class Test(View):
 
     def update_inventory_texts(self):
         self.inventory_texts.clear()
-        for index, (item, quantity) in enumerate(self.player.inventory.items()):
+        for index, item in enumerate(self.items_inventory):
             container = self.inventory_sprites[index]
             new_text = arcade.Text(
-                text=f"{item} x {quantity}",
+                text=str(item.quantity),
                 font_size=9,
                 x=container.center_x,
                 y=container.center_y - (container.height * 0.5 + 10),
@@ -457,7 +460,10 @@ class Test(View):
         return False
 
     def process_mineral_interaction(self, mineral: Mineral) -> bool:
-        if len(self.player.inventory) >= 4:
+        if (
+            len(self.player.inventory) >= 4
+            and mineral.mineral not in self.player.inventory
+        ):
             return True
         mineral.setup()
         mineral.state_machine.process_state(arcade.key.E)
@@ -523,8 +529,8 @@ class Test(View):
         )
 
     def clean_up(self) -> None:
-        for area_list in self._actual_area.values():
-            area_list.clear()
+        for chunk_list in self._actual_area.values():
+            chunk_list.clear()
 
         self.chunk_manager.get_chunk_key.cache_clear()
         del self.chunk_manager
