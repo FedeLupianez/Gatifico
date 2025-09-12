@@ -3,6 +3,9 @@ from Constants import AssetsConstants, PlayerConfig
 from StateMachine import StateMachine
 from DataManager import loadData, texture_manager, game_data
 from characters.Enemy import Enemy
+from typing import Literal
+from time import time
+from random import randint
 
 
 class Player(StateMachine):
@@ -77,6 +80,20 @@ class Player(StateMachine):
         self.max_inventory: int = 64
         self.coins: int = 0
 
+        self.actual_floor: Literal["grass", "wood"] = "grass"
+        self.step_sounds: dict[Literal["grass", "wood"], list[arcade.Sound]] = {
+            "grass": [
+                arcade.Sound("src/resources/Sounds/Step_grass_1.mp3"),
+                arcade.Sound("src/resources/Sounds/Step_grass_2.mp3"),
+            ],
+            "wood": [
+                arcade.Sound("src/resources/Sounds/Step_wood_1.mp3"),
+                arcade.Sound("src/resources/Sounds/Step_wood_2.mp3"),
+            ],
+        }
+        self.last_step_sound_time: float = 0.0
+        self.step_coldown = 0.5
+
     def genericStateHandler(self, event: int):
         """Función genérica para todos los estados del personaje, ya que casi todos hacen lo mismo"""
         # Cargo la configuración del estado actual
@@ -134,7 +151,10 @@ class Player(StateMachine):
                 # Si no es ninguna de las otras teclas retorna el estado actual
                 return self.actual_state_id
 
-    def setup(self, position: tuple[int, int] | None = None):
+    def setup(
+        self,
+        position: tuple[int, int] | None = None,
+    ):
         """Función para configurar la maquina de estados del personaje"""
         self.add_state(Player.IDLE_FRONT, self.genericStateHandler)
         self.add_state(Player.IDLE_BACK, self.genericStateHandler)
@@ -183,6 +203,18 @@ class Player(StateMachine):
         self.frames = self.animations[self.actual_state_id]
         self.texture_index = 0
 
+    def play_step_sound(self) -> None:
+        if "IDLE" not in self.actual_state_id:
+            current_time = time()
+            if not (current_time - self.last_step_sound_time > self.step_coldown):
+                return
+            volume = 1 if self.actual_floor == "grass" else 0.2
+            self.step_sounds[self.actual_floor][randint(0, 1)].play(
+                volume=volume, speed=1.2
+            )
+
+            self.last_step_sound_time = current_time
+
     def update_animation(self, deltaTime: float):
         """Función para actualizar la animación del personaje"""
         self.animation_timer += deltaTime
@@ -193,6 +225,7 @@ class Player(StateMachine):
             if self.sprite.texture != new_texture:
                 self.texture_index = new_index
                 self.sprite.texture = new_texture
+                self.play_step_sound()
 
     def add_to_inventory(self, item: str, cant: int) -> None:
         if item not in self.inventory:
