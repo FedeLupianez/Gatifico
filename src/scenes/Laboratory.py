@@ -21,6 +21,7 @@ class Laboratory(View):
         self.keys_pressed: set[int] = set()
         self.camera.zoom = Constants.Game.FOREST_ZOOM_CAMERA
         self.camera.position = self.player.sprite.position
+        self.gui_camera.viewport = self.camera.viewport
 
         # constantes para precalcular las operacions para actualizar la camara
         self._screen_width = self.camera.viewport_width
@@ -32,6 +33,9 @@ class Laboratory(View):
         self._map_height = self.tilemap.height * self.tilemap.tile_height
         self.last_inventory_hash = 0
 
+        self._item_mouse_text = arcade.Text(
+            text="", x=0, y=0, anchor_x="center", anchor_y="center", align="center"
+        )
         # Inicializacion de funciones
         self.setup_spritelists()
         self.setup_player()
@@ -41,7 +45,7 @@ class Laboratory(View):
         self.update_inventory_texts()
 
     def on_show_view(self) -> None:
-        self.window.set_mouse_visible(False)
+        self.window.set_mouse_visible(True)
 
     def setup_spritelists(self):
         self.player_sprites = arcade.SpriteList()
@@ -163,6 +167,14 @@ class Laboratory(View):
 
         return False
 
+    def on_mouse_motion(self, x: int, y: int, dx: int, dy: int) -> bool | None:
+        if item := arcade.get_sprites_at_point((x, y), self.inventory_items):
+            self._item_mouse_text.text = item[0].name or ""
+            self._item_mouse_text.x = x
+            self._item_mouse_text.y = y
+        else:
+            self._item_mouse_text.text = ""
+
     def on_key_press(self, symbol: int, modifiers: int) -> bool | None:
         if symbol == arcade.key.E:
             self.handle_interactions()
@@ -195,6 +207,8 @@ class Laboratory(View):
         self.inventory_items.draw(pixelated=True)
         for text in self.inventory_texts:
             text.draw()
+        if self._item_mouse_text.text:
+            self._item_mouse_text.draw()
 
     def on_draw(self) -> None:
         self.clear()
