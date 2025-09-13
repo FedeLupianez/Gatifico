@@ -1,3 +1,4 @@
+from logging import exception
 from typing import Callable
 import arcade
 from .View import View
@@ -5,6 +6,7 @@ from characters.Player import Player
 from .utils import add_containers_to_list
 from items.Item import Item
 from items.Container import Container
+import random
 
 
 class Sell(View):
@@ -14,11 +16,18 @@ class Sell(View):
         player: Player,
     ) -> None:
         super().__init__(background_url=None, tilemap_url=None)
-        self.player_items = player.get_inventory()
         self.player = player
         self.window.set_mouse_visible(True)
         self.callback = callback
         self.next_item_id = 0
+
+        all_minerals = list(Item.MineralsResources.keys())
+        num_seller_items = random.randint(1, len(all_minerals))
+        seller_item_names = random.sample(all_minerals, num_seller_items)
+        self.seller_items = {
+            name: random.randint(1, 20) for name in seller_item_names
+        }
+
         self.item_to_sell: Item | None = None
         self.setup()
 
@@ -28,20 +37,23 @@ class Sell(View):
         self._setup_items()
 
     def _setup_lists(self) -> None:
-        self.container_sprites = arcade.SpriteList()
-        self.item_sprites = arcade.SpriteList()
+        self.seller_containers = arcade.SpriteList()
+        self.seller_item_sprites = arcade.SpriteList()
+        self.player_containers = arcade.SpriteList()
+        self.player_item_sprites = arcade.SpriteList()
         self.item_texts: list[arcade.Text] = []
 
     def _setup_containers(self) -> None:
         # Contenedores del jugador
-        player_positions = [(100 + 75 * i, 100) for i in range(len(self.player_items))]
+        player_positions = [
+            (100 + 75 * i, 100) for i in range(len(self.player.get_inventory().items()))
+        ]
         cant_containers = len(player_positions)
         screen_center_x = self.window.width * 0.5
         mid_container = cant_containers // 2
 
         if cant_containers > 0:
             player_positions[mid_container] = (screen_center_x, 100)
-
             for i in range(mid_container - 1, -1, -1):
                 last_pos = player_positions[i + 1]
                 player_positions[i] = (last_pos[0] - 75, 100)
@@ -52,14 +64,21 @@ class Sell(View):
 
         add_containers_to_list(
             point_list=player_positions,
-            list_to_add=self.container_sprites,
+            list_to_add=self.player_containers,
+            container_size=50,
+        )
+        # Contenedores del vendedor :
+        positions = [(400 + 75 * i, 500) for i in range(len(self.seller_items))]
+        add_containers_to_list(
+            point_list=positions,
+            list_to_add=self.seller_containers,
             container_size=50,
         )
 
     def _setup_items(self) -> None:
         # Items del jugador
-        for index, (name, quantity) in enumerate(self.player_items.items()):
-            container: Container = self.container_sprites[index]
+        for index, (name, quantity) in enumerate(self.player.get_inventory().items()):
+            container: Container = self.player_containers[index]
             container.item_placed = True
             new_item = Item(name=name, quantity=quantity, scale=3)
             new_item.id = self.next_item_id
@@ -67,10 +86,21 @@ class Sell(View):
             new_item.change_container(container.id)
             new_item.change_position(container.center_x, container.center_y)
             self.item_texts.append(self._create_item_text(new_item))
-            self.item_sprites.append(new_item)
+            self.player_item_sprites.append(new_item)
+        # Items del vendedor
+        for index, (name, quantity) in enumerate(self.seller_items.items()):
+            container: Container = self.seller_containers[index]
+            container.item_placed = True
+            new_item = Item(name=name, quantity=quantity, scale=3)
+            new_item.id = self.next_item_id
+            self.next_item_id += 1
+            new_item.change_container(container.id)
+            new_item.change_position(container.center_x, container.center_y)
+            self.item_texts.append(self._create_item_text(new_item))
+            self.seller_item_sprites.append(new_item)
 
     def _create_item_text(self, item: Item, fontSize: int = 11) -> arcade.Text:
-        content = f"{item.name} x {item.quantity}"
+        content = f"{item.quantity} ${item.price}"
         text_sprite = arcade.Text(
             text=content,
             font_size=fontSize,
@@ -84,30 +114,35 @@ class Sell(View):
 
     def on_draw(self) -> None:
         self.clear()
-        self.container_sprites.draw(pixelated=True)
-        self.item_sprites.draw(pixelated=True)
+        self.seller_containers.draw(pixelated=True)
+        self.seller_item_sprites.draw(pixelated=True)
+        self.player_containers.draw(pixelated=True)
+        self.player_item_sprites.draw(pixelated=True)
         for text in self.item_texts:
             text.draw()
 
-    def sell_item(self, item: Item) -> None:
-        # Realizar venta
-        self.player.add_coins(item.price * item.quantity)
-        self.player.remove_from_inventory(item.name, item.quantity)
-        print(f"item vendido : {item.name} | {item.price}")
+    def player_sell_item(self, item: Item) -> None:
+        # El jugador vende
+        try:
+            self.player.pay(item.price)
+            self.player.add_to_inventory(item.name, item.quantity)
+            self.seller_items.pop(item.name)
+            print(f"item vendido : {item.name} | {item.price}")
+        except ValueError as e:
+            print(e)
+            return
         self.item_to_sell = None
         self.setup()
 
     def on_mouse_press(
         self, x: int, y: int, button: int, modifiers: int
     ) -> bool | None:
-        if button != arcade.MOUSE_BUTTON_LEFT:
-            return
+        if button == arcade.MOUSE_BUTTON_LEFT:
+            temp = arcade.get_sprites_at_point((x, y), self.seller_item_sprites)
+            if not temp:
+                self.item_to_sell = None
+                return
 
-        temp = arcade.get_sprites_at_point((x, y), self.item_sprites)
-        if not temp:
-            self.item_to_sell = None
-            return
-
-        assert isinstance(temp[-1], Item)
-        self.item_to_sell = temp[-1]
-        self.sell_item(self.item_to_sell)
+            assert isinstance(temp[-1], Item), "No se encontró el item"
+            self.item_to_sell = temp[-1]
+            self.player_sell_item(self.item_to_sell)
