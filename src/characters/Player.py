@@ -78,7 +78,7 @@ class Player(StateMachine):
         # Diccionario para el inventario
         self.inventory: dict[str, int] = {}
         self.max_inventory: int = 64
-        self.coins: int = 0
+        self.coins: int = 100
 
         self.actual_floor: Literal["grass", "wood"] = "grass"
         self.step_sounds: dict[Literal["grass", "wood"], list[arcade.Sound]] = {
@@ -241,12 +241,13 @@ class Player(StateMachine):
     def get_items(self) -> list[tuple[str, int]]:
         return list(self.inventory.items())
 
-    def remove_from_inventory(self, item: str, cant: int) -> None:
+    def remove_from_inventory(self, item: str, cant: int) -> bool:
         if item not in self.inventory:
-            return
+            return False
         self.inventory[item] -= cant
         if self.inventory[item] <= 0:
-            del self.inventory[item]
+            self.inventory.pop(item)
+        return True
 
     def pay(self, price: int):
         if (self.coins - price) < 0:
