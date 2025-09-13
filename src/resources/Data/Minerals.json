@@ -3,41 +3,41 @@
       "big": {"path": "src/resources/Minerals/piedra/piedra_big.png", "touches": 3},
       "mid": {"path": "src/resources/Minerals/piedra/piedra_mid.png", "touches": 2},
       "small": {"path": "src/resources/Minerals/piedra/piedra_small.png", "touches": 1},
-      "item": {"path": "src/resources/Minerals/Rock/Rock_Item.png"}
+      "item": {"path": "src/resources/Minerals/Rock/Rock_Item.png", "price": 10}
    },
 
    "rubi":{
       "big": {"path": "src/resources/Minerals/piedra_rubi/piedra_rubi_big.png", "touches": 3},
       "mid": {"path": "src/resources/Minerals/piedra_rubi/piedra_rubi_mid.png", "touches": 2},
       "small": {"path": "src/resources/Minerals/piedra_rubi/piedra_rubi_small.png", "touches": 1},
-      "item": {"path": "src/resources/Minerals/Rubi/Rubi_Item.png"}
+      "item": {"path": "src/resources/Minerals/Rubi/Rubi_Item.png", "price": 100}
    },
 
    "azufre":{
       "big": {"path": "src/resources/Minerals/azufre/azufre_big.png", "touches": 3},
       "mid": {"path": "src/resources/Minerals/azufre/azufre_mid.png", "touches": 2},
       "small": {"path": "src/resources/Minerals/azufre/azufre_small.png", "touches": 1},
-      "item": {"path": "src/resources/Minerals/Azufre_test/azufre_item.png"}
+      "item": {"path": "src/resources/Minerals/Azufre_test/azufre_item.png", "price": 50}
    },
 
    "piedra_cuarzo":{
       "big": {"path": "src/resources/Minerals/piedra_cuarzo/piedra_cuarzo_big.png", "touches": 3},
       "mid": {"path": "src/resources/Minerals/piedra_cuarzo/piedra_cuarzo_mid.png", "touches": 2},
       "small": {"path": "src/resources/Minerals/piedra_cuarzo/piedra_cuarzo_small.png", "touches": 1},
-      "item": {"path": "src/resources/Minerals/piedra_cuarzo/piedra_cuarzo_small.png"}
+      "item": {"path": "src/resources/Minerals/piedra_cuarzo/piedra_cuarzo_small.png", "price": 30}
    },
 
    "piedra_rubi":{
       "big": {"path": "src/resources/Minerals/piedra_rubi/piedra_rubi_big.png", "touches": 3},
       "mid": {"path": "src/resources/Minerals/piedra_rubi/piedra_rubi_mid.png", "touches": 2},
       "small": {"path": "src/resources/Minerals/piedra_rubi/piedra_rubi_small.png", "touches": 1},
-      "item": {"path": "src/resources/Minerals/piedra_rubi/piedra_rubi_small.png"}
+      "item": {"path": "src/resources/Minerals/piedra_rubi/piedra_rubi_small.png", "price": 80}
    },
 
    "cuarzo":{
       "big": {"path": "src/resources/Minerals/cuarzo/cuarzo_big.png", "touches": 3},
       "mid": {"path": "src/resources/Minerals/cuarzo/cuarzo_mid.png", "touches": 2},
       "small": {"path": "src/resources/Minerals/cuarzo/cuarzo_small.png", "touches": 1},
-      "item": {"path": "src/resources/Minerals/cuarzo/cuarzo_small.png"}
+      "item": {"path": "src/resources/Minerals/cuarzo/cuarzo_small.png", "price": 40}
    }
 }

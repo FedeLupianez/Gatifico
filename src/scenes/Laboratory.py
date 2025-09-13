@@ -8,6 +8,7 @@ import Constants
 from scenes.Chest import Chest
 from scenes.MixTable import MixTable
 from scenes.SplitTable import SplitTable
+from scenes.Sell import Sell
 import DataManager
 from .utils import add_containers_to_list
 
@@ -56,6 +57,7 @@ class Laboratory(View):
     def setup_player(self):
         self.player.setup((330, 45))
         self.player_sprites.append(self.player.sprite)
+        self.player.actual_floor = "wood"
 
     def setup_layers(self):
         if not self.tilemap:
@@ -123,6 +125,8 @@ class Laboratory(View):
         return False
 
     def open_chest(self, chest_id: str):
+        self.keys_pressed.clear()
+        self.player.stop_state()
         new_scene = Chest(
             chest_id=chest_id,
             player=self.player,
@@ -141,6 +145,15 @@ class Laboratory(View):
         if new_scene:
             self.window.show_view(new_scene)
 
+    def open_sell_view(self):
+        self.keys_pressed.clear()
+        self.player.stop_state()
+        new_scene = Sell(
+            player=self.player,
+            callback=self.callback,
+        )
+        self.window.show_view(new_scene)
+
     def process_object_interaction(self, obj: Object) -> bool:
         obj_name: str = obj.name.lower()
         self.keys_pressed.clear()
@@ -154,6 +167,9 @@ class Laboratory(View):
             return True
         if "table" in obj_name:
             self.open_table(table_id=obj_name)
+            return True
+        if "seller" in obj_name:
+            self.open_sell_view()
             return True
 
         return False

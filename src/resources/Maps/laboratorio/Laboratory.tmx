@@ -92,5 +92,6 @@
   <object id="7" name="split_table" type="table" x="164.82" y="224.748" width="49.875" height="35.3523"/>
   <object id="8" name="tele" type="interact" x="302.909" y="122.909" width="54.1818" height="33.4545"/>
   <object id="9" name="door" type="door" x="300" y="340" width="60" height="20"/>
+  <object id="10" name="seller" type="interact" x="240" y="300" width="40" height="40"/>
  </objectgroup>
 </map>

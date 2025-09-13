@@ -241,10 +241,20 @@ class Player(StateMachine):
     def get_items(self) -> list[tuple[str, int]]:
         return list(self.inventory.items())
 
+    def remove_from_inventory(self, item: str, cant: int) -> None:
+        if item not in self.inventory:
+            return
+        self.inventory[item] -= cant
+        if self.inventory[item] <= 0:
+            del self.inventory[item]
+
     def pay(self, price: int):
         if (self.coins - price) < 0:
             raise ValueError("No hay suficiente dinero")
         self.coins -= price
+
+    def add_coins(self, coins: int) -> None:
+        self.coins += coins
 
     def attack(self, enemy: Enemy):
         print(f"atacando a {enemy}")
