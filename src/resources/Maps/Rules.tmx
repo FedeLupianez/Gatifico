@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="49" height="42" tilewidth="17" tileheight="17" infinite="0" nextlayerid="3" nextobjectid="1">
  <tileset firstgid="1" source="../Background/TIleMaps/Naturaleza.tsx"/>
- <layer id="1" name="input_Trees" width="49" height="42">
+ <layer id="1" name="input_Objects" width="49" height="42">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,

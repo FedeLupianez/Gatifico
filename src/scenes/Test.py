@@ -11,7 +11,7 @@ from items.Item import Item
 from .utils import add_containers_to_list
 from .Chest import Chest
 from dataclasses import dataclass, field
-from time import time
+# from time import time
 
 import random
 from functools import lru_cache
@@ -24,13 +24,12 @@ class Chunk:
             "mineral": [],
             "interact": [],
             "floor": [],
-            "trees": [],
             "copes": [],
             "objects": [],
         }
     )
     is_loaded: bool = False
-    last_accessed: float = field(default_factory=time)
+    # last_accessed: float = field(default_factory=time)
 
 
 class Chunk_Manager:
@@ -48,7 +47,7 @@ class Chunk_Manager:
         if key not in self.chunks:
             self.chunks[key] = Chunk()
         chunk = self.chunks[key]
-        chunk.last_accessed = time()
+        # chunk.last_accessed = time()
         return chunk
 
     def get_nearby_chunks(self, center_key: tuple[int, int]):
@@ -87,12 +86,9 @@ class Test(View):
             "interact": arcade.SpriteList(use_spatial_hash=True, lazy=True),
             "mineral": arcade.SpriteList(use_spatial_hash=True, lazy=True),
             "floor": arcade.SpriteList(use_spatial_hash=True, lazy=True),
-            "trees": arcade.SpriteList(use_spatial_hash=True, lazy=True),
             "copes": arcade.SpriteList(use_spatial_hash=True, lazy=True),
             "objects": arcade.SpriteList(use_spatial_hash=True, lazy=True),
         }
-        self.last_area_key = None
-        self._cached_keys = []
         self._view_hitboxes: bool = False
         self._setup_scene()
 
@@ -154,7 +150,7 @@ class Test(View):
         self.batch_assign_sprites(self.interact_objects, "interact")
         self.load_mineral_layer()
         # Variable para precomputar las listas de colisiones
-        self._collision_list = arcade.SpriteList()
+        self._collision_list = arcade.SpriteList(use_spatial_hash=True, lazy=True)
 
     def assign_sprite_chunk(self, sprite: arcade.Sprite, sprite_type: str):
         chunk_key = self.chunk_manager.get_chunk_key(sprite.center_x, sprite.center_y)
@@ -170,7 +166,7 @@ class Test(View):
 
     def assign_tilemap_chunks(self) -> None:
         for layer, sprite_list in self.tilemap.sprite_lists.items():
-            if layer.capitalize() in ["Paredes", "Colisiones", "Interactuables"]:
+            if layer.capitalize() in ["Colisiones", "Interactuables"]:
                 continue
 
             layer_key = layer.lower()
@@ -263,7 +259,6 @@ class Test(View):
         draw_order = [
             "floor",
             "walls",
-            "trees",
             "player",
             "objects",
             "mineral",
@@ -288,6 +283,16 @@ class Test(View):
             color=arcade.color.GREEN, line_thickness=2
         )
         self.player.sprite.draw_hit_box(color=arcade.color.RED, line_thickness=2)
+        self._actual_area["interact"].draw_hit_boxes(
+            color=arcade.color.ALICE_BLUE, line_thickness=2
+        )
+        self._actual_area["objects"].draw_hit_boxes(
+            color=arcade.color.ALICE_BLUE, line_thickness=2
+        )
+
+        # self._actual_area["collisions"].draw_hit_boxes(
+        #     color=arcade.color.ALICE_BLUE, line_thickness=2
+        # )
 
     def gui_draw(self):
         if not self.inventory_dirty:
@@ -348,7 +353,6 @@ class Test(View):
             "mineral": arcade.SpriteList(),
             "interact": arcade.SpriteList(),
             "floor": arcade.SpriteList(),
-            "trees": arcade.SpriteList(),
             "copes": arcade.SpriteList(),
             "objects": arcade.SpriteList(),
         }
