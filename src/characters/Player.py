@@ -8,7 +8,7 @@ from time import time
 from random import randint
 
 
-class Player(StateMachine):
+class Player(StateMachine, PlayerConfig):
     # Defino los id de los estados para no repetir magic strings
     IDLE_SIDE_LEFT = "IDLE_SIDE_LEFT"
     IDLE_SIDE_RIGHT = "IDLE_SIDE_RIGHT"
@@ -18,29 +18,25 @@ class Player(StateMachine):
     RIGHT = "RIGHT"
     UP = "UP"
     DOWN = "DOWN"
-    ANIMATION_STATE_CONFIG: dict = loadData("PlayerAnimationsConfig.json")
+    ANIMATIONS_CONFIG: dict = loadData("PlayerAnimationsConfig.json")
     INITIAL_INDEX = AssetsConstants.INITIAL_INDEX
-    SCALE = PlayerConfig.CHARACTER_SCALE
-    SPEED = PlayerConfig.PLAYER_SPEED
-    HITBOX_WIDTH = 27
-    HITBOX_HEIGHT = 30
 
     def __init__(self):
         super().__init__(Player.IDLE_FRONT)
         self.motions = [arcade.key.W, arcade.key.A, arcade.key.S, arcade.key.D]
         # Todos los path tienen llaves {} donde iría el numero de sprite
-        self.actual_animation_path: str = Player.ANIMATION_STATE_CONFIG["IDLE_FRONT"][
+        self.actual_animation_path: str = Player.ANIMATIONS_CONFIG["IDLE_FRONT"][
             "path"
         ].replace("{}", str(Player.INITIAL_INDEX))
         self.sprite: arcade.Sprite = arcade.Sprite(
-            self.actual_animation_path, scale=Player.SCALE
+            self.actual_animation_path, scale=self.SCALE
         )  # objeto sprite del personaje
 
-        self.speed = Player.SPEED
-        self.actual_animation_frames: int = Player.ANIMATION_STATE_CONFIG[
-            Player.IDLE_FRONT
-        ]["frames"]  # cantidad de frames de la animacion
-        self.actual_animation_speed: float = Player.ANIMATION_STATE_CONFIG[
+        self.speed = self.SPEED
+        self.actual_animation_frames: int = Player.ANIMATIONS_CONFIG[Player.IDLE_FRONT][
+            "frames"
+        ]  # cantidad de frames de la animacion
+        self.actual_animation_speed: float = Player.ANIMATIONS_CONFIG[
             Player.IDLE_FRONT
         ]["animation_speed"]
         self.frames: list[arcade.Texture] = []  # lista de texturas actual
@@ -64,13 +60,13 @@ class Player(StateMachine):
 
         # Cargo las texturas en el diccionario
         for state in self.animations:
-            cant_frames = Player.ANIMATION_STATE_CONFIG[state]["frames"]
+            cant_frames = Player.ANIMATIONS_CONFIG[state]["frames"]
             for i in range(
                 Player.INITIAL_INDEX,
                 cant_frames + Player.INITIAL_INDEX,
             ):
                 self.animations[state].append(
-                    self._load_texture(Player.ANIMATION_STATE_CONFIG[state]["path"], i)
+                    self._load_texture(Player.ANIMATIONS_CONFIG[state]["path"], i)
                 )
 
         self.texture_index = 0  # indice actual de la textura
@@ -78,6 +74,7 @@ class Player(StateMachine):
         # Diccionario para el inventario
         self.inventory: dict[str, int] = {}
         self.max_inventory: int = 64
+        # Monedas del jugador
         self.coins: int = 100
 
         self.actual_floor: Literal["grass", "wood"] = "grass"
@@ -91,13 +88,15 @@ class Player(StateMachine):
                 arcade.Sound("src/resources/Sounds/Step_wood_2.mp3"),
             ],
         }
+        # Tiempo del ultimo sonido de paso, con este sabemos
+        # si se terminó de reproducir el sonido anterior
         self.last_step_sound_time: float = 0.0
-        self.step_coldown = 0.5
+        self.step_coldown = 0.5  # Tiempo entre sonido y sonido
 
     def genericStateHandler(self, event: int):
         """Función genérica para todos los estados del personaje, ya que casi todos hacen lo mismo"""
         # Cargo la configuración del estado actual
-        config = Player.ANIMATION_STATE_CONFIG[self.actual_state_id]
+        config = Player.ANIMATIONS_CONFIG[self.actual_state_id]
         # Hago los cambios que tengan que ver con el sprite
         self.sprite.change_x = config["speed_x"]
         self.sprite.change_y = config["speed_y"]
@@ -110,7 +109,7 @@ class Player(StateMachine):
         frames = config["frames"]
         self.actual_animation_speed = config.get("animation_speed", 0.1)
 
-        template_path = Player.ANIMATION_STATE_CONFIG[self.actual_state_id]["path"]
+        template_path = Player.ANIMATIONS_CONFIG[self.actual_state_id]["path"]
         if template_path != self.actual_animation_path:
             self.actual_animation_path = template_path
             self.actual_animation_frames = frames
@@ -204,16 +203,16 @@ class Player(StateMachine):
         self.texture_index = 0
 
     def play_step_sound(self) -> None:
-        if "IDLE" not in self.actual_state_id:
-            current_time = time()
-            if not (current_time - self.last_step_sound_time > self.step_coldown):
-                return
-            volume = 1 if self.actual_floor == "grass" else 0.2
-            self.step_sounds[self.actual_floor][randint(0, 1)].play(
-                volume=volume, speed=1.2
-            )
-
-            self.last_step_sound_time = current_time
+        if "IDLE" in self.actual_state_id:
+            return
+        current_time = time()
+        if not (current_time - self.last_step_sound_time > self.step_coldown):
+            return
+        volume = 1 if self.actual_floor == "grass" else 0.2
+        self.step_sounds[self.actual_floor][randint(0, 1)].play(
+            volume=volume, speed=1.2
+        )
+        self.last_step_sound_time = current_time
 
     def update_animation(self, deltaTime: float):
         """Función para actualizar la animación del personaje"""
@@ -235,7 +234,7 @@ class Player(StateMachine):
                 return
             self.inventory[item] += cant
 
-    def get_inventory(self):
+    def get_inventory(self) -> dict[str, int]:
         return self.inventory
 
     def get_items(self) -> list[tuple[str, int]]:
@@ -258,5 +257,4 @@ class Player(StateMachine):
         self.coins += coins
 
     def attack(self, enemy: Enemy):
-        print(f"atacando a {enemy}")
         enemy.hurt(damage=10)

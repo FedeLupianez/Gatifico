@@ -1,4 +1,3 @@
-from PIL.Image import new
 import arcade
 from typing import Dict, Any, Callable
 
@@ -118,7 +117,7 @@ class Test(View):
     def setup_inventory_containers(self) -> None:
         """Agrego los contenedores a la lista del inventario"""
         CONTAINER_SIZE = 35
-        ITEMS_INIT = Constants.PlayerConfig.PLAYER_INVENTORY_POSITION
+        ITEMS_INIT = Constants.PlayerConfig.INVENTORY_POSITION
         positions = [(ITEMS_INIT[0] + 50 * i, ITEMS_INIT[1]) for i in range(4)]
         add_containers_to_list(
             positions, self.inventory_sprites, container_size=CONTAINER_SIZE
@@ -261,26 +260,23 @@ class Test(View):
                     collision_attemps += 1
 
     def world_draw(self):
+        draw_order = [
+            "floor",
+            "walls",
+            "trees",
+            "player",
+            "objects",
+            "mineral",
+            "copes",
+        ]
         self.camera.use()
-
-        if self._actual_area["floor"]:
-            self._actual_area["floor"].draw(pixelated=True)
-        self.walls.draw(pixelated=True)
-
-        if self._actual_area["trees"]:
-            self._actual_area["trees"].draw(pixelated=True)
-
-        self.characters_sprites.draw(pixelated=True)  # dibuja el personaje
-
-        if self._actual_area["copes"]:
-            self._actual_area["copes"].draw(pixelated=True)
-
-        if self._actual_area["objects"]:
-            self._actual_area["objects"].draw(pixelated=True)
-
-        if self._actual_area["mineral"]:
-            self._actual_area["mineral"].draw(pixelated=True)
-
+        for layer in draw_order:
+            if layer in self._actual_area:
+                self._actual_area[layer].draw(pixelated=True)
+            elif layer == "player":
+                self.characters_sprites.draw(pixelated=True)
+            elif layer == "walls":
+                self.walls.draw(pixelated=True)
         if self._view_hitboxes:
             self.draw_hit_boxes()
 

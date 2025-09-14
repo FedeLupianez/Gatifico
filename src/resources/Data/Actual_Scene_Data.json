@@ -1,1 +1,1 @@
-{"player": {"position": {"center_x": 0.0, "center_y": 0.0}, "inventory": {}}, "scene": "SELL"}
+{"player": {"position": {"center_x": 405, "center_y": 336}, "inventory": {"piedra": 2, "piedra_cuarzo": 4}}, "scene": "TEST"}

@@ -17,9 +17,11 @@ class Game:
 
 class PlayerConfig:
     # Valores del personaje principal :
-    CHARACTER_SCALE = 0.5
-    PLAYER_SPEED = 0.5
-    PLAYER_INVENTORY_POSITION = (550, 100)
+    SCALE = 0.5
+    SPEED = 0.5
+    INVENTORY_POSITION = (550, 100)
+    HITBOX_WIDTH = 27
+    HITBOX_HEIGHT = 30
 
 
 class SignalCodes:
