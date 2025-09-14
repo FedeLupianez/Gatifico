@@ -76,6 +76,7 @@ class Player(StateMachine, PlayerConfig):
         self.max_inventory: int = 64
         # Monedas del jugador
         self.coins: int = 100
+        self.chunk_key: tuple[int, int] = (0, 0)
 
         self.actual_floor: Literal["grass", "wood"] = "grass"
         self.step_sounds: dict[Literal["grass", "wood"], list[arcade.Sound]] = {

@@ -65,13 +65,26 @@ class Test(View):
         tileMapUrl = "src/resources/Maps/Tests.tmx"
         super().__init__(background_url=None, tilemap_url=tileMapUrl)
         self.window.set_mouse_visible(False)
+
+        # Constantes de clase
+        self.player = player  # Personaje principal
+        self.callback = callback  # Callback al ViewManager
+
+        # Le pongo el zoom a la cámara
+        self.camera.zoom = Constants.Game.FOREST_ZOOM_CAMERA
+        self.camera.position = self.player.sprite.position
+
         self.chunk_manager = Chunk_Manager(
             int(self.camera.viewport.width // 7), int(self.camera.viewport.height // 7)
         )
+        # constantes para precalcular las operacions para actualizar la camara
+        self._screen_width = self.camera.viewport_width
+        self._screen_height = self.camera.viewport_height
+        self._half_w = (self._screen_width / self.camera.zoom) * 0.5
+        self._half_h = (self._screen_height / self.camera.zoom) * 0.5
+        self._map_width = self.tilemap.width * self.tilemap.tile_width
+        self._map_height = self.tilemap.height * self.tilemap.tile_height
 
-        self.callback = callback
-
-        self.player = player  # Defino el personaje
         self.enemies: list[Enemy] = [Enemy(500, 500)]
 
         self.keys_pressed: set = set()
@@ -79,6 +92,7 @@ class Test(View):
         self.inventory_dirty = True
         # Hash para detectar cambios en el inventario
         self.last_inventory_hash = None
+        self._view_hitboxes: bool = False  # Flag para mostrar las hitboxes
 
         self.areas: dict[tuple, dict[str, list]] = {}
         self._actual_area: dict[str, arcade.SpriteList] = {
@@ -89,7 +103,6 @@ class Test(View):
             "copes": arcade.SpriteList(use_spatial_hash=True, lazy=True),
             "objects": arcade.SpriteList(use_spatial_hash=True, lazy=True),
         }
-        self._view_hitboxes: bool = False
         self._setup_scene()
 
     def _setup_scene(self) -> None:
@@ -97,6 +110,9 @@ class Test(View):
         self.setup_spritelists()
         self.setup_scene_layer()
         self.setup_player()
+        self.player_chunk_key = self.chunk_manager.get_chunk_key(
+            self.player.sprite.center_x, self.player.sprite.center_y
+        )
         self.update_inventory_sprites()
         self.update_inventory_texts()
         self.assign_tilemap_chunks()
@@ -126,14 +142,16 @@ class Test(View):
         self.inventory_sprites.append(inventory_sprite)
 
     def setup_player(self) -> None:
+        # Cargo el inventario anterior del jugador, si no tiene le pongo uno vacío
         player_data = DataManager.game_data["player"]
-        self.player.inventory = player_data["inventory"]
-        self.player.setup((900, 600))
+        self.player.inventory = player_data.get("inventory", {})
+        self.player.setup(position=(900, 600))  # Setup del personaje
+        # Le asigno la chunk_key al jugador
+        self.player.chunk_key = self.chunk_manager.get_chunk_key(
+            self.player.sprite.center_x, self.player.sprite.center_y
+        )
         self.characters_sprites.append(self.player.sprite)
         self.characters_sprites.append(self.enemies[0])
-        # Camara para seguir al jugador :
-        self.camera.zoom = Constants.Game.FOREST_ZOOM_CAMERA
-        self.camera.position = self.player.sprite.position
         del player_data
 
     def setup_scene_layer(self) -> None:
@@ -153,6 +171,7 @@ class Test(View):
         self._collision_list = arcade.SpriteList(use_spatial_hash=True, lazy=True)
 
     def assign_sprite_chunk(self, sprite: arcade.Sprite, sprite_type: str):
+        """Se asigna una chunk_key a un sprite específico"""
         chunk_key = self.chunk_manager.get_chunk_key(sprite.center_x, sprite.center_y)
         if hasattr(sprite, "chunk_key"):
             sprite.chunk_key = chunk_key
@@ -161,10 +180,12 @@ class Test(View):
             chunk.sprites[sprite_type].append(sprite)
 
     def batch_assign_sprites(self, sprite_list: arcade.SpriteList, sprite_type: str):
+        """Asignación de chunk_key a toda una SpriteList"""
         for sprite in sprite_list:
             self.assign_sprite_chunk(sprite, sprite_type)
 
     def assign_tilemap_chunks(self) -> None:
+        """Función para cargar los tiles del tilemap en sus respectivos chunks"""
         for layer, sprite_list in self.tilemap.sprite_lists.items():
             if layer.capitalize() in ["Colisiones", "Interactuables"]:
                 continue
@@ -303,18 +324,9 @@ class Test(View):
         for text in self.inventory_texts:
             text.draw()
 
-    def on_draw(self) -> bool | None:
-        # Función que se llama cada vez que se dibuja la escena
-        self.clear()  # limpia la pantalla
-        self.world_draw()
-        self.gui_draw()
+    # Funciones de actualización
 
     def update_inventory(self):
-        self.update_inventory_sprites()
-        self.update_inventory_texts()
-        self.inventory_dirty = True
-
-    def update_inventory_display(self) -> None:
         """Esta función se asegura de actualizar el inventario solo cuando hay cambios en este"""
         current_hash = hash(tuple(sorted(self.player.inventory.items())))
 
@@ -322,7 +334,9 @@ class Test(View):
         if self.last_inventory_hash == current_hash:
             return
         self.last_inventory_hash = current_hash
-        self.update_inventory()
+        self.update_inventory_sprites()
+        self.update_inventory_texts()
+        self.inventory_dirty = True
 
     def update_inventory_sprites(self):
         self.items_inventory.clear()
@@ -350,16 +364,15 @@ class Test(View):
 
     def update_actual_chunk(self):
         active_chunk_lists = {
-            "mineral": arcade.SpriteList(),
-            "interact": arcade.SpriteList(),
+            "mineral": arcade.SpriteList(use_spatial_hash=True),
+            "interact": arcade.SpriteList(use_spatial_hash=True),
             "floor": arcade.SpriteList(),
             "copes": arcade.SpriteList(),
-            "objects": arcade.SpriteList(),
+            "objects": arcade.SpriteList(use_spatial_hash=True),
         }
-        player_key = self.chunk_manager.get_chunk_key(
-            self.player.sprite.center_x, self.player.sprite.center_y
+        nearby_chunks = self.chunk_manager.get_nearby_chunks(
+            center_key=self.player_chunk_key
         )
-        nearby_chunks = self.chunk_manager.get_nearby_chunks(center_key=player_key)
         self._collision_list.clear()
         self._collision_list.extend(self.walls)
         for key in nearby_chunks:
@@ -372,6 +385,22 @@ class Test(View):
                 self._collision_list.extend(sprites)
         self._actual_area = active_chunk_lists
 
+    def update_camera(self, player_moved: bool) -> None:
+        cam_lerp = 0.25 if (player_moved) else 0.06
+
+        target_x = self.player.sprite.center_x
+        target_y = self.player.sprite.center_y
+
+        # Le pongo el limite del mundo a la cámara
+        target_x = max(self._half_w, min(target_x, self._map_width - self._half_w))
+        target_y = max(self._half_h, min(target_y, self._map_height - self._half_h))
+
+        self.camera.position = arcade.math.lerp_2d(
+            self.camera.position, (target_x, target_y), cam_lerp
+        )
+
+    # Funciones de cambio de escena
+
     def change_to_menu(self) -> None:
         DataManager.store_actual_data(self.player, "TEST")
         self.callback(Constants.SignalCodes.CHANGE_VIEW, "MENU")
@@ -383,6 +412,71 @@ class Test(View):
             previusScene=self,
         )
         self.window.show_view(new_scene)
+
+    # Funciones de Interacción con objetos
+    def handleInteractions(self):
+        closest_obj = arcade.get_closest_sprite(
+            self.player.sprite, self._actual_area["interact"]
+        )
+        if closest_obj and closest_obj[1] <= 50:
+            return self.process_object_interaction(closest_obj[0])
+
+        closest_obj = arcade.get_closest_sprite(
+            self.player.sprite, self._actual_area["mineral"]
+        )
+        if closest_obj and closest_obj[1] <= 50:
+            return self.process_mineral_interaction(closest_obj[0])
+
+        return False
+
+    def process_object_interaction(self, interact_obj: Object) -> bool:
+        """Procesa la interaccion con un objeto"""
+        object_name = interact_obj.name.lower()
+        self.keys_pressed.clear()
+        self.player.stop_state()
+        if "chest" in object_name:
+            self.open_chest(chest_id=object_name)
+            return True
+
+        match object_name:
+            case "door":
+                # Cambio de escena y guardo los datos actuales
+                DataManager.store_actual_data(self.player, "TEST")
+                self.callback(Constants.SignalCodes.CHANGE_VIEW, "LABORATORY")
+                return True
+            case "comerce":
+                # Cambiar a la escena de compra
+                return True
+        return False
+
+    def process_mineral_interaction(self, mineral: Mineral) -> bool:
+        """Procesa la interacción con un mineral"""
+        if (
+            len(self.player.inventory) >= 4
+            and mineral.mineral not in self.player.inventory
+        ):
+            return True
+        mineral.setup()
+        mineral.state_machine.process_state(arcade.key.E)
+        self.player.add_to_inventory(mineral.mineral, 1)
+
+        # Cambio el valor del hash del inventario para que se actualice
+        self.last_inventory_hash = None
+
+        if mineral.should_removed:
+            mineral.remove_from_sprite_lists()
+            self.chunk_manager.chunks[mineral.chunk_key].sprites["mineral"].remove(
+                mineral
+            )
+        return True
+
+    # Funciones de escena de arcade
+
+    def on_draw(self) -> bool | None:
+        # Función que se llama cada vez que se dibuja la escena
+        self.clear()  # limpia la pantalla
+        self.world_draw()
+        self.gui_draw()
 
     def on_key_press(self, symbol: int, modifiers: int) -> bool | None:
         match symbol:
@@ -423,62 +517,6 @@ class Test(View):
         self.keys_pressed.add(symbol)
         return None
 
-    def handleInteractions(self):
-        closest_obj = arcade.get_closest_sprite(
-            self.player.sprite, self._actual_area["interact"]
-        )
-        if closest_obj and closest_obj[1] <= 50:
-            return self.process_object_interaction(closest_obj[0])
-
-        closest_obj = arcade.get_closest_sprite(
-            self.player.sprite, self._actual_area["mineral"]
-        )
-        if closest_obj and closest_obj[1] <= 50:
-            return self.process_mineral_interaction(closest_obj[0])
-        del closest_obj
-
-        return False
-
-    def process_object_interaction(self, interact_obj: Object) -> bool:
-        """Procesa la interaccion con un objeto"""
-        object_name = interact_obj.name.lower()
-        self.keys_pressed.clear()
-        self.player.stop_state()
-        if "chest" in object_name:
-            self.open_chest(chest_id=object_name)
-            return True
-
-        match object_name:
-            case "door":
-                # Cambio de escena y guardo los datos actuales
-                DataManager.store_actual_data(self.player, "TEST")
-                self.callback(Constants.SignalCodes.CHANGE_VIEW, "LABORATORY")
-                return True
-            case "comerce":
-                # Cambiar a la escena de compra
-                return True
-        return False
-
-    def process_mineral_interaction(self, mineral: Mineral) -> bool:
-        if (
-            len(self.player.inventory) >= 4
-            and mineral.mineral not in self.player.inventory
-        ):
-            return True
-        mineral.setup()
-        mineral.state_machine.process_state(arcade.key.E)
-        self.player.add_to_inventory(mineral.mineral, 1)
-
-        # Cambio el valor del hash del inventario para que se actualice
-        self.last_inventory_hash = None
-
-        if mineral.should_removed:
-            mineral.remove_from_sprite_lists()
-            self.chunk_manager.chunks[mineral.chunk_key].sprites["mineral"].remove(
-                mineral
-            )
-        return True
-
     def on_key_release(self, symbol: int, modifiers: int) -> bool | None:
         self.keys_pressed.discard(symbol)
         self.player.process_state(-symbol)
@@ -501,15 +539,17 @@ class Test(View):
             or abs(player.center_y - lastPosition[1]) > 0
         )
         if player_moved or self.camera.position != self.player.sprite.position:
-            cam_lerp = 0.25 if (player_moved) else 0.06
-            self.camera.position = arcade.math.lerp_2d(
-                self.camera.position, self.player.sprite.position, cam_lerp
-            )
+            self.update_camera(player_moved)
 
-        self.update_inventory_display()
+        self.update_inventory()
 
         if player_moved:
-            self.update_actual_chunk()
+            new_chunk_key = self.chunk_manager.get_chunk_key(
+                player.center_x, player.center_y
+            )
+            if new_chunk_key != self.player_chunk_key:
+                self.player_chunk_key = new_chunk_key
+                self.update_actual_chunk()
             # Detección de colisiones
             if self.player_collides():
                 self.player.sprite.center_x, self.player.sprite.center_y = lastPosition
