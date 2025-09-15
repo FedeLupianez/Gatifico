@@ -3,7 +3,7 @@ import arcade.gui
 from scenes.View import View
 from characters.Player import Player
 import DataManager
-from typing import Callable, Dict
+from typing import Dict
 from Constants import Filter, Game
 from items.Container import Container
 from items.Item import Item
@@ -395,7 +395,6 @@ class MixTable(View):
             self.item_to_move.change_position(x, y)
 
     def clean_up(self) -> None:
-        print("borrando referencias")
         del self.background_image
         del_references_list(self.container_sprites)
         del self.container_sprites

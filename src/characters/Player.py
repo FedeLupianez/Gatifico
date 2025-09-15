@@ -1,7 +1,7 @@
 import arcade
 from Constants import AssetsConstants, PlayerConfig
 from StateMachine import StateMachine
-from DataManager import loadData, texture_manager, game_data
+from DataManager import loadData, texture_manager, game_data, get_path
 from characters.Enemy import Enemy
 from typing import Literal
 from time import time
@@ -81,12 +81,12 @@ class Player(StateMachine, PlayerConfig):
         self.actual_floor: Literal["grass", "wood"] = "grass"
         self.step_sounds: dict[Literal["grass", "wood"], list[arcade.Sound]] = {
             "grass": [
-                arcade.Sound("src/resources/Sounds/Step_grass_1.mp3"),
-                arcade.Sound("src/resources/Sounds/Step_grass_2.mp3"),
+                arcade.Sound(get_path("Step_grass_1.mp3")),
+                arcade.Sound(get_path("Step_grass_2.mp3")),
             ],
             "wood": [
-                arcade.Sound("src/resources/Sounds/Step_wood_1.mp3"),
-                arcade.Sound("src/resources/Sounds/Step_wood_2.mp3"),
+                arcade.Sound(get_path("Step_wood_1.mp3")),
+                arcade.Sound(get_path("Step_wood_2.mp3")),
             ],
         }
         # Tiempo del ultimo sonido de paso, con este sabemos
@@ -259,3 +259,6 @@ class Player(StateMachine, PlayerConfig):
 
     def attack(self, enemy: Enemy):
         enemy.hurt(damage=10)
+
+    def throw_item(self, item: str):
+        self.inventory.pop(item)

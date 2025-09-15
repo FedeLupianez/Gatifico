@@ -2,15 +2,15 @@ import arcade
 from Constants import Game, SignalCodes
 import Constants
 from scenes.View import View
-import DataManager
+from DataManager import game_data, get_path
 
-Start_button_path: str = "src/resources/UI/PlayButton.png"
-Exit_button_path: str = "src/resources/UI/ExitButton.png"
+Start_button_path: str = get_path("PlayButton.png")
+Exit_button_path: str = get_path("ExitButton.png")
 
 
 class Menu(View):
     def __init__(self, callback):
-        background_url = "src/resources/UI/MenuBackground.jpg"
+        background_url = get_path("MenuBackground.jpg")
         super().__init__(background_url=background_url, tilemap_url=None)
 
         self.window.set_mouse_visible(True)
@@ -63,7 +63,7 @@ class Menu(View):
         if self.start_button.collides_with_point((x, y)):
             self.callback(
                 SignalCodes.CHANGE_VIEW,
-                DataManager.game_data["scene"],
+                game_data["scene"],
                 load_screen=True,
             )
             return

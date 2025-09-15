@@ -9,13 +9,13 @@ from scenes.Chest import Chest
 from scenes.MixTable import MixTable
 from scenes.SplitTable import SplitTable
 from scenes.Sell import Sell
-import DataManager
+import DataManager as Dm
 from .utils import add_containers_to_list
 
 
 class Laboratory(View):
     def __init__(self, callback: Callable, player: Player):
-        tileMapUrl = "src/resources/Maps/laboratorio/Laboratory.tmx"
+        tileMapUrl = Dm.get_path("Laboratory.tmx")
         super().__init__(background_url=None, tilemap_url=tileMapUrl)
         self.player = player
         self.callback = callback
@@ -24,15 +24,12 @@ class Laboratory(View):
         self.camera.position = self.player.sprite.position
         self.gui_camera.viewport = self.camera.viewport
 
-        # constantes para precalcular las operacions para actualizar la camara
-        self._screen_width = self.camera.viewport_width
-        self._screen_height = self.camera.viewport_height
-        self._half_w = (self._screen_width / self.camera.zoom) * 0.5
-        self._half_h = (self._screen_height / self.camera.zoom) * 0.5
-
         self._map_width = self.tilemap.width * self.tilemap.tile_width
         self._map_height = self.tilemap.height * self.tilemap.tile_height
+        self.is_first_load: bool = True
+
         self.last_inventory_hash = 0
+        self.update_sizes()
 
         self._item_mouse_text = arcade.Text(
             text="", x=0, y=0, anchor_x="center", anchor_y="center", align="center"
@@ -44,9 +41,6 @@ class Laboratory(View):
         self.setup_inventory_containers()
         self.update_inventory_items(self.player.get_items())
         self.update_inventory_texts()
-
-    def on_show_view(self) -> None:
-        self.window.set_mouse_visible(True)
 
     def setup_spritelists(self):
         self.player_sprites = arcade.SpriteList()
@@ -74,14 +68,12 @@ class Laboratory(View):
     def setup_inventory_containers(self) -> None:
         """Agrego los contenedores a la lista del inventario"""
         CONTAINER_SIZE = 35
-        ITEMS_INIT = Constants.PlayerConfig.PLAYER_INVENTORY_POSITION
+        ITEMS_INIT = Constants.PlayerConfig.INVENTORY_POSITION
         positions = [(ITEMS_INIT[0] + 50 * i, ITEMS_INIT[1]) for i in range(4)]
         add_containers_to_list(
             positions, self.inventory_containers, container_size=CONTAINER_SIZE
         )
-        inventory_sprite = arcade.Sprite(
-            "src/resources/UI/inventory_tools.png", scale=3
-        )
+        inventory_sprite = arcade.Sprite(Dm.get_path("inventory_tools.png"), scale=3)
         inventory_sprite.center_x = ITEMS_INIT[0] + 75
         inventory_sprite.center_y = ITEMS_INIT[1]
         self.inventory_containers.append(inventory_sprite)
@@ -132,6 +124,7 @@ class Laboratory(View):
             player=self.player,
             previusScene=self,
         )
+        self.is_first_load = False
         self.window.show_view(new_scene)
 
     def open_table(self, table_id: str):
@@ -143,23 +136,15 @@ class Laboratory(View):
                 new_scene = MixTable(background_scene=self, player=self.player)
 
         if new_scene:
+            self.is_first_load = False
             self.window.show_view(new_scene)
-
-    def open_sell_view(self):
-        self.keys_pressed.clear()
-        self.player.stop_state()
-        new_scene = Sell(
-            player=self.player,
-            callback=self.callback,
-        )
-        self.window.show_view(new_scene)
 
     def process_object_interaction(self, obj: Object) -> bool:
         obj_name: str = obj.name.lower()
         self.keys_pressed.clear()
         self.player.stop_state()
         if obj_name == "door":
-            DataManager.store_actual_data(self.player, "LABORATORY")
+            Dm.store_actual_data(self.player, "LABORATORY")
             self.callback(Constants.SignalCodes.CHANGE_VIEW, "TEST")
             return True
         if "chest" in obj_name:
@@ -167,9 +152,6 @@ class Laboratory(View):
             return True
         if "table" in obj_name:
             self.open_table(table_id=obj_name)
-            return True
-        if "seller" in obj_name:
-            self.open_sell_view()
             return True
 
         return False
@@ -186,8 +168,8 @@ class Laboratory(View):
     def on_mouse_motion(self, x: int, y: int, dx: int, dy: int) -> bool | None:
         if item := arcade.get_sprites_at_point((x, y), self.inventory_items):
             self._item_mouse_text.text = item[0].name or ""
-            self._item_mouse_text.x = x
-            self._item_mouse_text.y = y
+            self._item_mouse_text.x = x + 10
+            self._item_mouse_text.y = y + 15
         else:
             self._item_mouse_text.text = ""
 
@@ -197,8 +179,8 @@ class Laboratory(View):
             return True
 
         if symbol == arcade.key.ESCAPE:
+            Dm.store_actual_data(self.player, "LABORATORY")
             # Si el jugador actualmente se está moviendo lo paro
-            DataManager.store_actual_data(self.player, "LABORATORY")
             self.keys_pressed.clear()
             self.player.stop_state()
             self.callback(Constants.SignalCodes.PAUSE_GAME)
@@ -230,6 +212,12 @@ class Laboratory(View):
         self.clear()
         self.world_draw()
         self.gui_draw()
+
+    def on_show_view(self) -> None:
+        self.window.set_mouse_visible(True)
+        if self.is_first_load:
+            self.camera.position = self.player.sprite.position
+            self.is_first_load = False
 
     def on_update(self, delta_time: float):
         self.player.update_animation(delta_time)

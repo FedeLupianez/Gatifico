@@ -38,6 +38,12 @@ class View(arcade.View):
         self.camera = Camera2D()
         self.gui_camera = Camera2D()
 
+        # constantes para precalcular las operacions para actualizar la camara
+        self._screen_width = self.camera.viewport_width
+        self._screen_height = self.camera.viewport_height
+        self._half_w = (self._screen_width / self.camera.zoom) * 0.5
+        self._half_h = (self._screen_height / self.camera.zoom) * 0.5
+
     def CreateScene(
         self, background_url: str | None, tilemap_url: str | None = None
     ) -> arcade.Scene:
@@ -99,3 +105,12 @@ class View(arcade.View):
             )
             temp_list.append(sprite)
         return temp_list
+
+    def update_sizes(self) -> None:
+        self._screen_width = self.camera.viewport_width
+        self._screen_height = self.camera.viewport_height
+        self._half_w = (self._screen_width / self.camera.zoom) * 0.5
+        self._half_h = (self._screen_height / self.camera.zoom) * 0.5
+
+    def on_resize(self, width: int, height: int) -> bool | None:
+        self.update_sizes()
