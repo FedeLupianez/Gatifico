@@ -6,7 +6,7 @@ from scenes.View import View, Object
 import Constants
 from characters.Player import Player
 from items.Mineral import Mineral
-import DataManager
+import DataManager as Dm
 from items.Item import Item
 from .utils import add_containers_to_list
 from .Chest import Chest
@@ -26,10 +26,9 @@ class Chunk:
             "floor": [],
             "copes": [],
             "objects": [],
+            "items": [],
         }
     )
-    is_loaded: bool = False
-    # last_accessed: float = field(default_factory=time)
 
 
 class Chunk_Manager:
@@ -37,7 +36,7 @@ class Chunk_Manager:
         self.chunk_size_x = chunk_size_x
         self.chunk_size_y = chunk_size_y
         self.chunks: Dict[tuple[int, int], Chunk] = {}
-        self.max_loaded_chunks = 15
+        self.is_world_loaded = False
 
     @lru_cache(maxsize=100)
     def get_chunk_key(self, x: float, y: float) -> tuple[int, int]:
@@ -47,7 +46,6 @@ class Chunk_Manager:
         if key not in self.chunks:
             self.chunks[key] = Chunk()
         chunk = self.chunks[key]
-        # chunk.last_accessed = time()
         return chunk
 
     def get_nearby_chunks(self, center_key: tuple[int, int]):
@@ -59,12 +57,45 @@ class Chunk_Manager:
             if (col + dx, row + dy) in self.chunks
         ]
 
+    def load_world(
+        self,
+        tilemap: arcade.TileMap,
+        ignored_layers: list[str] | None = None,
+    ) -> None:
+        """Función para cargar los tiles del tilemap en sus respectivos chunks"""
+        for layer, sprite_list in tilemap.sprite_lists.items():
+            if ignored_layers and layer.capitalize() in ignored_layers:
+                continue
+            layer_key = layer.lower()
+            for sprite in sprite_list:
+                key = self.get_chunk_key(sprite.center_x, sprite.center_y)
+
+                chunk = self.get_chunk(key)
+                if layer_key in chunk.sprites:
+                    self.chunks[key].sprites[layer_key].append(sprite)
+        self.is_world_loaded = True
+
+    def assign_sprite_chunk(self, sprite: arcade.Sprite, sprite_type: str) -> None:
+        """Se asigna una chunk_key a un sprite específico"""
+        chunk_key = self.get_chunk_key(sprite.center_x, sprite.center_y)
+        if hasattr(sprite, "chunk_key"):
+            setattr(sprite, "chunk_key", chunk_key)
+        chunk = self.get_chunk(chunk_key)
+        if sprite_type in chunk.sprites:
+            # Cargo el sprite en el chunk especificado
+            self.chunks[chunk_key].sprites[sprite_type].append(sprite)
+
+    def batch_assign_sprites(self, sprite_list: arcade.SpriteList, sprite_type: str):
+        """Asignación de chunk_key a toda una SpriteList"""
+        for sprite in sprite_list:
+            self.assign_sprite_chunk(sprite, sprite_type)
+
 
 class Test(View):
     def __init__(self, callback: Callable, player: Player) -> None:
-        tileMapUrl = "src/resources/Maps/Tests.tmx"
+        tileMapUrl = Dm.get_path("Tests.tmx")
         super().__init__(background_url=None, tilemap_url=tileMapUrl)
-        self.window.set_mouse_visible(False)
+        self.window.set_mouse_visible(True)
 
         # Constantes de clase
         self.player = player  # Personaje principal
@@ -73,15 +104,12 @@ class Test(View):
         # Le pongo el zoom a la cámara
         self.camera.zoom = Constants.Game.FOREST_ZOOM_CAMERA
         self.camera.position = self.player.sprite.position
+        self.is_first_load: bool = True
 
         self.chunk_manager = Chunk_Manager(
             int(self.camera.viewport.width // 7), int(self.camera.viewport.height // 7)
         )
-        # constantes para precalcular las operacions para actualizar la camara
-        self._screen_width = self.camera.viewport_width
-        self._screen_height = self.camera.viewport_height
-        self._half_w = (self._screen_width / self.camera.zoom) * 0.5
-        self._half_h = (self._screen_height / self.camera.zoom) * 0.5
+        # constantes para precalcular el tamaño del mapa
         self._map_width = self.tilemap.width * self.tilemap.tile_width
         self._map_height = self.tilemap.height * self.tilemap.tile_height
 
@@ -102,6 +130,7 @@ class Test(View):
             "floor": arcade.SpriteList(use_spatial_hash=True, lazy=True),
             "copes": arcade.SpriteList(use_spatial_hash=True, lazy=True),
             "objects": arcade.SpriteList(use_spatial_hash=True, lazy=True),
+            "items": arcade.SpriteList(use_spatial_hash=True),
         }
         self._setup_scene()
 
@@ -115,8 +144,12 @@ class Test(View):
         )
         self.update_inventory_sprites()
         self.update_inventory_texts()
-        self.assign_tilemap_chunks()
+        # El chunk_manager carga todo el mundo
+        self.chunk_manager.load_world(
+            self.tilemap, ignored_layers=["Colisiones", "Interactuables"]
+        )
         self.update_actual_chunk()
+        self.update_sizes()
 
     def setup_spritelists(self):
         # Listas de Sprites
@@ -134,16 +167,14 @@ class Test(View):
         add_containers_to_list(
             positions, self.inventory_sprites, container_size=CONTAINER_SIZE
         )
-        inventory_sprite = arcade.Sprite(
-            "src/resources/UI/inventory_tools.png", scale=3
-        )
+        inventory_sprite = arcade.Sprite(Dm.get_path("inventory_tools.png"), scale=3)
         inventory_sprite.center_x = ITEMS_INIT[0] + 75
         inventory_sprite.center_y = ITEMS_INIT[1]
         self.inventory_sprites.append(inventory_sprite)
 
     def setup_player(self) -> None:
         # Cargo el inventario anterior del jugador, si no tiene le pongo uno vacío
-        player_data = DataManager.game_data["player"]
+        player_data = Dm.game_data["player"]
         self.player.inventory = player_data.get("inventory", {})
         self.player.setup(position=(900, 600))  # Setup del personaje
         # Le asigno la chunk_key al jugador
@@ -165,38 +196,10 @@ class Test(View):
         # Capas de colisiones :
         self.collision_objects = self.load_object_layers("Colisiones", self.tilemap)
         self.interact_objects = self.load_object_layers("Interactuables", self.tilemap)
-        self.batch_assign_sprites(self.interact_objects, "interact")
+        self.chunk_manager.batch_assign_sprites(self.interact_objects, "interact")
         self.load_mineral_layer()
         # Variable para precomputar las listas de colisiones
         self._collision_list = arcade.SpriteList(use_spatial_hash=True, lazy=True)
-
-    def assign_sprite_chunk(self, sprite: arcade.Sprite, sprite_type: str):
-        """Se asigna una chunk_key a un sprite específico"""
-        chunk_key = self.chunk_manager.get_chunk_key(sprite.center_x, sprite.center_y)
-        if hasattr(sprite, "chunk_key"):
-            sprite.chunk_key = chunk_key
-        chunk = self.chunk_manager.get_chunk(chunk_key)
-        if sprite_type in chunk.sprites:
-            chunk.sprites[sprite_type].append(sprite)
-
-    def batch_assign_sprites(self, sprite_list: arcade.SpriteList, sprite_type: str):
-        """Asignación de chunk_key a toda una SpriteList"""
-        for sprite in sprite_list:
-            self.assign_sprite_chunk(sprite, sprite_type)
-
-    def assign_tilemap_chunks(self) -> None:
-        """Función para cargar los tiles del tilemap en sus respectivos chunks"""
-        for layer, sprite_list in self.tilemap.sprite_lists.items():
-            if layer.capitalize() in ["Colisiones", "Interactuables"]:
-                continue
-
-            layer_key = layer.lower()
-            for sprite in sprite_list:
-                key = self.chunk_manager.get_chunk_key(sprite.center_x, sprite.center_y)
-
-                chunk = self.chunk_manager.get_chunk(key)
-                if layer_key in chunk.sprites:
-                    chunk.sprites[layer_key].append(sprite)
 
     def load_mineral_layer(self) -> None:
         if "Minerales" not in self.tilemap.object_lists:
@@ -216,7 +219,7 @@ class Test(View):
                 except ValueError as e:
                     print(e)
         for mineral in minerals_to_create:
-            self.assign_sprite_chunk(mineral, "mineral")
+            self.chunk_manager.assign_sprite_chunk(mineral, "mineral")
         self.load_random_minerals()
 
     def create_mineral_from_object(self, obj: Any) -> Mineral:
@@ -265,7 +268,7 @@ class Test(View):
             while collision_attemps < max_collision_attemps:
                 collisions = mineral.collides_with_list(self.collision_objects)
                 if not collisions:
-                    self.assign_sprite_chunk(mineral, "mineral")
+                    self.chunk_manager.assign_sprite_chunk(mineral, "mineral")
                     break
                 else:
                     mineral.center_x = random.randint(
@@ -281,6 +284,7 @@ class Test(View):
             "floor",
             "walls",
             "player",
+            "items",
             "objects",
             "mineral",
             "copes",
@@ -366,9 +370,10 @@ class Test(View):
         active_chunk_lists = {
             "mineral": arcade.SpriteList(use_spatial_hash=True),
             "interact": arcade.SpriteList(use_spatial_hash=True),
-            "floor": arcade.SpriteList(),
-            "copes": arcade.SpriteList(),
+            "floor": arcade.SpriteList(use_spatial_hash=True),
+            "copes": arcade.SpriteList(use_spatial_hash=True),
             "objects": arcade.SpriteList(use_spatial_hash=True),
+            "items": arcade.SpriteList(use_spatial_hash=True),
         }
         nearby_chunks = self.chunk_manager.get_nearby_chunks(
             center_key=self.player_chunk_key
@@ -402,7 +407,7 @@ class Test(View):
     # Funciones de cambio de escena
 
     def change_to_menu(self) -> None:
-        DataManager.store_actual_data(self.player, "TEST")
+        Dm.store_actual_data(self.player, "TEST")
         self.callback(Constants.SignalCodes.CHANGE_VIEW, "MENU")
 
     def open_chest(self, chest_id: str) -> None:
@@ -411,6 +416,7 @@ class Test(View):
             player=self.player,
             previusScene=self,
         )
+        self.is_first_load = False
         self.window.show_view(new_scene)
 
     # Funciones de Interacción con objetos
@@ -426,6 +432,17 @@ class Test(View):
         )
         if closest_obj and closest_obj[1] <= 50:
             return self.process_mineral_interaction(closest_obj[0])
+        closest_obj = arcade.get_closest_sprite(
+            self.player.sprite, self._actual_area["items"]
+        )
+        if closest_obj and closest_obj[1] <= 50:
+            item = closest_obj[0]
+            self._actual_area["items"].remove(item)
+            self.player.add_to_inventory(item.name, item.quantity)
+            self.chunk_manager.chunks[self.player_chunk_key].sprites["items"].remove(
+                item
+            )
+            return True
 
         return False
 
@@ -441,7 +458,7 @@ class Test(View):
         match object_name:
             case "door":
                 # Cambio de escena y guardo los datos actuales
-                DataManager.store_actual_data(self.player, "TEST")
+                Dm.store_actual_data(self.player, "TEST")
                 self.callback(Constants.SignalCodes.CHANGE_VIEW, "LABORATORY")
                 return True
             case "comerce":
@@ -488,7 +505,7 @@ class Test(View):
                 return self.handleInteractions()
 
             case arcade.key.ESCAPE:
-                DataManager.store_actual_data(self.player, "TEST")
+                Dm.store_actual_data(self.player, "TEST")
                 self.keys_pressed.clear()
                 self.player.stop_state()
                 self.callback(Constants.SignalCodes.PAUSE_GAME, "Pause Game")
@@ -520,6 +537,10 @@ class Test(View):
     def on_key_release(self, symbol: int, modifiers: int) -> bool | None:
         self.keys_pressed.discard(symbol)
         self.player.process_state(-symbol)
+
+    def on_show_view(self) -> None:
+        if self.is_first_load:
+            self.camera.position = self.player.sprite.position
 
     def on_update(self, delta_time: float) -> bool | None:
         self.player.update_animation(delta_time)
@@ -553,6 +574,26 @@ class Test(View):
             # Detección de colisiones
             if self.player_collides():
                 self.player.sprite.center_x, self.player.sprite.center_y = lastPosition
+
+    def on_mouse_press(
+        self, x: int, y: int, button: int, modifiers: int
+    ) -> bool | None:
+        if button == arcade.MOUSE_BUTTON_LEFT:
+            # Tiro el item al suelo
+            item = arcade.get_sprites_at_point((x, y), self.items_inventory)
+            if item:
+                item = item[0]
+                assert isinstance(item, Item), "No se encontró el item"
+                item.position = (
+                    self.player.sprite.position[0] + 20,
+                    self.player.sprite.position[1],
+                )
+                item.scale = 1
+                self.chunk_manager.assign_sprite_chunk(item, "items")
+                self.items_inventory.remove(item)
+                self.player.throw_item(item.name)
+                self.update_actual_chunk()
+                return True
 
     def player_collides(self) -> bool:
         """Función para detectar si hay colisiones"""
