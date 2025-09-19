@@ -1,26 +1,19 @@
 import arcade
-from typing import Dict, Literal
-import DataManager
+from DataManager import mineral_resources
 
 
 class Item(arcade.Sprite):
-    MineralsResources: Dict[
-        str,
-        Dict[
-            Literal["big", "mid", "small", "item"],
-            Dict[Literal["path", "touches", "price"], str | int],
-        ],
-    ] = DataManager.loadData("Minerals.json")
+    _resources = mineral_resources
     __slots__ = ["id", "name", "quantity", "container_id"]
 
     def __init__(self, name: str, quantity: int, scale: int = 1) -> None:
-        path: str = str(Item.MineralsResources[name]["item"]["path"])
+        path: str = str(Item._resources[name]["item"]["path"])
         super().__init__(path, scale=scale)
         self.id: int = -1
         self.name = name
         self.quantity = quantity
         self.container_id: int = -1
-        self.price: int = int(Item.MineralsResources[name]["item"].get("price", 0))
+        self.price: int = int(Item._resources[name]["item"].get("price", 0))
 
     def change_position(self, center_x: float, center_y: float) -> None:
         self.center_x = center_x
@@ -30,7 +23,7 @@ class Item(arcade.Sprite):
         self.container_id = newContainerId
 
     def change_texture(self, new_texture: str) -> None:
-        new_path: str = str(Item.MineralsResources[new_texture]["item"]["path"])
+        new_path: str = str(Item._resources[new_texture]["item"]["path"])
         self.texture = arcade.load_texture(new_path)
 
     def __str__(self):

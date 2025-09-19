@@ -23,8 +23,25 @@ def loadData(filename: str) -> dict:
         return json.load(file)
 
 
+def read_file(filename: str):
+    with open(DATAFILES_DIR + filename, "r") as file:
+        return file.readlines()
+
+
+def write_file(filename: str, data: str, mode: Literal["a", "w"]) -> None:
+    with open(DATAFILES_DIR + filename, mode) as file:
+        file.write(data)
+
+
 game_data: dict = loadData("Actual_Scene_Data.json")
 chests_data: dict = loadData("Chests_Data.json")
+mineral_resources: Dict[
+    str,
+    Dict[
+        Literal["big", "mid", "small", "item"],
+        Dict[Literal["path", "touches", "price"], str | int],
+    ],
+] = loadData("Minerals.json")
 seconds_to_save: int = 3
 
 

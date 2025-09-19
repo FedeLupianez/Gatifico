@@ -146,7 +146,7 @@ class Test(View):
         self.update_inventory_texts()
         # El chunk_manager carga todo el mundo
         self.chunk_manager.load_world(
-            self.tilemap, ignored_layers=["Colisiones", "Interactuables"]
+            self.tilemap, ignored_layers=["Colisiones", "Interactuables", "Minerales"]
         )
         self.update_actual_chunk()
         self.update_sizes()
@@ -190,16 +190,44 @@ class Test(View):
             raise ValueError("TileMap no puede set None")
 
         # Capas de vista :
-        self.floor = self.scene["Floor"]
         self.walls = self.scene["Paredes"]
         self.background_objects = self.scene["Objects"]
         # Capas de colisiones :
         self.collision_objects = self.load_object_layers("Colisiones", self.tilemap)
         self.interact_objects = self.load_object_layers("Interactuables", self.tilemap)
         self.chunk_manager.batch_assign_sprites(self.interact_objects, "interact")
-        self.load_mineral_layer()
+        self.load_antique_minerals()
         # Variable para precomputar las listas de colisiones
         self._collision_list = arcade.SpriteList(use_spatial_hash=True, lazy=True)
+
+    def load_antique_minerals(self) -> None:
+        minerals_to_create = []
+        lines = Dm.read_file("minerals_in_map.txt")
+        for line in lines:
+            name, size, x, y, touches = line.split(",")
+            mineral = Mineral(
+                mineral=name, size_type=size, center_x=float(x), center_y=float(y)
+            )
+            mineral.touches = int(touches)
+            minerals_to_create.append(mineral)
+
+        if len(minerals_to_create) < 5:
+            new_minerals = self.load_random_minerals()
+            minerals_to_create.extend(new_minerals)
+
+        for mineral in minerals_to_create:
+            self.chunk_manager.assign_sprite_chunk(mineral, "mineral")
+
+    def save_minerals(self) -> None:
+        # Recorro todos los chunks
+        result_file: str = ""
+        counter = 0
+        for chunk in self.chunk_manager.chunks.values():
+            for mineral in chunk.sprites["mineral"]:
+                counter += 1
+                result_file += f"{mineral.mineral},{mineral.size_type},{mineral.center_x},{mineral.center_y:},{mineral.touches}\n"
+        print(f"Guardando {counter} minerales")
+        Dm.write_file("minerals_in_map.txt", result_file, "w")
 
     def load_mineral_layer(self) -> None:
         if "Minerales" not in self.tilemap.object_lists:
@@ -220,7 +248,6 @@ class Test(View):
                     print(e)
         for mineral in minerals_to_create:
             self.chunk_manager.assign_sprite_chunk(mineral, "mineral")
-        self.load_random_minerals()
 
     def create_mineral_from_object(self, obj: Any) -> Mineral:
         """Función para crear un minerl a partir de un objeto de Tilemap"""
@@ -237,11 +264,9 @@ class Test(View):
             center_y=center_y,
         )
 
-    def load_random_minerals(self) -> None:
+    def load_random_minerals(self) -> list[Mineral]:
         names = list(list(Mineral._resources.keys()))
         sizes = ["big", "mid", "small"]
-        # Pongo un límite en los intentos de crear
-        # el mineral para evitar loops infinitos
         max_collision_attemps = 10
         mineral_count = random.randint(1, 15)
         random_data = [
@@ -254,7 +279,7 @@ class Test(View):
             for _ in range(mineral_count)
         ]
 
-        # en este loop creo 10 minerales con atributos random
+        created_minerals = []
         for i in range(mineral_count):
             data = random_data[i]
             collision_attemps = 0
@@ -268,7 +293,7 @@ class Test(View):
             while collision_attemps < max_collision_attemps:
                 collisions = mineral.collides_with_list(self.collision_objects)
                 if not collisions:
-                    self.chunk_manager.assign_sprite_chunk(mineral, "mineral")
+                    created_minerals.append(mineral)
                     break
                 else:
                     mineral.center_x = random.randint(
@@ -278,6 +303,8 @@ class Test(View):
                         50, Constants.Game.SCREEN_HEIGHT - 50
                     )
                     collision_attemps += 1
+        print("Minerales creados aleatoriamente : ", len(created_minerals))
+        return created_minerals
 
     def world_draw(self):
         draw_order = [
@@ -459,6 +486,7 @@ class Test(View):
             case "door":
                 # Cambio de escena y guardo los datos actuales
                 Dm.store_actual_data(self.player, "TEST")
+                self.save_minerals()
                 self.callback(Constants.SignalCodes.CHANGE_VIEW, "LABORATORY")
                 return True
             case "comerce":
@@ -619,9 +647,7 @@ class Test(View):
         del self.camera
         del self.interact_objects
         del self._collision_list
-        del self.floor
         del self.walls
-        del self.background_objects
         del self.collision_objects
         del self.last_inventory_hash
         del self.keys_pressed

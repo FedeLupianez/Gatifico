@@ -1,8 +1,6 @@
 import arcade
 from StateMachine import StateMachine
-from DataManager import texture_manager
-from typing import Dict, Any
-from DataManager import loadData
+from DataManager import texture_manager, mineral_resources
 
 
 class Mineral(arcade.Sprite):
@@ -27,7 +25,7 @@ class Mineral(arcade.Sprite):
         "state_machine",
     ]
 
-    _resources: Dict[str, Any] = loadData("Minerals.json")
+    _resources = mineral_resources
 
     def __init__(
         self,

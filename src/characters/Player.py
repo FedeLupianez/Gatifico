@@ -70,7 +70,7 @@ class Player(StateMachine, PlayerConfig):
                 )
 
         self.texture_index = 0  # indice actual de la textura
-        self.animation_timer: float = 0.0  # timer de la animacion
+        self.animation_timer: float = 0.0  # timer de la animación
         # Diccionario para el inventario
         self.inventory: dict[str, int] = {}
         self.max_inventory: int = 64
@@ -188,7 +188,7 @@ class Player(StateMachine, PlayerConfig):
             self.process_state(new_key)
 
     def update_position(self):
-        """Actualiza la posición del personaje segun la velocidad actual"""
+        """Actualiza la posición del personaje según la velocidad actual"""
         self.sprite.center_x += self.sprite.change_x
         self.sprite.center_y += self.sprite.change_y
 

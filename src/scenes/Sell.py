@@ -1,4 +1,3 @@
-from logging import exception
 from typing import Callable
 import arcade
 from .View import View
@@ -21,7 +20,7 @@ class Sell(View):
         self.callback = callback
         self.next_item_id = 0
 
-        all_minerals = list(Item.MineralsResources.keys())
+        all_minerals = list(Item._resources.keys())
         num_seller_items = random.randint(1, len(all_minerals))
         seller_item_names = random.sample(all_minerals, num_seller_items)
         self.seller_items = {name: random.randint(1, 20) for name in seller_item_names}
