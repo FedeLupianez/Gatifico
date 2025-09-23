@@ -33,8 +33,8 @@ def write_file(filename: str, data: str, mode: Literal["a", "w"]) -> None:
         file.write(data)
 
 
-game_data: dict = loadData("Actual_Scene_Data.json")
-chests_data: dict = loadData("Chests_Data.json")
+game_data: dict = loadData("Saved/Actual_Scene_Data.json")
+chests_data: dict = loadData("Saved/Chests_Data.json")
 mineral_resources: Dict[
     str,
     Dict[
@@ -62,7 +62,7 @@ def store_actual_data(player, actualScene) -> None:
         "time_stamp": actual_time,
     }
     game_data = data
-    with open(DATAFILES_DIR + "Actual_Scene_Data.json", "w") as file:
+    with open(DATAFILES_DIR + "Saved/Actual_Scene_Data.json", "w") as file:
         json.dump(data, file)
 
 

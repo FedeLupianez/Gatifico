@@ -106,11 +106,12 @@ class View(arcade.View):
             temp_list.append(sprite)
         return temp_list
 
-    def update_sizes(self) -> None:
-        self._screen_width = self.camera.viewport_width
-        self._screen_height = self.camera.viewport_height
+    def update_sizes(self, width: int, height: int) -> None:
+        self.camera.match_window()
+        self._screen_width = width
+        self._screen_height = height
         self._half_w = (self._screen_width / self.camera.zoom) * 0.5
         self._half_h = (self._screen_height / self.camera.zoom) * 0.5
 
     def on_resize(self, width: int, height: int) -> bool | None:
-        self.update_sizes()
+        self.update_sizes(width, height)

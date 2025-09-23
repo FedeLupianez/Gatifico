@@ -11,7 +11,6 @@ from items.Item import Item
 from .utils import add_containers_to_list
 from .Chest import Chest
 from dataclasses import dataclass, field
-# from time import time
 
 import random
 from functools import lru_cache
@@ -149,7 +148,9 @@ class Test(View):
             self.tilemap, ignored_layers=["Colisiones", "Interactuables", "Minerales"]
         )
         self.update_actual_chunk()
-        self.update_sizes()
+        self.update_sizes(
+            int(self.camera.viewport.width), int(self.camera.viewport.height)
+        )
 
     def setup_spritelists(self):
         # Listas de Sprites
@@ -191,7 +192,6 @@ class Test(View):
 
         # Capas de vista :
         self.walls = self.scene["Paredes"]
-        self.background_objects = self.scene["Objects"]
         # Capas de colisiones :
         self.collision_objects = self.load_object_layers("Colisiones", self.tilemap)
         self.interact_objects = self.load_object_layers("Interactuables", self.tilemap)
@@ -336,10 +336,10 @@ class Test(View):
         )
         self.player.sprite.draw_hit_box(color=arcade.color.RED, line_thickness=2)
         self._actual_area["interact"].draw_hit_boxes(
-            color=arcade.color.ALICE_BLUE, line_thickness=2
+            color=arcade.color.AFRICAN_VIOLET, line_thickness=2
         )
         self._actual_area["objects"].draw_hit_boxes(
-            color=arcade.color.ALICE_BLUE, line_thickness=2
+            color=arcade.color.ANTIQUE_BRONZE, line_thickness=2
         )
 
         # self._actual_area["collisions"].draw_hit_boxes(

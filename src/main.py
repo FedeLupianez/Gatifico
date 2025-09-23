@@ -24,9 +24,6 @@ class Main(arcade.Window):
         self.player = Player()
         self.ViewManager = ViewManager(self.player, self)
 
-    def on_resize(self, width: int, height: int):
-        self.ViewManager.update_camera_view()
-
     def on_close(self):
         DataManager.store_actual_data(
             self.player, actualScene=self.ViewManager.current_scene_id
