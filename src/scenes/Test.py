@@ -182,6 +182,7 @@ class Test(View):
         self.player.chunk_key = self.chunk_manager.get_chunk_key(
             self.player.sprite.center_x, self.player.sprite.center_y
         )
+        self.player.actual_floor = "grass"
         self.characters_sprites.append(self.player.sprite)
         self.characters_sprites.append(self.enemies[0])
         del player_data
@@ -487,6 +488,7 @@ class Test(View):
                 # Cambio de escena y guardo los datos actuales
                 Dm.store_actual_data(self.player, "TEST")
                 self.save_minerals()
+                arcade.play_sound(Dm.get_sound("door.mp3"))
                 self.callback(Constants.SignalCodes.CHANGE_VIEW, "LABORATORY")
                 return True
             case "comerce":

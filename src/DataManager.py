@@ -1,7 +1,7 @@
 import json
 import os
 from typing import Dict, Literal, TypedDict
-from arcade import TextureCacheManager
+from arcade import TextureCacheManager, Sound
 from time import time
 
 
@@ -35,6 +35,7 @@ def write_file(filename: str, data: str, mode: Literal["a", "w"]) -> None:
 
 game_data: dict = loadData("Saved/Actual_Scene_Data.json")
 chests_data: dict = loadData("Saved/Chests_Data.json")
+sounds_loader: dict[str, Sound] = {}
 mineral_resources: Dict[
     str,
     Dict[
@@ -79,6 +80,13 @@ def get_path(file_name: str) -> str:
         if file_name in files:
             return os.path.abspath(os.path.join(base_dir, file_name))
     return ""
+
+
+def get_sound(file_name: str) -> Sound:
+    global sounds_loader
+    if file_name not in sounds_loader:
+        sounds_loader[file_name] = Sound(get_path(file_name))
+    return sounds_loader[file_name]
 
 
 texture_manager = TextureCacheManager()

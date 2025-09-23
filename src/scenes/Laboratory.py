@@ -8,7 +8,6 @@ import Constants
 from scenes.Chest import Chest
 from scenes.MixTable import MixTable
 from scenes.SplitTable import SplitTable
-from scenes.Sell import Sell
 import DataManager as Dm
 from .utils import add_containers_to_list
 
@@ -29,7 +28,9 @@ class Laboratory(View):
         self.is_first_load: bool = True
 
         self.last_inventory_hash = 0
-        self.update_sizes()
+        self.update_sizes(
+            int(self.camera.viewport.width), int(self.camera.viewport.height)
+        )
 
         self._item_mouse_text = arcade.Text(
             text="", x=0, y=0, anchor_x="center", anchor_y="center", align="center"
@@ -145,6 +146,7 @@ class Laboratory(View):
         self.player.stop_state()
         if obj_name == "door":
             Dm.store_actual_data(self.player, "LABORATORY")
+            arcade.play_sound(Dm.get_sound("door.mp3"))
             self.callback(Constants.SignalCodes.CHANGE_VIEW, "TEST")
             return True
         if "chest" in obj_name:
