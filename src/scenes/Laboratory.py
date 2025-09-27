@@ -13,10 +13,10 @@ from .utils import add_containers_to_list
 
 
 class Laboratory(View):
-    def __init__(self, callback: Callable, player: Player):
+    def __init__(self, callback: Callable):
         tileMapUrl = Dm.get_path("Laboratory.tmx")
         super().__init__(background_url=None, tilemap_url=tileMapUrl)
-        self.player = player
+        self.player = Player()
         self.callback = callback
         self.keys_pressed: set[int] = set()
         self.camera.zoom = Constants.Game.FOREST_ZOOM_CAMERA
@@ -122,7 +122,6 @@ class Laboratory(View):
         self.player.stop_state()
         new_scene = Chest(
             chest_id=chest_id,
-            player=self.player,
             previusScene=self,
         )
         self.is_first_load = False
@@ -132,9 +131,9 @@ class Laboratory(View):
         new_scene: View | None = None
         match table_id:
             case "split_table":
-                new_scene = SplitTable(background_scene=self, player=self.player)
+                new_scene = SplitTable(background_scene=self)
             case "mix_table":
-                new_scene = MixTable(background_scene=self, player=self.player)
+                new_scene = MixTable(background_scene=self)
 
         if new_scene:
             self.is_first_load = False

@@ -9,6 +9,9 @@ from random import randint
 
 
 class Player(StateMachine, PlayerConfig):
+    """Clase player, esta es un singleton, por lo que si se instancia mas de una vez devuelve la
+    misma instancia"""
+
     # Defino los id de los estados para no repetir magic strings
     IDLE_SIDE_LEFT = "IDLE_SIDE_LEFT"
     IDLE_SIDE_RIGHT = "IDLE_SIDE_RIGHT"
@@ -20,8 +23,18 @@ class Player(StateMachine, PlayerConfig):
     DOWN = "DOWN"
     ANIMATIONS_CONFIG: dict = loadData("PlayerAnimationsConfig.json")
     INITIAL_INDEX = AssetsConstants.INITIAL_INDEX
+    _instace = None
+    _initialized = False
+
+    # Config para que solo haya una instancia del jugador
+    def __new__(cls) -> "Player":
+        if not cls._instace:
+            cls._instace = super().__new__(cls)
+        return cls._instace
 
     def __init__(self):
+        if self._initialized:
+            return
         super().__init__(Player.IDLE_FRONT)
         self.motions = [arcade.key.W, arcade.key.A, arcade.key.S, arcade.key.D]
         # Todos los path tienen llaves {} donde iría el numero de sprite
@@ -93,6 +106,8 @@ class Player(StateMachine, PlayerConfig):
         # si se terminó de reproducir el sonido anterior
         self.last_step_sound_time: float = 0.0
         self.step_coldown = 0.5  # Tiempo entre sonido y sonido
+        self.setup()
+        self._initialized = True
 
     def genericStateHandler(self, event: int):
         """Función genérica para todos los estados del personaje, ya que casi todos hacen lo mismo"""

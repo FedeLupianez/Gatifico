@@ -14,11 +14,10 @@ import gc
 class ViewManager:
     current_scene_id = "MENU"
 
-    def __init__(self, player: Player, window: arcade.Window) -> None:
+    def __init__(self, window: arcade.Window) -> None:
         self.window = window
         # Tiene su propia ventana
         self.current_scene = Menu(self.callback)
-        self.player = player
 
         # Diccionario con los objetos de las escenas pero sin instanciar para ahorrar recursos
         self.scenes = {
@@ -56,11 +55,8 @@ class ViewManager:
 
             if not data:
                 raise ValueError("Data no está disponible")
-            # Cambio la variable anterior por la nueva escena
-            if data == "MENU":
-                self.current_scene = self.scenes[data](self.callback)
-            else:
-                self.current_scene = self.scenes[data](self.callback, self.player)
+            # Creo una nueva escena
+            self.current_scene = self.scenes[data](self.callback)
 
             if "load_screen" in kwargs:
                 load_scene = Load_screen(self.current_scene)

@@ -24,7 +24,7 @@ ITEMS_INIT: tuple[int, int] = (400, 250)
 
 
 class MixTable(View):
-    def __init__(self, background_scene: View, player: Player):
+    def __init__(self, background_scene: View):
         super().__init__(background_url=None, tilemap_url=None)
         background_image = background_scene.get_screenshot()
 
@@ -35,8 +35,8 @@ class MixTable(View):
 
         # Init de la clase
         self.background_scene = background_scene
-        self.player = player
-        self.items: dict = player.get_inventory() or {
+        self.player = Player()
+        self.items: dict = self.player.get_inventory() or {
             "rubi": 4,
             "piedra": 3,
             "azufre": 5,

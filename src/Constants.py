@@ -9,7 +9,7 @@ class Game:
     SCREEN_CENTER_X = SCREEN_WIDTH / 2
     SCREEN_CENTER_Y = SCREEN_HEIGHT / 2
 
-    FPS = 1 / 60
+    FPS = 1 / 61
 
     FOREST_ZOOM_CAMERA = 4  # Zoom de la camara en el bosque
     DEBUG_MODE = True

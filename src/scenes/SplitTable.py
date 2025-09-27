@@ -1,5 +1,4 @@
 import arcade.gui
-from typing import Callable
 from items.Container import Container
 from items.Item import Item
 import arcade
@@ -22,7 +21,6 @@ class SplitTable(View):
     def __init__(
         self,
         background_scene: View,
-        player: Player,
     ) -> None:
         super().__init__(None, None)
         self.window.set_mouse_visible(True)
@@ -56,8 +54,8 @@ class SplitTable(View):
             y=Game.SCREEN_CENTER_Y,
         )
 
-        self.player = player
-        self.items: dict = player.get_inventory() or {
+        self.player = Player()
+        self.items: dict = self.player.get_inventory() or {
             "rubi": 4,
             "piedra": 3,
             "azufre": 5,

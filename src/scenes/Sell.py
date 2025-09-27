@@ -12,10 +12,9 @@ class Sell(View):
     def __init__(
         self,
         callback: Callable,
-        player: Player,
     ) -> None:
         super().__init__(background_url=None, tilemap_url=None)
-        self.player = player
+        self.player = Player()
         self.window.set_mouse_visible(True)
         self.callback = callback
         self.next_item_id = 0

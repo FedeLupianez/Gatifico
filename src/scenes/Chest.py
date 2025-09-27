@@ -14,7 +14,7 @@ ITEMS_INIT = (550, 300)
 
 
 class Chest(View):
-    def __init__(self, chest_id: str, player: Player, previusScene: View) -> None:
+    def __init__(self, chest_id: str, previusScene: View) -> None:
         super().__init__(background_url=None, tilemap_url=None)
         background_image = previusScene.get_screenshot()
 
@@ -33,7 +33,7 @@ class Chest(View):
         self.item_texts: list[arcade.Text] = []
         self.next_item_id: int = 0
         self.id: str = chest_id
-        self.player = player
+        self.player = Player()
         self.is_mouse_active = False
         self.item_to_move: Item | None = None
         self.previus_scene = previusScene

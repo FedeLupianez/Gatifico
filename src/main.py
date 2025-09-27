@@ -3,13 +3,8 @@
 import arcade
 from scenes.ViewManager import ViewManager
 from characters.Player import Player
-import os
 import Constants
 import DataManager
-
-BASE_DIR = os.path.dirname(
-    os.path.abspath(__file__)
-)  # Encuentra la ruta al archivo main.py
 
 
 class Main(arcade.Window):
@@ -22,7 +17,7 @@ class Main(arcade.Window):
             draw_rate=Constants.Game.FPS,
         )
         self.player = Player()
-        self.ViewManager = ViewManager(self.player, self)
+        self.ViewManager = ViewManager(self)
 
     def on_close(self):
         DataManager.store_actual_data(

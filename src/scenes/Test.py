@@ -91,13 +91,13 @@ class Chunk_Manager:
 
 
 class Test(View):
-    def __init__(self, callback: Callable, player: Player) -> None:
+    def __init__(self, callback: Callable) -> None:
         tileMapUrl = Dm.get_path("Tests.tmx")
         super().__init__(background_url=None, tilemap_url=tileMapUrl)
         self.window.set_mouse_visible(True)
 
         # Constantes de clase
-        self.player = player  # Personaje principal
+        self.player = Player()
         self.callback = callback  # Callback al ViewManager
 
         # Le pongo el zoom a la cámara
@@ -159,6 +159,8 @@ class Test(View):
         self.items_inventory: arcade.SpriteList = arcade.SpriteList()
         self.inventory_texts: list[arcade.Text] = []
         self.setup_inventory_containers()
+        if Constants.Game.DEBUG_MODE:
+            self.fps_text = arcade.Text("0", 10, 10, arcade.color.WHITE, 12)
 
     def setup_inventory_containers(self) -> None:
         """Agrego los contenedores a la lista del inventario"""
@@ -351,6 +353,7 @@ class Test(View):
         if not self.inventory_dirty:
             return
         self.gui_camera.use()
+        self.fps_text.draw()
         self.inventory_sprites.draw(pixelated=True)
         self.items_inventory.draw(pixelated=True)
         for text in self.inventory_texts:
@@ -441,7 +444,6 @@ class Test(View):
     def open_chest(self, chest_id: str) -> None:
         new_scene = Chest(
             chest_id=chest_id,
-            player=self.player,
             previusScene=self,
         )
         self.is_first_load = False
@@ -574,6 +576,7 @@ class Test(View):
 
     def on_update(self, delta_time: float) -> bool | None:
         self.player.update_animation(delta_time)
+        self.fps_text.text = f"{int(1 / delta_time)}"
         player = self.player.sprite
         lastPosition = (player.center_x, player.center_y)
 
