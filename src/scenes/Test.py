@@ -566,8 +566,8 @@ class Test(View):
             case arcade.key.F:
                 self.player.attack(self.enemies[0])
             case arcade.key.G:
-                is_dead = self.player.hurt(10)
-                if is_dead:
+                is_died = self.player.hurt(10)
+                if is_died:
                     self.callback(Constants.SignalCodes.CHANGE_VIEW, "MENU")
                 return
 
@@ -585,6 +585,9 @@ class Test(View):
     def on_update(self, delta_time: float) -> bool | None:
         self.player.update_animation(delta_time)
         self.fps_text.text = f"{int(1 / delta_time)}"
+        if self.player.lifes == 0:
+            self.callback(Constants.SignalCodes.CHANGE_VIEW, "MENU")
+            return
         player = self.player.sprite
         lastPosition = (player.center_x, player.center_y)
 

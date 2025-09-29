@@ -1,9 +1,7 @@
 import arcade
 from Constants import AssetsConstants, PlayerConfig
-import Constants
 from StateMachine import StateMachine
 from DataManager import loadData, texture_manager, game_data, get_path
-from characters.Enemy import Enemy
 from typing import Literal
 from time import time
 from random import randint
@@ -283,21 +281,26 @@ class Player(StateMachine, PlayerConfig):
     def add_coins(self, coins: int) -> None:
         self.coins += coins
 
-    def attack(self, enemy: Enemy):
+    def attack(self, enemy):
         enemy.hurt(damage=10)
+
+    def change_hearts(self) -> None:
+        # Remuevo los corazones sobrantes
+        diff = len(self.lifes_sprite_list) - self.lifes
+        print(f"{self.healt=}")
+        # Si la parte decimal de la vida es impar significa que debe tener medio corazón
+        is_half_heart = (self.healt / 10) % 2 != 0
+        texture_name = "empty_heart.png" if not is_half_heart else "mid_heart.png"
+        texture = texture_manager.load_or_get_texture(get_path(texture_name))
+        self.lifes_sprite_list[-diff].texture = texture
 
     def hurt(self, damage: int):
         self.healt -= damage
         if self.healt <= 0:
             self.healt = 0
         self.lifes = self.healt // 20
-        if self.lifes < 0:
-            self.lifes = 0
-        # Remuevo los corazones sobrantes
-        diff = len(self.lifes_sprite_list) - self.lifes
-        texture = texture_manager.load_or_get_texture(get_path("empty_heart.png"))
-        self.lifes_sprite_list[-diff].texture = texture
-        if diff == len(self.lifes_sprite_list):
+        self.change_hearts()
+        if self.lifes <= 0:
             return True
         return False
 

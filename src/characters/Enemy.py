@@ -1,5 +1,6 @@
 from typing import Literal
 import arcade
+from characters.Player import Player
 
 
 class Enemy(arcade.SpriteSolidColor):
@@ -13,10 +14,19 @@ class Enemy(arcade.SpriteSolidColor):
         )
         self.speed = 0.8
         self.health = 100
+        self.damage = 10
         self.is_hurt = False
         self.hit_time = 1  # tiempo en segundos que dura la animación de daño
-        self.actual_state: Literal["IDLE", "ATTACK"] = "IDLE"
+        self.actual_state: Literal["IDLE", "ATTACK", "RUN"] = "IDLE"
         self.distance_to_player: float = 0
+        self.persecute_radius = 140
+
+        self.attack_radius = 35
+        self.attack_coldown = 0.8
+        self.attack_time = self.attack_coldown
+
+        # Referencia al player
+        self.player = Player()
 
     def process_state(self, player_position: tuple[float, float]) -> None:
         self.distance_to_player = (
@@ -24,10 +34,12 @@ class Enemy(arcade.SpriteSolidColor):
             + (player_position[1] - self.center_y) ** 2
         ) ** 0.5
 
-        if self.distance_to_player > 140 or self.distance_to_player < 35:
+        if self.distance_to_player > self.persecute_radius:
             self.actual_state = "IDLE"
-        else:
+        elif self.distance_to_player < self.attack_radius:
             self.actual_state = "ATTACK"
+        else:
+            self.actual_state = "RUN"
 
     def update(self, delta_time: float, player_position: tuple[float, float]):
         self.process_state(player_position)
@@ -38,6 +50,12 @@ class Enemy(arcade.SpriteSolidColor):
                 self.hit_time = 5
 
         if self.actual_state == "ATTACK":
+            self.attack_time -= delta_time
+            if self.attack_time <= 0:
+                self.attack()
+                self.attack_time = self.attack_coldown
+
+        if self.actual_state == "RUN":
             diff_x = player_position[0] - self.center_x
             diff_y = player_position[1] - self.center_y
             self.center_x += (diff_x / self.distance_to_player) * self.speed
@@ -48,3 +66,6 @@ class Enemy(arcade.SpriteSolidColor):
     def hurt(self, damage: int):
         self.is_hurt = True
         self.health -= damage
+
+    def attack(self) -> None:
+        self.player.hurt(self.damage)
