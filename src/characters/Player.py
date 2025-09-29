@@ -200,7 +200,7 @@ class Player(StateMachine, PlayerConfig):
         }
         new_key = states_keys.get(self.actual_state_id, None)
         if new_key:
-            self.process_state(new_key)
+            self.process_state(-new_key)
 
     def update_position(self):
         """Actualiza la posición del personaje según la velocidad actual"""
