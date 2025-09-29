@@ -138,6 +138,8 @@ class Test(View):
         self.setup_spritelists()
         self.setup_scene_layer()
         self.setup_player()
+        for i in range(len(self.player.lifes_sprite_list)):
+            self.player.lifes_sprite_list[i].center_y = self.window.height - 44
         self.player_chunk_key = self.chunk_manager.get_chunk_key(
             self.player.sprite.center_x, self.player.sprite.center_y
         )
@@ -358,6 +360,7 @@ class Test(View):
         self.items_inventory.draw(pixelated=True)
         for text in self.inventory_texts:
             text.draw()
+        self.player.lifes_sprite_list.draw(pixelated=True)
 
     # Funciones de actualización
 
@@ -562,6 +565,11 @@ class Test(View):
                     )
             case arcade.key.F:
                 self.player.attack(self.enemies[0])
+            case arcade.key.G:
+                is_dead = self.player.hurt(10)
+                if is_dead:
+                    self.callback(Constants.SignalCodes.CHANGE_VIEW, "MENU")
+                return
 
         self.keys_pressed.add(symbol)
         return None

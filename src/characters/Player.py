@@ -1,5 +1,6 @@
 import arcade
 from Constants import AssetsConstants, PlayerConfig
+import Constants
 from StateMachine import StateMachine
 from DataManager import loadData, texture_manager, game_data, get_path
 from characters.Enemy import Enemy
@@ -90,6 +91,10 @@ class Player(StateMachine, PlayerConfig):
         # Monedas del jugador
         self.coins: int = 100
         self.chunk_key: tuple[int, int] = (0, 0)
+
+        self.healt = 100
+        self.lifes = 5
+        self.lifes_sprite_list = arcade.SpriteList()
 
         self.actual_floor: Literal["grass", "wood"] = "grass"
         self.step_sounds: dict[Literal["grass", "wood"], list[arcade.Sound]] = {
@@ -189,6 +194,12 @@ class Player(StateMachine, PlayerConfig):
         )
         self.inventory = antique_data["inventory"]
         self.update_spritelist()
+        texture = texture_manager.load_or_get_texture(get_path("full_heart.png"))
+        self.lifes_sprite_list.clear()
+        for i in range(self.lifes):
+            temp = arcade.Sprite(texture, scale=3)
+            temp.center_x = 40 + ((temp.width + 10) * i)
+            self.lifes_sprite_list.append(temp)
         del antique_data
 
     def stop_state(self) -> None:
@@ -274,6 +285,21 @@ class Player(StateMachine, PlayerConfig):
 
     def attack(self, enemy: Enemy):
         enemy.hurt(damage=10)
+
+    def hurt(self, damage: int):
+        self.healt -= damage
+        if self.healt <= 0:
+            self.healt = 0
+        self.lifes = self.healt // 20
+        if self.lifes < 0:
+            self.lifes = 0
+        # Remuevo los corazones sobrantes
+        diff = len(self.lifes_sprite_list) - self.lifes
+        texture = texture_manager.load_or_get_texture(get_path("empty_heart.png"))
+        self.lifes_sprite_list[-diff].texture = texture
+        if diff == len(self.lifes_sprite_list):
+            return True
+        return False
 
     def throw_item(self, item: str):
         self.inventory.pop(item)
