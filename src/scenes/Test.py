@@ -26,6 +26,7 @@ class Chunk:
             "copes": [],
             "objects": [],
             "items": [],
+            "enemy": [],
         }
     )
 
@@ -55,6 +56,21 @@ class Chunk_Manager:
             for dy in range(-1, 2)
             if (col + dx, row + dy) in self.chunks
         ]
+
+    def update_enemy_key(self, enemy: Enemy, kill: bool = False):
+        if kill:
+            if enemy in self.chunks[enemy.chunk_key].sprites["enemy"]:
+                self.chunks[enemy.chunk_key].sprites["enemy"].remove(enemy)
+            return
+
+        chunk_key = self.get_chunk_key(enemy.center_x, enemy.center_y)
+        if enemy.chunk_key == chunk_key:
+            return
+        # Cambio de chunk al enemigo:
+        self.chunks[enemy.chunk_key].sprites["enemy"].remove(enemy)
+        chunk = self.get_chunk(chunk_key)
+        chunk.sprites["enemy"].append(enemy)
+        enemy.chunk_key = chunk_key
 
     def load_world(
         self,
@@ -112,7 +128,13 @@ class Test(View):
         self._map_width = self.tilemap.width * self.tilemap.tile_width
         self._map_height = self.tilemap.height * self.tilemap.tile_height
 
-        self.enemies: list[Enemy] = [Enemy(500, 500)]
+        for _ in range(10):
+            enemy = Enemy(
+                random.randint(0, int(self._map_width)),
+                random.randint(0, int(self._map_height)),
+                self.chunk_manager.update_enemy_key,
+            )
+            self.chunk_manager.assign_sprite_chunk(enemy, "enemy")
 
         self.keys_pressed: set = set()
         # Flag para actualizaciones selectivas del inventario
@@ -130,6 +152,7 @@ class Test(View):
             "copes": arcade.SpriteList(use_spatial_hash=True, lazy=True),
             "objects": arcade.SpriteList(use_spatial_hash=True, lazy=True),
             "items": arcade.SpriteList(use_spatial_hash=True),
+            "enemy": arcade.SpriteList(use_spatial_hash=True),
         }
         self._setup_scene()
 
@@ -140,9 +163,6 @@ class Test(View):
         self.setup_player()
         for i in range(len(self.player.lifes_sprite_list)):
             self.player.lifes_sprite_list[i].center_y = self.window.height - 44
-        self.player_chunk_key = self.chunk_manager.get_chunk_key(
-            self.player.sprite.center_x, self.player.sprite.center_y
-        )
         self.update_inventory_sprites()
         self.update_inventory_texts()
         # El chunk_manager carga todo el mundo
@@ -188,7 +208,6 @@ class Test(View):
         )
         self.player.actual_floor = "grass"
         self.characters_sprites.append(self.player.sprite)
-        self.characters_sprites.append(self.enemies[0])
         del player_data
 
     def setup_scene_layer(self) -> None:
@@ -315,18 +334,19 @@ class Test(View):
         draw_order = [
             "floor",
             "walls",
-            "player",
             "items",
             "objects",
             "mineral",
+            "characters",
             "copes",
         ]
         self.camera.use()
         for layer in draw_order:
             if layer in self._actual_area:
                 self._actual_area[layer].draw(pixelated=True)
-            elif layer == "player":
+            elif layer == "characters":
                 self.characters_sprites.draw(pixelated=True)
+                self._actual_area["enemy"].draw(pixelated=True)
             elif layer == "walls":
                 self.walls.draw(pixelated=True)
         if self._view_hitboxes:
@@ -346,10 +366,6 @@ class Test(View):
         self._actual_area["objects"].draw_hit_boxes(
             color=arcade.color.ANTIQUE_BRONZE, line_thickness=2
         )
-
-        # self._actual_area["collisions"].draw_hit_boxes(
-        #     color=arcade.color.ALICE_BLUE, line_thickness=2
-        # )
 
     def gui_draw(self):
         if not self.inventory_dirty:
@@ -408,9 +424,10 @@ class Test(View):
             "copes": arcade.SpriteList(use_spatial_hash=True),
             "objects": arcade.SpriteList(use_spatial_hash=True),
             "items": arcade.SpriteList(use_spatial_hash=True),
+            "enemy": arcade.SpriteList(use_spatial_hash=True),
         }
         nearby_chunks = self.chunk_manager.get_nearby_chunks(
-            center_key=self.player_chunk_key
+            center_key=self.player.chunk_key
         )
         self._collision_list.clear()
         self._collision_list.extend(self.walls)
@@ -472,12 +489,20 @@ class Test(View):
             item = closest_obj[0]
             self._actual_area["items"].remove(item)
             self.player.add_to_inventory(item.name, item.quantity)
-            self.chunk_manager.chunks[self.player_chunk_key].sprites["items"].remove(
+            self.chunk_manager.chunks[self.player.chunk_key].sprites["items"].remove(
                 item
             )
             return True
 
         return False
+
+    def process_enemy_interaction(self) -> None:
+        closest_obj = arcade.get_closest_sprite(
+            self.player.sprite, self._actual_area["enemy"]
+        )
+        if closest_obj and closest_obj[1] <= 50:
+            self.player.attack(closest_obj[0])
+            return
 
     def process_object_interaction(self, interact_obj: Object) -> bool:
         """Procesa la interaccion con un objeto"""
@@ -564,7 +589,7 @@ class Test(View):
                         else 1
                     )
             case arcade.key.F:
-                self.player.attack(self.enemies[0])
+                self.process_enemy_interaction()
             case arcade.key.G:
                 is_died = self.player.hurt(10)
                 if is_died:
@@ -596,7 +621,7 @@ class Test(View):
                 self.player.process_state(key)
 
         self.player.update_position()
-        for enemy in self.enemies:
+        for enemy in self._actual_area["enemy"]:
             enemy.update(delta_time, player.position)
 
         player_moved = (
@@ -608,13 +633,14 @@ class Test(View):
 
         self.update_inventory()
 
+        new_chunk_key = self.chunk_manager.get_chunk_key(
+            player.center_x, player.center_y
+        )
+        if new_chunk_key != self.player.chunk_key:
+            self.player.chunk_key = new_chunk_key
+            self.update_actual_chunk()
+
         if player_moved:
-            new_chunk_key = self.chunk_manager.get_chunk_key(
-                player.center_x, player.center_y
-            )
-            if new_chunk_key != self.player_chunk_key:
-                self.player_chunk_key = new_chunk_key
-                self.update_actual_chunk()
             # Detección de colisiones
             if self.player_collides():
                 self.player.sprite.center_x, self.player.sprite.center_y = lastPosition
@@ -643,14 +669,10 @@ class Test(View):
         """Función para detectar si hay colisiones"""
         if not self._collision_list:
             return False
-
-        return (
-            len(
-                arcade.check_for_collision_with_list(
-                    self.player.sprite, self._collision_list
-                )
+        return any(
+            arcade.check_for_collision_with_list(
+                self.player.sprite, self._collision_list
             )
-            > 0
         )
 
     def clean_up(self) -> None:

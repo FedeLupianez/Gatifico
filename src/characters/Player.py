@@ -45,6 +45,7 @@ class Player(StateMachine, PlayerConfig):
         )  # objeto sprite del personaje
 
         self.speed = self.SPEED
+        self.knockback = 5
         self.actual_animation_frames: int = Player.ANIMATIONS_CONFIG[Player.IDLE_FRONT][
             "frames"
         ]  # cantidad de frames de la animacion
@@ -282,12 +283,11 @@ class Player(StateMachine, PlayerConfig):
         self.coins += coins
 
     def attack(self, enemy):
-        enemy.hurt(damage=10)
+        enemy.hurt(damage=10, knockback=self.knockback)
 
     def change_hearts(self) -> None:
         # Remuevo los corazones sobrantes
         diff = len(self.lifes_sprite_list) - self.lifes
-        print(f"{self.healt=}")
         # Si la parte decimal de la vida es impar significa que debe tener medio corazón
         is_half_heart = (self.healt / 10) % 2 != 0
         texture_name = "empty_heart.png" if not is_half_heart else "mid_heart.png"

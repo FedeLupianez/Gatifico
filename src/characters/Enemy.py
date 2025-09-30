@@ -1,10 +1,12 @@
-from typing import Literal
+from typing import Callable, Literal
 import arcade
 from characters.Player import Player
 
 
 class Enemy(arcade.SpriteSolidColor):
-    def __init__(self, center_x: float, center_y: float) -> None:
+    def __init__(
+        self, center_x: float, center_y: float, callback_update_chunk: Callable
+    ) -> None:
         super().__init__(
             color=arcade.color.GREEN,
             width=25,
@@ -17,7 +19,7 @@ class Enemy(arcade.SpriteSolidColor):
         self.damage = 10
         self.is_hurt = False
         self.hit_time = 1  # tiempo en segundos que dura la animación de daño
-        self.actual_state: Literal["IDLE", "ATTACK", "RUN"] = "IDLE"
+        self.actual_state: Literal["IDLE", "ATTACK", "RUN", "STUNED"] = "IDLE"
         self.distance_to_player: float = 0
         self.persecute_radius = 140
 
@@ -27,6 +29,9 @@ class Enemy(arcade.SpriteSolidColor):
 
         # Referencia al player
         self.player = Player()
+        # Esta función se va a ejecutar cuando el enemy se quede quieto para actualizar su chunk_key
+        self.callback = callback_update_chunk
+        self.chunk_key: tuple[int, int] = (0, 0)
 
     def process_state(self, player_position: tuple[float, float]) -> None:
         self.distance_to_player = (
@@ -45,9 +50,11 @@ class Enemy(arcade.SpriteSolidColor):
         self.process_state(player_position)
         if self.is_hurt:
             self.hit_time -= delta_time
+            self.color = arcade.color.RED
             if self.hit_time <= 0:
                 self.is_hurt = False
                 self.hit_time = 5
+                self.color = arcade.color.GREEN
 
         if self.actual_state == "ATTACK":
             self.attack_time -= delta_time
@@ -61,11 +68,37 @@ class Enemy(arcade.SpriteSolidColor):
             self.center_x += (diff_x / self.distance_to_player) * self.speed
             self.center_y += (diff_y / self.distance_to_player) * self.speed
 
-        self.color = arcade.color.RED if self.is_hurt else arcade.color.GREEN
+        if self.actual_state == "IDLE":
+            self.callback(self)
 
-    def hurt(self, damage: int):
+    def hurt(self, damage: int, knockback: int = 0):
         self.is_hurt = True
         self.health -= damage
+        if self.health <= 0:
+            self.callback(self, kill=True)
+            self.remove_from_sprite_lists()
+            return
+        # Enviar para atrás si tiene knockback
+        if not knockback > 0:
+            return
+        diff_x: int = int(self.player.sprite.center_x - self.center_x)
+        diff_y: int = int(self.player.sprite.center_y - self.center_y)
+        knockback *= 5
+        result_x: int = 0
+        result_y: int = 0
+        if not (
+            self.player.sprite.center_x >= self.left
+            and self.player.sprite.center_x <= self.right
+        ):
+            result_x = (knockback) if diff_x < 0 else -(knockback)
+
+        if not (
+            self.player.sprite.center_y >= self.bottom
+            and self.player.sprite.center_y <= self.top
+        ):
+            result_y = (knockback) if diff_y < 0 else -(knockback)
+        self.center_x += result_x
+        self.center_y += result_y
 
     def attack(self) -> None:
         self.player.hurt(self.damage)
