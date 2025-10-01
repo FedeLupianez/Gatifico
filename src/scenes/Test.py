@@ -1,5 +1,6 @@
 import arcade
-from typing import Dict, Any, Callable
+from typing import Any, Callable
+from random import randint, choice
 
 from characters.Enemy import Enemy
 from scenes.View import View, Object
@@ -10,100 +11,7 @@ import DataManager as Dm
 from items.Item import Item
 from .utils import add_containers_to_list
 from .Chest import Chest
-from dataclasses import dataclass, field
-
-import random
-from functools import lru_cache
-
-
-@dataclass
-class Chunk:
-    sprites: Dict[str, list] = field(
-        default_factory=lambda: {
-            "mineral": [],
-            "interact": [],
-            "floor": [],
-            "copes": [],
-            "objects": [],
-            "items": [],
-            "enemy": [],
-        }
-    )
-
-
-class Chunk_Manager:
-    def __init__(self, chunk_size_x: int, chunk_size_y: int) -> None:
-        self.chunk_size_x = chunk_size_x
-        self.chunk_size_y = chunk_size_y
-        self.chunks: Dict[tuple[int, int], Chunk] = {}
-        self.is_world_loaded = False
-
-    @lru_cache(maxsize=100)
-    def get_chunk_key(self, x: float, y: float) -> tuple[int, int]:
-        return (int(x // self.chunk_size_x), int(y // self.chunk_size_y))
-
-    def get_chunk(self, key: tuple[int, int]) -> Chunk:
-        if key not in self.chunks:
-            self.chunks[key] = Chunk()
-        chunk = self.chunks[key]
-        return chunk
-
-    def get_nearby_chunks(self, center_key: tuple[int, int]):
-        col, row = center_key
-        return [
-            (col + dx, row + dy)
-            for dx in range(-1, 2)
-            for dy in range(-1, 2)
-            if (col + dx, row + dy) in self.chunks
-        ]
-
-    def update_enemy_key(self, enemy: Enemy, kill: bool = False):
-        if kill:
-            if enemy in self.chunks[enemy.chunk_key].sprites["enemy"]:
-                self.chunks[enemy.chunk_key].sprites["enemy"].remove(enemy)
-            return
-
-        chunk_key = self.get_chunk_key(enemy.center_x, enemy.center_y)
-        if enemy.chunk_key == chunk_key:
-            return
-        # Cambio de chunk al enemigo:
-        self.chunks[enemy.chunk_key].sprites["enemy"].remove(enemy)
-        chunk = self.get_chunk(chunk_key)
-        chunk.sprites["enemy"].append(enemy)
-        enemy.chunk_key = chunk_key
-
-    def load_world(
-        self,
-        tilemap: arcade.TileMap,
-        ignored_layers: list[str] | None = None,
-    ) -> None:
-        """Función para cargar los tiles del tilemap en sus respectivos chunks"""
-        for layer, sprite_list in tilemap.sprite_lists.items():
-            if ignored_layers and layer.capitalize() in ignored_layers:
-                continue
-            layer_key = layer.lower()
-            for sprite in sprite_list:
-                key = self.get_chunk_key(sprite.center_x, sprite.center_y)
-
-                chunk = self.get_chunk(key)
-                if layer_key in chunk.sprites:
-                    self.chunks[key].sprites[layer_key].append(sprite)
-        self.is_world_loaded = True
-
-    def assign_sprite_chunk(self, sprite: arcade.Sprite, sprite_type: str) -> None:
-        """Se asigna una chunk_key a un sprite específico"""
-        chunk_key = self.get_chunk_key(sprite.center_x, sprite.center_y)
-        if hasattr(sprite, "chunk_key"):
-            setattr(sprite, "chunk_key", chunk_key)
-        chunk = self.get_chunk(chunk_key)
-        if sprite_type in chunk.sprites:
-            # Cargo el sprite en el chunk especificado
-            self.chunks[chunk_key].sprites[sprite_type].append(sprite)
-
-    def batch_assign_sprites(self, sprite_list: arcade.SpriteList, sprite_type: str):
-        """Asignación de chunk_key a toda una SpriteList"""
-        for sprite in sprite_list:
-            self.assign_sprite_chunk(sprite, sprite_type)
+from Managers.ChunkManager import Chunk_Manager
 
 
 class Test(View):
@@ -130,9 +38,10 @@ class Test(View):
 
         for _ in range(10):
             enemy = Enemy(
-                random.randint(0, int(self._map_width)),
-                random.randint(0, int(self._map_height)),
+                randint(0, int(self._map_width)),
+                randint(0, int(self._map_height)),
                 self.chunk_manager.update_enemy_key,
+                self.chunk_manager.drop_item,
             )
             self.chunk_manager.assign_sprite_chunk(enemy, "enemy")
 
@@ -292,13 +201,13 @@ class Test(View):
         names = list(list(Mineral._resources.keys()))
         sizes = ["big", "mid", "small"]
         max_collision_attemps = 10
-        mineral_count = random.randint(1, 15)
+        mineral_count = randint(1, 15)
         random_data = [
             {
-                "name": random.choice(names),
-                "size": random.choice(sizes),
-                "x": random.randint(50, Constants.Game.SCREEN_WIDTH - 50),
-                "y": random.randint(50, Constants.Game.SCREEN_HEIGHT - 50),
+                "name": choice(names),
+                "size": choice(sizes),
+                "x": randint(50, Constants.Game.SCREEN_WIDTH - 50),
+                "y": randint(50, Constants.Game.SCREEN_HEIGHT - 50),
             }
             for _ in range(mineral_count)
         ]
@@ -320,12 +229,8 @@ class Test(View):
                     created_minerals.append(mineral)
                     break
                 else:
-                    mineral.center_x = random.randint(
-                        0, Constants.Game.SCREEN_WIDTH - 50
-                    )
-                    mineral.center_y = random.randint(
-                        50, Constants.Game.SCREEN_HEIGHT - 50
-                    )
+                    mineral.center_x = randint(0, Constants.Game.SCREEN_WIDTH - 50)
+                    mineral.center_y = randint(50, Constants.Game.SCREEN_HEIGHT - 50)
                     collision_attemps += 1
         print("Minerales creados aleatoriamente : ", len(created_minerals))
         return created_minerals

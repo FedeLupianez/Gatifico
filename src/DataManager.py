@@ -19,6 +19,10 @@ class PlayerData(TypedDict):
 
 # Función para leer un archivo json
 def loadData(filename: str) -> dict:
+    if not os.path.exists(DATAFILES_DIR + filename):
+        # Si no existe creo el archivo
+        os.makedirs(os.path.dirname(DATAFILES_DIR + filename), exist_ok=True)
+        return {}
     with open(DATAFILES_DIR + filename, "r") as file:
         return json.load(file)
 
