@@ -1,12 +1,15 @@
 from typing import Callable
 import arcade
-import math
 from characters.Player import Player
 from utils import random_item
 from StateMachine import StateMachine
+from DataManager import get_path, texture_manager
 
 
-class Enemy(arcade.SpriteSolidColor):
+class Enemy(arcade.Sprite):
+    WALK = "WALK"
+    _sprites: dict[str, list[arcade.Texture]] = {WALK: []}
+
     def __init__(
         self,
         center_x: float,
@@ -14,14 +17,15 @@ class Enemy(arcade.SpriteSolidColor):
         callback_update_chunk: Callable,
         callback_drop_item: Callable,
     ) -> None:
-        super().__init__(
-            color=arcade.color.GREEN,
-            width=25,
-            height=25,
-            center_x=center_x,
-            center_y=center_y,
-        )
+        # Si el dict de clase no está cargado lo cargo
+        if not self._sprites[self.WALK]:
+            for i in range(6):
+                texture = self._load_texture("Spider_walk_{}.png", i + 1)
+                self._sprites[self.WALK].append(texture)
+        super().__init__(center_x=center_x, center_y=center_y)
+        self.texture = self._sprites[self.WALK][0]
         self.speed = 0.8
+        self.scale = 2
         self.health = 100
         self.damage = 10
         self.hurt_time = 1  # tiempo en segundos que dura la animación de daño
@@ -44,6 +48,10 @@ class Enemy(arcade.SpriteSolidColor):
         self.state_machine.add_state("ATTACK", self.attack_state)
         self.state_machine.add_state("RUN", self.run_state)
         self.state_machine.add_state("HURT", self.hurt_state)
+
+    def _load_texture(self, path: str, index: int):
+        route = path.replace("{}", str(index))
+        return texture_manager.load_or_get_texture(get_path(route))
 
     def get_new_state(self) -> str:
         if self.distance_to_player > self.persecute_radius:
@@ -105,7 +113,8 @@ class Enemy(arcade.SpriteSolidColor):
 
         # Si ya pasó el tiemp de hit lo vuelvo al estado IDLE
         if self.hurt_time <= 0:
-            self.color = arcade.color.GREEN
+            # Volver al color normal de la texture
+            self.color = arcade.color.WHITE
             self.change_y = 0
             self.change_x = 0
             return "IDLE"

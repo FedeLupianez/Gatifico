@@ -1,23 +1,26 @@
-# Archivo principal del juego, hay que tratar de que este archivo no contenga
-# demasiadas líneas, lo ideal sería que se importen los componentes y los personajes acá
 import arcade
 from Managers.ViewManager import ViewManager
 from characters.Player import Player
 import Constants
 import DataManager
+from pyglet.image import load as load_image
 
 
 class Main(arcade.Window):
     def __init__(self) -> None:
+        icon = load_image(DataManager.get_path("icon.png"))
+        icon = icon.get_image_data()
         super().__init__(
             Constants.Game.SCREEN_WIDTH,
             Constants.Game.SCREEN_HEIGHT,
             title="Gatifico",
             update_rate=Constants.Game.FPS,
             draw_rate=Constants.Game.FPS,
+            center_window=True,
         )
-        self.player = Player()
+        self.set_icon(icon)
         self.ViewManager = ViewManager(self)
+        self.player = Player()
 
     def on_close(self):
         DataManager.store_actual_data(

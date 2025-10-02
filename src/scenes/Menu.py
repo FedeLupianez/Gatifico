@@ -3,6 +3,7 @@ from Constants import Game, SignalCodes
 import Constants
 from scenes.View import View
 from DataManager import game_data, get_path
+from characters.Player import Player
 
 Start_button_path: str = get_path("PlayButton.png")
 Exit_button_path: str = get_path("ExitButton.png")
@@ -36,6 +37,7 @@ class Menu(View):
 
         self.callback = callback
         self.camera.zoom = 1
+        Player().setup()
 
     def on_draw(self):
         self.clear()

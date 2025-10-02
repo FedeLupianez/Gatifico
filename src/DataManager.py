@@ -1,3 +1,4 @@
+from functools import lru_cache
 import json
 import os
 from typing import Dict, Literal, TypedDict
@@ -38,7 +39,6 @@ def write_file(filename: str, data: str, mode: Literal["a", "w"]) -> None:
 
 
 game_data: dict = loadData("Saved/Actual_Scene_Data.json")
-print(game_data)
 chests_data: dict = loadData("Saved/Chests_Data.json")
 sounds_loader: dict[str, Sound] = {}
 mineral_resources: Dict[
@@ -79,9 +79,10 @@ def store_chest_data(new_data: ChestsData, chest_id: str):
         json.dump(chests_data, file)
 
 
+@lru_cache(maxsize=100)
 def get_path(file_name: str) -> str:
     """Función que retorna el path absoluto desde la carpeta source al archivo"""
-    for base_dir, carpetas, files in os.walk(BASE_DIR):
+    for base_dir, dirs, files in os.walk(BASE_DIR):
         if file_name in files:
             return os.path.abspath(os.path.join(base_dir, file_name))
     return ""

@@ -47,7 +47,8 @@ class Chest(View):
         positions_2 = [(ITEMS_INIT[0] + 60 * i, ITEMS_INIT[1] + 60) for i in range(4)]
         player_init_pos = Constants.PlayerConfig.INVENTORY_POSITION
         player_items = [
-            (player_init_pos[0] + 60 * i, player_init_pos[1]) for i in range(5)
+            (player_init_pos[0] + 60 * i, player_init_pos[1])
+            for i in range(len(self.player.get_inventory().items()))
         ]
         add_containers_to_list(
             point_list=positions_1,

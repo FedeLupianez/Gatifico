@@ -71,17 +71,6 @@ class Player(StateMachine, PlayerConfig):
             Player.DOWN: [],
         }
 
-        # Cargo las texturas en el diccionario
-        for state in self.animations:
-            cant_frames = Player.ANIMATIONS_CONFIG[state]["frames"]
-            for i in range(
-                Player.INITIAL_INDEX,
-                cant_frames + Player.INITIAL_INDEX,
-            ):
-                self.animations[state].append(
-                    self._load_texture(Player.ANIMATIONS_CONFIG[state]["path"], i)
-                )
-
         self.texture_index = 0  # indice actual de la textura
         self.animation_timer: float = 0.0  # timer de la animación
         # Diccionario para el inventario
@@ -96,16 +85,7 @@ class Player(StateMachine, PlayerConfig):
         self.lifes_sprite_list = arcade.SpriteList()
 
         self.actual_floor: Literal["grass", "wood"] = "grass"
-        self.step_sounds: dict[Literal["grass", "wood"], list[arcade.Sound]] = {
-            "grass": [
-                arcade.Sound(get_path("Step_grass_1.mp3")),
-                arcade.Sound(get_path("Step_grass_2.mp3")),
-            ],
-            "wood": [
-                arcade.Sound(get_path("Step_wood_1.mp3")),
-                arcade.Sound(get_path("Step_wood_2.mp3")),
-            ],
-        }
+        self.step_sounds: dict[Literal["grass", "wood"], list[arcade.Sound]] = {}
         # Tiempo del ultimo sonido de paso, con este sabemos
         # si se terminó de reproducir el sonido anterior
         self.last_step_sound_time: float = 0.0
@@ -174,6 +154,8 @@ class Player(StateMachine, PlayerConfig):
         self,
         position: tuple[int, int] | None = None,
     ):
+        self.setup_sprites()
+        self.setup_sounds()
         """Función para configurar la maquina de estados del personaje"""
         self.add_state(Player.IDLE_FRONT, self.genericStateHandler)
         self.add_state(Player.IDLE_BACK, self.genericStateHandler)
@@ -183,7 +165,6 @@ class Player(StateMachine, PlayerConfig):
         self.add_state(Player.RIGHT, self.genericStateHandler)
         self.add_state(Player.DOWN, self.genericStateHandler)
         self.add_state(Player.UP, self.genericStateHandler)
-        print(game_data)
         antique_data = game_data["player"]
         self.sprite.center_x = (
             position[0] if position else antique_data["position"]["center_x"]
@@ -200,6 +181,28 @@ class Player(StateMachine, PlayerConfig):
             temp.center_x = 40 + ((temp.width + 10) * i)
             self.lifes_sprite_list.append(temp)
         del antique_data
+
+    def setup_sprites(self) -> None:
+        # Cargo las texturas en el diccionario
+        for state in self.animations:
+            cant_frames = Player.ANIMATIONS_CONFIG[state]["frames"]
+            for i in range(
+                Player.INITIAL_INDEX,
+                cant_frames + Player.INITIAL_INDEX,
+            ):
+                self.animations[state].append(
+                    self._load_texture(Player.ANIMATIONS_CONFIG[state]["path"], i)
+                )
+
+    def setup_sounds(self) -> None:
+        self.step_sounds["grass"] = [
+            arcade.Sound(get_path("Step_grass_1.mp3")),
+            arcade.Sound(get_path("Step_grass_2.mp3")),
+        ]
+        self.step_sounds["wood"] = [
+            arcade.Sound(get_path("Step_wood_1.mp3")),
+            arcade.Sound(get_path("Step_wood_2.mp3")),
+        ]
 
     def stop_state(self) -> None:
         states_keys = {
