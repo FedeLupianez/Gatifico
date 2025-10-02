@@ -306,7 +306,7 @@ class SplitTable(View):
             )
         arcade.draw_rect_filled(
             rect=self.rect_table,
-            color=arcade.color.PALE_BROWN,
+            color=arcade.color.BLACK,
         )
 
     def on_draw(self) -> None:
