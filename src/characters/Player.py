@@ -80,8 +80,8 @@ class Player(StateMachine, PlayerConfig):
         self.coins: int = 100
         self.chunk_key: tuple[int, int] = (0, 0)
 
-        self.healt = 100
-        self.lifes = 5
+        self.healt = game_data["player"]["healt"] or 100
+        self.lifes = game_data["player"]["lifes"] or 5
         self.lifes_sprite_list = arcade.SpriteList()
 
         self.actual_floor: Literal["grass", "wood"] = "grass"
@@ -174,13 +174,14 @@ class Player(StateMachine, PlayerConfig):
         )
         self.inventory = antique_data["inventory"]
         self.update_spritelist()
-        texture = texture_manager.load_or_get_texture(get_path("full_heart.png"))
-        self.lifes_sprite_list.clear()
-        for i in range(self.lifes):
-            temp = arcade.Sprite(texture, scale=3)
-            temp.center_x = 40 + ((temp.width + 10) * i)
-            self.lifes_sprite_list.append(temp)
         del antique_data
+        self.setup_lifes()
+        self._initialized = True
+
+    def reset(self) -> None:
+        self.lifes = 5
+        self.healt = 100
+        self.setup_lifes()
 
     def setup_sprites(self) -> None:
         # Cargo las texturas en el diccionario
@@ -193,6 +194,32 @@ class Player(StateMachine, PlayerConfig):
                 self.animations[state].append(
                     self._load_texture(Player.ANIMATIONS_CONFIG[state]["path"], i)
                 )
+
+    def setup_lifes(self):
+        texture = texture_manager.load_or_get_texture(get_path("full_heart.png"))
+        self.lifes_sprite_list.clear()
+        hearts = self.healt / 20
+        mid_heart = hearts - int(hearts)
+        center_x = 0
+        for _ in range(int(hearts)):
+            temp = arcade.Sprite(texture, scale=3)
+            center_x += temp.width + 10
+            temp.center_x = center_x
+            self.lifes_sprite_list.append(temp)
+
+        if mid_heart:
+            texture = texture_manager.load_or_get_texture(get_path("half_heart.png"))
+            temp = arcade.Sprite(texture, scale=3)
+            center_x += temp.width + 10
+            temp.center_x = center_x
+            self.lifes_sprite_list.append(temp)
+
+        for _ in range(int(5 - hearts)):
+            texture = texture_manager.load_or_get_texture(get_path("empty_heart.png"))
+            temp = arcade.Sprite(texture, scale=3)
+            center_x += temp.width + 10
+            temp.center_x = center_x
+            self.lifes_sprite_list.append(temp)
 
     def setup_sounds(self) -> None:
         self.step_sounds["grass"] = [
@@ -293,7 +320,7 @@ class Player(StateMachine, PlayerConfig):
         diff = len(self.lifes_sprite_list) - self.lifes
         # Si la parte decimal de la vida es impar significa que debe tener medio corazón
         is_half_heart = (self.healt / 10) % 2 != 0
-        texture_name = "empty_heart.png" if not is_half_heart else "mid_heart.png"
+        texture_name = "empty_heart.png" if not is_half_heart else "half_heart.png"
         texture = texture_manager.load_or_get_texture(get_path(texture_name))
         self.lifes_sprite_list[-diff].texture = texture
 

@@ -37,7 +37,6 @@ class Menu(View):
 
         self.callback = callback
         self.camera.zoom = 1
-        Player().setup()
 
     def on_draw(self):
         self.clear()

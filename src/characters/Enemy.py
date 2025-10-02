@@ -8,6 +8,7 @@ from DataManager import get_path, texture_manager
 
 class Enemy(arcade.Sprite):
     WALK = "WALK"
+    IDLE = "IDLE"
     _sprites: dict[str, list[arcade.Texture]] = {WALK: []}
 
     def __init__(
@@ -29,6 +30,11 @@ class Enemy(arcade.Sprite):
         self.health = 100
         self.damage = 10
         self.hurt_time = 1  # tiempo en segundos que dura la animación de daño
+
+        self.animation_cooldown = 0.3
+        self.animation_timer = 0
+        self.frame_index = 0
+
         self.distance_to_player: float = 0
         self.persecute_radius = 140
 
@@ -43,10 +49,10 @@ class Enemy(arcade.Sprite):
         self.drop_item = callback_drop_item
         self.chunk_key: tuple[int, int] = (0, 0)
 
-        self.state_machine = StateMachine("IDLE")
-        self.state_machine.add_state("IDLE", self.idle_state)
+        self.state_machine = StateMachine(self.IDLE)
+        self.state_machine.add_state(self.IDLE, self.idle_state)
         self.state_machine.add_state("ATTACK", self.attack_state)
-        self.state_machine.add_state("RUN", self.run_state)
+        self.state_machine.add_state(self.WALK, self.walk_state)
         self.state_machine.add_state("HURT", self.hurt_state)
 
     def _load_texture(self, path: str, index: int):
@@ -55,25 +61,28 @@ class Enemy(arcade.Sprite):
 
     def get_new_state(self) -> str:
         if self.distance_to_player > self.persecute_radius:
-            return "IDLE"
+            return self.IDLE
         elif self.distance_to_player < self.attack_radius:
             return "ATTACK"
         else:
-            return "RUN"
+            return self.WALK
 
     def idle_state(self, event):
         if event == 0:  # on enter
             self.change_x = 0
             self.change_y = 0
             return
+        self.texture = self._sprites["WALK"][0]
         return self.get_new_state()
 
-    def run_state(self, event):
+    def walk_state(self, event):
         if event == 0:  # on enter
             return
         *_, player_position = event
         diff_x = player_position[0] - self.center_x
         diff_y = player_position[1] - self.center_y
+        self.scale_x = -2 if diff_x > 0 else 2
+
         if self.distance_to_player > 0:
             self.change_x = (diff_x / self.distance_to_player) * self.speed
             self.change_y = (diff_y / self.distance_to_player) * self.speed
@@ -100,6 +109,7 @@ class Enemy(arcade.Sprite):
             self.color = arcade.color.RED
             self.hurt_time = 1
             return
+        self.texture = self._sprites["WALK"][0]
         delta_time, *_ = event
         self.hurt_time -= delta_time
 
@@ -132,6 +142,19 @@ class Enemy(arcade.Sprite):
         self.center_x += self.change_x
         self.center_y += self.change_y
         self.update_chunk(self)
+        self.update_animation(delta_time)
+
+    def update_animation(self, delta_time: float) -> None:
+        if self.state_machine.actual_state_id in ["HURT", "IDLE"]:
+            return
+        self.animation_timer += delta_time
+        if self.animation_timer > self.animation_cooldown:
+            self.animation_timer = 0
+            new_index = (self.frame_index + 1) % len(self._sprites[self.WALK])
+            new_texture = self._sprites[self.WALK][new_index]
+            if self.texture != new_texture:
+                self.frame_index = new_index
+                self.texture = new_texture
 
     def hurt(self, damage: int, knockback: int = 0):
         self.health -= damage

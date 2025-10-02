@@ -512,10 +512,15 @@ class Test(View):
         if self.is_first_load:
             self.camera.position = self.player.sprite.position
 
-    def on_update(self, delta_time: float) -> bool | None:
+    def on_fixed_update(self, delta_time: float):
         self.player.update_animation(delta_time)
+        for enemy in self._actual_area["enemy"]:
+            enemy.update(delta_time, self.player.sprite.position)
+
+    def on_update(self, delta_time: float) -> bool | None:
         self.fps_text.text = f"{int(1 / delta_time)}"
         if self.player.lifes == 0:
+            self.player.reset()
             self.callback(Constants.SignalCodes.CHANGE_VIEW, "MENU")
             return
         player = self.player.sprite
@@ -526,8 +531,6 @@ class Test(View):
                 self.player.process_state(key)
 
         self.player.update_position()
-        for enemy in self._actual_area["enemy"]:
-            enemy.update(delta_time, player.position)
 
         player_moved = (
             abs(player.center_x - lastPosition[0]) > 0

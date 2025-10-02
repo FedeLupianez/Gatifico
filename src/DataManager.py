@@ -63,6 +63,8 @@ def store_actual_data(player, actualScene) -> None:
                 "center_y": player.sprite.center_y,
             },
             "inventory": player.inventory,
+            "lifes": player.lifes,
+            "healt": player.healt,
         },
         "scene": actualScene,
         "time_stamp": actual_time,
