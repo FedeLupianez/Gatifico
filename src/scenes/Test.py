@@ -70,6 +70,7 @@ class Test(View):
         self.setup_spritelists()
         self.setup_scene_layer()
         self.setup_player()
+        # Hago que la vida siempre esté en el top de la ventana
         for i in range(len(self.player.lifes_sprite_list)):
             self.player.lifes_sprite_list[i].center_y = self.window.height - 44
         self.update_inventory_sprites()
@@ -515,7 +516,7 @@ class Test(View):
     def on_fixed_update(self, delta_time: float):
         self.player.update_animation(delta_time)
         for enemy in self._actual_area["enemy"]:
-            enemy.update(delta_time, self.player.sprite.position)
+            enemy.update(delta_time, self.player.sprite.position, self._collision_list)
 
     def on_update(self, delta_time: float) -> bool | None:
         self.fps_text.text = f"{int(1 / delta_time)}"

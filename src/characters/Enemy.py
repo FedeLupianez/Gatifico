@@ -131,7 +131,12 @@ class Enemy(arcade.Sprite):
 
         return "HURT"
 
-    def update(self, delta_time: float, player_position: tuple[float, float]):
+    def update(
+        self,
+        delta_time: float,
+        player_position: tuple[float, float],
+        objects_collisions: arcade.SpriteList,
+    ):
         self.distance_to_player = (
             (player_position[0] - self.center_x) ** 2
             + (player_position[1] - self.center_y) ** 2
@@ -139,10 +144,16 @@ class Enemy(arcade.Sprite):
 
         self.state_machine.process_state((delta_time, player_position))
 
-        self.center_x += self.change_x
-        self.center_y += self.change_y
+        self.update_position(objects=objects_collisions)
         self.update_chunk(self)
         self.update_animation(delta_time)
+
+    def update_position(self, objects: arcade.SpriteList) -> None:
+        last_position = self.position
+        self.center_x += self.change_x
+        self.center_y += self.change_y
+        if self.collides_with_list(objects):
+            self.position = last_position
 
     def update_animation(self, delta_time: float) -> None:
         if self.state_machine.actual_state_id in ["HURT", "IDLE"]:
