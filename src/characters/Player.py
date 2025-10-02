@@ -45,7 +45,7 @@ class Player(StateMachine, PlayerConfig):
         )  # objeto sprite del personaje
 
         self.speed = self.SPEED
-        self.knockback = 5
+        self.knockback = 15
         self.actual_animation_frames: int = Player.ANIMATIONS_CONFIG[Player.IDLE_FRONT][
             "frames"
         ]  # cantidad de frames de la animacion
