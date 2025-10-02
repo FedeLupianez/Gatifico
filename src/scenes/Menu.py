@@ -74,7 +74,6 @@ class Menu(View):
     def clean_up(self):
         """Limpia todos los recursos"""
         self.sprite_list.clear()
-        del self.sprite_list
         del self.start_button
         del self.exit_button
         del self.callback

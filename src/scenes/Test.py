@@ -135,7 +135,7 @@ class Test(View):
 
     def load_antique_minerals(self) -> None:
         minerals_to_create = []
-        lines = Dm.read_file("minerals_in_map.txt")
+        lines = Dm.read_file("Saved/minerals_in_map.txt")
         for line in lines:
             name, size, x, y, touches = line.split(",")
             mineral = Mineral(

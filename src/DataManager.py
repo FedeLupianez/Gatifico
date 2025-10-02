@@ -38,6 +38,7 @@ def write_file(filename: str, data: str, mode: Literal["a", "w"]) -> None:
 
 
 game_data: dict = loadData("Saved/Actual_Scene_Data.json")
+print(game_data)
 chests_data: dict = loadData("Saved/Chests_Data.json")
 sounds_loader: dict[str, Sound] = {}
 mineral_resources: Dict[
