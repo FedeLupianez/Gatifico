@@ -1,0 +1,7 @@
+piedra_cuarzo,mid,107,360,2
+azufre,big,128,658,3
+cuarzo,mid,56,669,2
+piedra,mid,683,646,2
+rubi,small,549,624,1
+rubi,small,738,337,1
+piedra,small,966,431,1
