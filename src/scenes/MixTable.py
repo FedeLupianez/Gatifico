@@ -1,5 +1,6 @@
 import arcade
 import arcade.gui
+import Constants
 from scenes.View import View
 from characters.Player import Player
 import DataManager
@@ -33,14 +34,18 @@ class MixTable(View):
         )
         self.background_image.image = apply_filter(background_image, Filter.DARK)
 
+        bg_image = arcade.Sprite(DataManager.get_path("mix_table.png"))
+        bg_image.center_x = Constants.Game.SCREEN_CENTER_X
+        bg_image.center_y = Constants.Game.SCREEN_CENTER_Y
+        bg_image.width = self.window.width
+        bg_image.height = self.window.height
+        self.bg_spritelist = arcade.SpriteList()
+        self.bg_spritelist.append(bg_image)
+
         # Init de la clase
         self.background_scene = background_scene
         self.player = Player()
-        self.items: dict = self.player.get_inventory() or {
-            "rubi": 4,
-            "piedra": 3,
-            "azufre": 5,
-        }
+        self.items: dict = self.player.get_inventory()
         self.next_item_id: int = 0
 
         # Configuraciones de cámara
@@ -302,6 +307,7 @@ class MixTable(View):
             rect=self.rect_table,
             color=arcade.color.BLACK,
         )
+        # self.bg_spritelist.draw(pixelated=True)
 
     def on_draw(self):
         self.clear()  # limpia la pantalla

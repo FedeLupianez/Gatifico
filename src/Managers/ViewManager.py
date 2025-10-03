@@ -1,6 +1,5 @@
 import arcade
 import Constants
-from characters.Player import Player
 from scenes.Sell import Sell
 from scenes.Load_screen import Load_screen
 from scenes.Menu import Menu

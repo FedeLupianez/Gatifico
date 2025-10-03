@@ -19,7 +19,7 @@ class PlayerConfig:
     # Valores del personaje principal :
     SCALE = 0.5
     SPEED = 0.5
-    INVENTORY_POSITION = (550, 100)
+    INVENTORY_POSITION = (523, 100)
     HITBOX_WIDTH = 27
     HITBOX_HEIGHT = 30
 

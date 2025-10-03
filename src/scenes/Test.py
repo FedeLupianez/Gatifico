@@ -36,7 +36,7 @@ class Test(View):
         self._map_width = self.tilemap.width * self.tilemap.tile_width
         self._map_height = self.tilemap.height * self.tilemap.tile_height
 
-        for _ in range(10):
+        for _ in range(5):
             enemy = Enemy(
                 randint(0, int(self._map_width)),
                 randint(0, int(self._map_height)),
@@ -98,12 +98,13 @@ class Test(View):
         """Agrego los contenedores a la lista del inventario"""
         CONTAINER_SIZE = 35
         ITEMS_INIT = Constants.PlayerConfig.INVENTORY_POSITION
-        positions = [(ITEMS_INIT[0] + 50 * i, ITEMS_INIT[1]) for i in range(4)]
+        positions = [(ITEMS_INIT[0] + (57.5 * i), ITEMS_INIT[1] + 5) for i in range(5)]
         add_containers_to_list(
             positions, self.inventory_sprites, container_size=CONTAINER_SIZE
         )
         inventory_sprite = arcade.Sprite(Dm.get_path("inventory_tools.png"), scale=3)
-        inventory_sprite.center_x = ITEMS_INIT[0] + 75
+        inventory_sprite.scale_y = 3.2
+        inventory_sprite.center_x = self.window.width * 0.5
         inventory_sprite.center_y = ITEMS_INIT[1]
         self.inventory_sprites.append(inventory_sprite)
 
@@ -319,6 +320,7 @@ class Test(View):
                 y=container.center_y - (container.height * 0.5 + 10),
                 anchor_x="center",
                 anchor_y="baseline",
+                color=arcade.color.BLACK,
             )
             self.inventory_texts.append(new_text)
 
