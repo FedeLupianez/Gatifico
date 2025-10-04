@@ -9,7 +9,7 @@ class Pause(View):
     def __init__(self, previus_scene: View, callback):
         super().__init__(background_url=None, tilemap_url=None)
         # Le pongo filtro oscuro al fondo
-        background_image = previus_scene.get_screenshot()
+        background_image = previus_scene.get_screenshot(draw_ui=True)
         self.background_image = arcade.texture.Texture.create_empty(
             "pause_bg", size=(background_image.width, background_image.height)
         )

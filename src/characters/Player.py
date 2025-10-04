@@ -20,8 +20,11 @@ class Player(StateMachine, PlayerConfig):
     RIGHT = "RIGHT"
     UP = "UP"
     DOWN = "DOWN"
+    HURT = "HURT"
     ANIMATIONS_CONFIG: dict = loadData("PlayerAnimationsConfig.json")
     INITIAL_INDEX = AssetsConstants.INITIAL_INDEX
+    MAX_ITEMS = 5
+
     _instace = None
     _initialized = False
 
@@ -73,6 +76,8 @@ class Player(StateMachine, PlayerConfig):
 
         self.texture_index = 0  # indice actual de la textura
         self.animation_timer: float = 0.0  # timer de la animación
+        self.hurt_time: float = 1
+        self.state_before_hurt = Player.IDLE_FRONT
         # Diccionario para el inventario
         self.inventory: dict[str, int] = {}
         self.max_inventory: int = 64
@@ -150,6 +155,12 @@ class Player(StateMachine, PlayerConfig):
                 # Si no es ninguna de las otras teclas retorna el estado actual
                 return self.actual_state_id
 
+    def hurt_state_handler(self, event: int):
+        """Manejador de estado para cuando el jugador esta herido.
+        Ignora los eventos y mantiene al jugador en el estado HURT.
+        La transición para salir de este estado se maneja en `update_animation`."""
+        return Player.HURT
+
     def setup(
         self,
         position: tuple[int, int] | None = None,
@@ -165,6 +176,7 @@ class Player(StateMachine, PlayerConfig):
         self.add_state(Player.RIGHT, self.genericStateHandler)
         self.add_state(Player.DOWN, self.genericStateHandler)
         self.add_state(Player.UP, self.genericStateHandler)
+        self.add_state(self.HURT, self.hurt_state_handler)
         antique_data = game_data["player"]
         self.sprite.center_x = (
             position[0] if position else antique_data["position"]["center_x"]
@@ -281,8 +293,18 @@ class Player(StateMachine, PlayerConfig):
                 self.texture_index = new_index
                 self.sprite.texture = new_texture
                 self.play_step_sound()
+        if self.actual_state_id == Player.HURT:
+            self.hurt_time -= deltaTime
+            if self.hurt_time <= 0:
+                self.sprite.color = arcade.color.WHITE
+                self.hurt_time = 1
+                self.set_state(self.state_before_hurt)
+            else:
+                self.sprite.color = arcade.color.RED
 
     def add_to_inventory(self, item: str, cant: int) -> None:
+        if item not in self.inventory and len(self.inventory) >= self.MAX_ITEMS:
+            return
         if item not in self.inventory:
             self.inventory[item] = cant
         else:
@@ -325,7 +347,13 @@ class Player(StateMachine, PlayerConfig):
         self.lifes_sprite_list[-diff].texture = texture
 
     def hurt(self, damage: int):
+        self.state_before_hurt = (
+            self.actual_state_id
+            if self.actual_state_id != Player.HURT
+            else self.last_state_id
+        )
         self.healt -= damage
+        self.set_state(Player.HURT)
         if self.healt <= 0:
             self.healt = 0
         self.lifes = self.healt // 20

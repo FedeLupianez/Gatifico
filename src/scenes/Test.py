@@ -436,11 +436,6 @@ class Test(View):
 
     def process_mineral_interaction(self, mineral: Mineral) -> bool:
         """Procesa la interacción con un mineral"""
-        if (
-            len(self.player.inventory) >= 4
-            and mineral.mineral not in self.player.inventory
-        ):
-            return True
         mineral.setup()
         mineral.state_machine.process_state(arcade.key.E)
         self.player.add_to_inventory(mineral.mineral, 1)
@@ -609,7 +604,9 @@ class Test(View):
 
         self._actual_area.clear()
 
-    def get_screenshot(self):
+    def get_screenshot(self, draw_ui: bool = False):
         self.clear()
         self.world_draw()
+        if draw_ui:
+            self.gui_draw()
         return arcade.get_image()
