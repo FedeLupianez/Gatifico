@@ -13,7 +13,7 @@ class Chunk:
             "mineral": [],
             "interact": [],
             "floor": [],
-            "copes": [],
+            "sky": [],
             "objects": [],
             "items": [],
             "enemy": [],

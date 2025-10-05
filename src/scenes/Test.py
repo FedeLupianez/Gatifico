@@ -58,7 +58,7 @@ class Test(View):
             "interact": arcade.SpriteList(use_spatial_hash=True, lazy=True),
             "mineral": arcade.SpriteList(use_spatial_hash=True, lazy=True),
             "floor": arcade.SpriteList(use_spatial_hash=True, lazy=True),
-            "copes": arcade.SpriteList(use_spatial_hash=True, lazy=True),
+            "sky": arcade.SpriteList(use_spatial_hash=True, lazy=True),
             "objects": arcade.SpriteList(use_spatial_hash=True, lazy=True),
             "items": arcade.SpriteList(use_spatial_hash=True),
             "enemy": arcade.SpriteList(use_spatial_hash=True),
@@ -249,7 +249,7 @@ class Test(View):
             "objects",
             "mineral",
             "characters",
-            "copes",
+            "sky",
         ]
         self.camera.use()
         for layer in draw_order:
@@ -333,7 +333,7 @@ class Test(View):
             "mineral": arcade.SpriteList(use_spatial_hash=True),
             "interact": arcade.SpriteList(use_spatial_hash=True),
             "floor": arcade.SpriteList(use_spatial_hash=True),
-            "copes": arcade.SpriteList(use_spatial_hash=True),
+            "sky": arcade.SpriteList(use_spatial_hash=True),
             "objects": arcade.SpriteList(use_spatial_hash=True),
             "items": arcade.SpriteList(use_spatial_hash=True),
             "enemy": arcade.SpriteList(use_spatial_hash=True),
@@ -347,8 +347,9 @@ class Test(View):
             chunk = self.chunk_manager.get_chunk(key)
             for list_name, sprite_list in active_chunk_lists.items():
                 sprites = chunk.sprites.get(list_name, [])
+                print(f"{list_name=} {len(sprites)=}")
                 sprite_list.extend(sprites)
-                if list_name in ["floor", "copes"]:
+                if list_name in ["floor", "sky"]:
                     continue
                 self._collision_list.extend(sprites)
         self._actual_area = active_chunk_lists

@@ -48,6 +48,7 @@ class Menu(View):
     def on_key_press(self, symbol: int, modifiers: int) -> bool | None:
         data_to_send = {
             arcade.key.SPACE: "TEST",
+            arcade.key.F: "FOREST",
             arcade.key.M: "MIX_TABLE",
             arcade.key.C: ("CHEST", "chest_1", {"rubi": 4, "piedra": 2}),
             arcade.key.S: "SPLIT_TABLE",

@@ -1,5 +1,6 @@
 import arcade
 import Constants
+from scenes.Forest import Forest
 from scenes.Sell import Sell
 from scenes.Load_screen import Load_screen
 from scenes.Menu import Menu
@@ -24,6 +25,7 @@ class ViewManager:
             "TEST": Test,
             "LABORATORY": Laboratory,
             "SELL": Sell,
+            "FOREST": Forest,
         }
         self.window.show_view(
             self.current_scene
