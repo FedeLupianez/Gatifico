@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="100" height="100" tilewidth="19" tileheight="19" infinite="0" nextlayerid="16" nextobjectid="9">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="100" height="100" tilewidth="18" tileheight="18" infinite="0" nextlayerid="16" nextobjectid="9">
  <tileset firstgid="1" source="../Assets/TileSets/pasto_2.tsx"/>
  <tileset firstgid="5" source="../Assets/TileSets/pasto_1.tsx"/>
  <tileset firstgid="9" source="../Assets/TileSets/tronco.tsx"/>

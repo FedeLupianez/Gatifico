@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="81" height="49" tilewidth="16" tileheight="16" infinite="0" nextlayerid="15" nextobjectid="137">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="81" height="49" tilewidth="16" tileheight="16" infinite="0" nextlayerid="15" nextobjectid="139">
  <tileset firstgid="1" source="Assets/TileSets/Grass.tsx"/>
  <tileset firstgid="226" source="Assets/TileSets/Wall.tsx"/>
  <tileset firstgid="1250" source="Assets/TileSets/Objetos.tsx"/>
@@ -262,6 +262,7 @@
   <object id="49" name="cartel_3" type="cartel" x="1057.63" y="64.875" width="29.25" height="38.25"/>
   <object id="50" name="cartel_4" type="cartel" x="1089.88" y="65.125" width="29.25" height="38.25"/>
   <object id="105" gid="83" x="884.667" y="183.667" width="17" height="17"/>
+  <object id="137" name="Seller" x="592" y="320" width="16" height="32"/>
  </objectgroup>
  <objectgroup id="11" name="Colisiones">
   <object id="132" name="chair" type="background" x="704" y="112" width="32" height="64"/>

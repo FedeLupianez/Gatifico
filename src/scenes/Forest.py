@@ -30,11 +30,15 @@ class Forest(View):
         self.is_first_load: bool = True
 
         self.chunk_manager = Chunk_Manager(
-            int(self.camera.viewport.width // 7), int(self.camera.viewport.height // 7)
+            int(self.camera.viewport.width // 7), int(self.camera.viewport.height // 6)
         )
         # constantes para precalcular el tamaño del mapa
         self._map_width = self.tilemap.width * self.tilemap.tile_width
         self._map_height = self.tilemap.height * self.tilemap.tile_height
+        self._dimensions_diff = (
+            (self._map_width - self._half_w),
+            (self._map_height - self._half_h),
+        )
 
         self.keys_pressed: set = set()
         # Flag para actualizaciones selectivas del inventario
@@ -120,7 +124,7 @@ class Forest(View):
         # Cargo el inventario anterior del jugador, si no tiene le pongo uno vacío
         player_data = Dm.game_data["player"]
         self.player.inventory = player_data.get("inventory", {})
-        self.player.setup(position=(900, 575))  # Setup del personaje
+        self.player.setup(position=(1000, 500))  # Setup del personaje
         # Le asigno la chunk_key al jugador
         self.player.chunk_key = self.chunk_manager.get_chunk_key(
             self.player.sprite.center_x, self.player.sprite.center_y
@@ -336,14 +340,18 @@ class Forest(View):
         self._actual_area = active_chunk_lists
 
     def update_camera(self, player_moved: bool) -> None:
-        cam_lerp = 0.25 if (player_moved) else 0.06
+        cam_lerp = (
+            Constants.Game.CAMERA_LERP_FAST
+            if (player_moved)
+            else Constants.Game.CAMERA_LERP_SLOW
+        )
 
         target_x = self.player.sprite.center_x
         target_y = self.player.sprite.center_y
 
         # Le pongo el limite del mundo a la cámara
-        target_x = max(self._half_w, min(target_x, self._map_width - self._half_w))
-        target_y = max(self._half_h, min(target_y, self._map_height - self._half_h))
+        target_x = max(self._half_w, min(target_x, self._dimensions_diff[0]))
+        target_y = max(self._half_h, min(target_y, self._dimensions_diff[1]))
 
         self.camera.position = arcade.math.lerp_2d(
             self.camera.position, (target_x, target_y), cam_lerp

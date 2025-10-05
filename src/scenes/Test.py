@@ -4,6 +4,7 @@ from random import randint, choice
 
 from characters.Enemy import Enemy
 from scenes.View import View, Object
+from scenes.Sell import Sell
 import Constants
 from characters.Player import Player
 from items.Mineral import Mineral
@@ -381,6 +382,11 @@ class Test(View):
         self.is_first_load = False
         self.window.show_view(new_scene)
 
+    def open_sell(self) -> None:
+        temp = Sell(self)
+        self.window.show_view(temp)
+        return
+
     # Funciones de Interacción con objetos
     def handleInteractions(self):
         closest_obj = arcade.get_closest_sprite(
@@ -433,8 +439,8 @@ class Test(View):
                 arcade.play_sound(Dm.get_sound("door.mp3"))
                 self.callback(Constants.SignalCodes.CHANGE_VIEW, "LABORATORY")
                 return True
-            case "comerce":
-                # Cambiar a la escena de compra
+            case "seller":
+                self.open_sell()
                 return True
         return False
 

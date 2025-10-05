@@ -39,8 +39,6 @@ class MixTable(View):
         bg_image.center_y = Constants.Game.SCREEN_CENTER_Y
         bg_image.width = self.window.width
         bg_image.height = self.window.height
-        self.bg_spritelist = arcade.SpriteList()
-        self.bg_spritelist.append(bg_image)
 
         # Init de la clase
         self.background_scene = background_scene
