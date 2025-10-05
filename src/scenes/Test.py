@@ -347,7 +347,6 @@ class Test(View):
             chunk = self.chunk_manager.get_chunk(key)
             for list_name, sprite_list in active_chunk_lists.items():
                 sprites = chunk.sprites.get(list_name, [])
-                print(f"{list_name=} {len(sprites)=}")
                 sprite_list.extend(sprites)
                 if list_name in ["floor", "sky"]:
                     continue

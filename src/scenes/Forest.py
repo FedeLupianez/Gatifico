@@ -92,6 +92,10 @@ class Forest(View):
                 self.chunk_manager.update_enemy_key,
                 self.chunk_manager.drop_item,
             )
+            while enemy.collides_with_list(self._collision_list):
+                enemy.center_x = randint(0, int(self._map_width))
+                enemy.center_y = randint(0, int(self._map_height))
+
             self.chunk_manager.assign_sprite_chunk(enemy, "enemy")
 
     def setup_inventory_containers(self) -> None:

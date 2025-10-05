@@ -300,7 +300,10 @@ class Player(StateMachine, PlayerConfig):
                 self.sprite.color = arcade.color.RED
 
     def add_to_inventory(self, item: str, cant: int) -> None:
-        if item not in self.inventory and len(self.inventory) >= self.MAX_ITEMS:
+        if (
+            item not in self.inventory
+            and len(self.inventory) >= PlayerConfig.MAX_ITEMS_CANT
+        ):
             return
         if item not in self.inventory:
             self.inventory[item] = cant
