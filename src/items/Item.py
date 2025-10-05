@@ -1,5 +1,6 @@
 import arcade
 from DataManager import mineral_resources
+from typing import Self
 
 
 class Item(arcade.Sprite):
@@ -28,3 +29,10 @@ class Item(arcade.Sprite):
 
     def __str__(self):
         return f"Nombre : {self.name}, Cantidad : {self.quantity}\nID: {self.id} Container ID : {self.container_id}"
+
+    def __equals__(self, other: Self) -> bool:
+        return self.name == other.name
+
+    def __del__(self) -> None:
+        self.remove_from_sprite_lists()
+        return

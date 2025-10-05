@@ -1,7 +1,8 @@
-piedra_cuarzo,mid,107,360,2
-azufre,big,128,658,3
-cuarzo,mid,56,669,2
-piedra,mid,683,646,2
-rubi,small,549,624,1
-rubi,small,738,337,1
-piedra,small,966,431,1
+piedra_rubi,small,1222.0,664.0,1
+cuarzo,big,256.0,587.0,3
+piedra_rubi,small,84.0,479.0,1
+piedra,small,230.0,404.0,1
+cuarzo,big,656.0,463.0,3
+piedra_rubi,small,600.0,414.0,1
+piedra_rubi,mid,1090.0,194.0,2
+azufre,mid,1102.0,476.0,2

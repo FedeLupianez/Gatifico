@@ -12,6 +12,8 @@ class Game:
     FPS = 1 / 61
 
     FOREST_ZOOM_CAMERA = 4  # Zoom de la camara en el bosque
+    CAMERA_LERP_FAST = 0.25
+    CAMERA_LERP_SLOW = 0.06
     DEBUG_MODE = True
 
 
@@ -19,6 +21,9 @@ class PlayerConfig:
     # Valores del personaje principal :
     SCALE = 0.5
     SPEED = 0.5
+    KNOCKBACK = 15
+    MAX_ITEMS_IN_INVENTORY = 5
+    MAX_ITEMS_CANT = 64
     INVENTORY_POSITION = (523, 100)
     HITBOX_WIDTH = 27
     HITBOX_HEIGHT = 30

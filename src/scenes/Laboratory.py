@@ -33,8 +33,15 @@ class Laboratory(View):
         )
 
         self._item_mouse_text = arcade.Text(
-            text="", x=0, y=0, anchor_x="center", anchor_y="center", align="center"
+            text="",
+            x=0,
+            y=0,
+            anchor_x="center",
+            anchor_y="center",
+            align="center",
         )
+        self._item_text_background = arcade.rect.Rect(0, 0, 0, 0, 0, 0, 0, 0)
+
         # Inicializacion de funciones
         self.setup_spritelists()
         self.setup_player()
@@ -171,8 +178,20 @@ class Laboratory(View):
     def on_mouse_motion(self, x: int, y: int, dx: int, dy: int) -> bool | None:
         if item := arcade.get_sprites_at_point((x, y), self.inventory_items):
             self._item_mouse_text.text = item[0].name or ""
-            self._item_mouse_text.x = x + 10
+            text_width = len(item[0].name) * self._item_mouse_text.font_size
+            self._item_mouse_text.x = x
             self._item_mouse_text.y = y + 15
+
+            self._item_text_background = arcade.rect.Rect(
+                width=text_width,
+                height=self._item_mouse_text.font_size + 5,
+                x=x,
+                y=y + 15,
+                left=0,
+                right=0,
+                top=0,
+                bottom=0,
+            )
         else:
             self._item_mouse_text.text = ""
 
@@ -209,6 +228,7 @@ class Laboratory(View):
         for text in self.inventory_texts:
             text.draw()
         if self._item_mouse_text.text:
+            arcade.draw_rect_filled(self._item_text_background, arcade.color.BLACK)
             self._item_mouse_text.draw()
 
     def on_draw(self) -> None:
@@ -241,7 +261,11 @@ class Laboratory(View):
         self.update_inventory_view()
 
     def update_camera(self, player_moved: bool) -> None:
-        cam_lerp = 0.25 if (player_moved) else 0.06
+        cam_lerp = (
+            Constants.Game.CAMERA_LERP_FAST
+            if (player_moved)
+            else Constants.Game.CAMERA_LERP_SLOW
+        )
 
         target_x = self.player.sprite.center_x
         target_y = self.player.sprite.center_y
@@ -268,7 +292,9 @@ class Laboratory(View):
         del self.interact_layer
         del self.collisions_list
 
-    def get_screenshot(self):
+    def get_screenshot(self, draw_ui: bool = False):
         self.clear()
         self.world_draw()
+        if draw_ui:
+            self.gui_draw()
         return arcade.get_image()

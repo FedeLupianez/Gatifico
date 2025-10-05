@@ -15,9 +15,9 @@ Combinations: Dict[str, Dict[str, str]] = DataManager.loadData("CombinationsTest
 
 # centros de los contenedores
 MIXING_Y = 450
-MIXING_ITEMS_POSITIONS: list[tuple[float, float]] = [
-    (565.0, MIXING_Y),
-    (640.0, MIXING_Y),
+MIXING_ITEMS_POSITIONS: list[tuple[int, int]] = [
+    (565, MIXING_Y),
+    (640, MIXING_Y),
 ]
 CONTAINER_SIZE = 50
 
@@ -61,7 +61,7 @@ class MixTable(View):
             right=Game.SCREEN_CENTER_X + (Game.SCREEN_CENTER_X / 3),
             top=Game.SCREEN_CENTER_Y + (Game.SCREEN_CENTER_Y * 0.5),
             bottom=Game.SCREEN_CENTER_Y - (Game.SCREEN_CENTER_Y * 0.5),
-            width=Game.SCREEN_CENTER_X + (Game.SCREEN_CENTER_X / 3),
+            width=int(Game.SCREEN_CENTER_X + (Game.SCREEN_CENTER_X / 3)),
             height=Game.SCREEN_CENTER_Y,
             x=Game.SCREEN_CENTER_X,
             y=Game.SCREEN_CENTER_Y,
@@ -121,14 +121,13 @@ class MixTable(View):
 
     def _setup_containers(self) -> None:
         positions = [
-            (ITEMS_INIT[0] + 75 * i, ITEMS_INIT[1]) for i in range(len(self.items))
+            ((ITEMS_INIT[0] + 75 * i), ITEMS_INIT[1]) for i in range(len(self.items))
         ]
         # Centrar los containers con la pantalla :
         # centro de la pantalla
         cant_containers = len(positions)
-        screen_center_x = self.window.width * 0.5
         mid_container = int(cant_containers * 0.5)
-        positions[mid_container] = (screen_center_x, ITEMS_INIT[1])
+        positions[mid_container] = (int(Constants.Game.SCREEN_CENTER_X), ITEMS_INIT[1])
 
         for i in range(mid_container - 1, -1, -1):
             last_pos = positions[i + 1]
@@ -183,7 +182,7 @@ class MixTable(View):
             anchor_x="center",
             anchor_y="baseline",
         )
-        text_sprite.id = item.id
+        setattr(text_sprite, "id", item.id)
         return text_sprite
 
     def _update_texts_position(self) -> None:
@@ -254,10 +253,11 @@ class MixTable(View):
 
         for item, container in zip((item_1, item_2), (input_1, input_2)):
             item.quantity -= 1
-            if item.quantity == 0:
-                item_text = self._find_element(
-                    list_to_find=self.item_texts, attr="id", target=item.id
-                )
+            if item.quantity != 0:
+                return
+            if item_text := self._find_element(
+                list_to_find=self.item_texts, attr="id", target=item.id
+            ):
                 self.item_texts.remove(item_text)
                 self.item_sprites.remove(item)
                 container.item_placed = False
@@ -307,7 +307,6 @@ class MixTable(View):
             rect=self.rect_table,
             color=arcade.color.BLACK,
         )
-        # self.bg_spritelist.draw(pixelated=True)
 
     def on_draw(self):
         self.clear()  # limpia la pantalla
@@ -375,25 +374,23 @@ class MixTable(View):
         other_item = self._find_element(
             self.item_sprites, attr="container_id", target=new_container.id
         )
+        if not other_item:
+            return
 
-        if other_item:
-            if other_item.name != self.item_to_move.name:
-                self._reset_sprite_position(self.item_to_move)
-                self.item_to_move = None
-                return
-            else:
-                self.item_to_move.quantity += other_item.quantity
-                self.item_sprites.remove(other_item)
-                text = self._find_element(
-                    list_to_find=self.item_texts, attr="id", target=other_item.id
-                )
-                self.item_texts.remove(text)
-                self.item_to_move.change_container(
-                    newContainerId=other_item.container_id
-                )
-                self._move_sprite_to_container(self.item_to_move, new_container)
-                self.item_to_move = None
-                return
+        if not self.item_to_move.__equals__(other_item):
+            self._reset_sprite_position(self.item_to_move)
+            self.item_to_move = None
+            return
+
+        self.item_to_move.quantity += other_item.quantity
+        other_item.__del__()
+        if text := self._find_element(
+            list_to_find=self.item_texts, attr="id", target=other_item.id
+        ):
+            self.item_texts.remove(text)
+            self.item_to_move.change_container(newContainerId=other_item.container_id)
+            self._move_sprite_to_container(self.item_to_move, new_container)
+            self.item_to_move = None
 
     def on_mouse_motion(self, x: int, y: int, dx: int, dy: int) -> bool | None:
         if self.item_to_move:

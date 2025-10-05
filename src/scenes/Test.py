@@ -97,8 +97,12 @@ class Test(View):
     def setup_inventory_containers(self) -> None:
         """Agrego los contenedores a la lista del inventario"""
         CONTAINER_SIZE = 35
+        DISTANCE_BETWEEN_CONTAINERS = 57.5
         ITEMS_INIT = Constants.PlayerConfig.INVENTORY_POSITION
-        positions = [(ITEMS_INIT[0] + (57.5 * i), ITEMS_INIT[1] + 5) for i in range(5)]
+        positions = [
+            (int(ITEMS_INIT[0] + (DISTANCE_BETWEEN_CONTAINERS * i)), ITEMS_INIT[1] + 5)
+            for i in range(Constants.PlayerConfig.MAX_ITEMS_IN_INVENTORY)
+        ]
         add_containers_to_list(
             positions, self.inventory_sprites, container_size=CONTAINER_SIZE
         )

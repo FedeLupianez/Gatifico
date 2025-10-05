@@ -23,7 +23,6 @@ class Player(StateMachine, PlayerConfig):
     HURT = "HURT"
     ANIMATIONS_CONFIG: dict = loadData("PlayerAnimationsConfig.json")
     INITIAL_INDEX = AssetsConstants.INITIAL_INDEX
-    MAX_ITEMS = 5
 
     _instace = None
     _initialized = False
@@ -38,7 +37,6 @@ class Player(StateMachine, PlayerConfig):
         if self._initialized:
             return
         super().__init__(Player.IDLE_FRONT)
-        self.motions = [arcade.key.W, arcade.key.A, arcade.key.S, arcade.key.D]
         # Todos los path tienen llaves {} donde iría el numero de sprite
         self.actual_animation_path: str = Player.ANIMATIONS_CONFIG["IDLE_FRONT"][
             "path"
@@ -48,7 +46,6 @@ class Player(StateMachine, PlayerConfig):
         )  # objeto sprite del personaje
 
         self.speed = self.SPEED
-        self.knockback = 15
         self.actual_animation_frames: int = Player.ANIMATIONS_CONFIG[Player.IDLE_FRONT][
             "frames"
         ]  # cantidad de frames de la animacion
@@ -335,7 +332,7 @@ class Player(StateMachine, PlayerConfig):
         self.coins += coins
 
     def attack(self, enemy):
-        enemy.hurt(damage=10, knockback=self.knockback)
+        enemy.hurt(damage=10, knockback=PlayerConfig.KNOCKBACK)
 
     def change_hearts(self) -> None:
         # Remuevo los corazones sobrantes
