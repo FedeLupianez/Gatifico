@@ -10,7 +10,7 @@ from characters.Player import Player
 from items.Mineral import Mineral
 import DataManager as Dm
 from items.Item import Item
-from .utils import add_containers_to_list
+from .utils import add_containers_to_list, is_in_box
 from .Chest import Chest
 from Managers.ChunkManager import Chunk_Manager
 
@@ -28,6 +28,7 @@ class Test(View):
         # Le pongo el zoom a la cámara
         self.camera.zoom = Constants.Game.FOREST_ZOOM_CAMERA
         self.camera.position = self.player.sprite.position
+        self.gui_camera.viewport = self.camera.viewport
         self.is_first_load: bool = True
 
         self.chunk_manager = Chunk_Manager(
@@ -123,7 +124,6 @@ class Test(View):
             self.player.sprite.center_x, self.player.sprite.center_y
         )
         self.player.actual_floor = "grass"
-        self.characters_sprites.append(self.player.sprite)
         del player_data
 
     def setup_scene_layer(self) -> None:
@@ -257,7 +257,7 @@ class Test(View):
             if layer in self._actual_area:
                 self._actual_area[layer].draw(pixelated=True)
             elif layer == "characters":
-                self.characters_sprites.draw(pixelated=True)
+                self.player.sprite_list.draw(pixelated=True)
                 self._actual_area["enemy"].draw(pixelated=True)
             elif layer == "walls":
                 self.walls.draw(pixelated=True)
@@ -406,10 +406,9 @@ class Test(View):
         if closest_obj and closest_obj[1] <= 50:
             item = closest_obj[0]
             self._actual_area["items"].remove(item)
+            item.remove_from_sprite_lists()
             self.player.add_to_inventory(item.name, item.quantity)
-            self.chunk_manager.chunks[self.player.chunk_key].sprites["items"].remove(
-                item
-            )
+            self.chunk_manager.chunks[item.chunk_key].sprites["items"].remove(item)
             return True
 
         return False
@@ -503,12 +502,6 @@ class Test(View):
                     )
             case arcade.key.F:
                 self.process_enemy_interaction()
-            case arcade.key.G:
-                is_died = self.player.hurt(10)
-                if is_died:
-                    self.callback(Constants.SignalCodes.CHANGE_VIEW, "MENU")
-                return
-
         self.keys_pressed.add(symbol)
         return None
 
@@ -529,6 +522,8 @@ class Test(View):
         self.fps_text.text = f"{int(1 / delta_time)}"
         if self.player.lifes == 0:
             self.player.reset()
+            self.save_minerals()
+            Dm.store_actual_data(self.player, "TEST")
             self.callback(Constants.SignalCodes.CHANGE_VIEW, "MENU")
             return
         player = self.player.sprite
@@ -565,21 +560,22 @@ class Test(View):
         self, x: int, y: int, button: int, modifiers: int
     ) -> bool | None:
         if button == arcade.MOUSE_BUTTON_LEFT:
+            items_hit = arcade.get_sprites_at_point((x, y), self.items_inventory)
+            if not items_hit:
+                return
+            item = items_hit[-1]
             # Tiro el item al suelo
-            item = arcade.get_sprites_at_point((x, y), self.items_inventory)
-            if item:
-                item = item[0]
-                assert isinstance(item, Item), "No se encontró el item"
-                item.position = (
-                    self.player.sprite.position[0] + 20,
-                    self.player.sprite.position[1],
-                )
-                item.scale = 1
-                self.chunk_manager.assign_sprite_chunk(item, "items")
-                self.items_inventory.remove(item)
-                self.player.throw_item(item.name)
-                self.update_actual_chunk()
-                return True
+            assert isinstance(item, Item), "No se encontró el item"
+            item.position = (
+                self.player.sprite.position[0] + 20,
+                self.player.sprite.position[1],
+            )
+            item.scale = 1
+            self.chunk_manager.assign_sprite_chunk(item, "items")
+            self.items_inventory.remove(item)
+            self.player.throw_item(item.name)
+            self.update_actual_chunk()
+            return True
 
     def player_collides(self) -> bool:
         """Función para detectar si hay colisiones"""

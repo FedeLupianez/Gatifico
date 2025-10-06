@@ -21,6 +21,7 @@ class Player(StateMachine, PlayerConfig):
     UP = "UP"
     DOWN = "DOWN"
     HURT = "HURT"
+    ATTACK = "ATTACK"
     ANIMATIONS_CONFIG: dict = loadData("PlayerAnimationsConfig.json")
     INITIAL_INDEX = AssetsConstants.INITIAL_INDEX
 
@@ -44,6 +45,8 @@ class Player(StateMachine, PlayerConfig):
         self.sprite: arcade.Sprite = arcade.Sprite(
             self.actual_animation_path, scale=self.SCALE
         )  # objeto sprite del personaje
+        self.sprite_list = arcade.SpriteList()
+        self.sprite_list.append(self.sprite)
 
         self.speed = self.SPEED
         self.actual_animation_frames: int = Player.ANIMATIONS_CONFIG[Player.IDLE_FRONT][
@@ -73,8 +76,10 @@ class Player(StateMachine, PlayerConfig):
 
         self.texture_index = 0  # indice actual de la textura
         self.animation_timer: float = 0.0  # timer de la animación
-        self.hurt_time: float = 1
-        self.state_before_hurt = Player.IDLE_FRONT
+        self.hurt_time: float = PlayerConfig.HURT_COLDOWN
+        self.attack_time: float = PlayerConfig.SELF_ATTACK_COOLDOWN
+
+        self.state_before = self.actual_state_id
         # Diccionario para el inventario
         self.inventory: dict[str, int] = {}
         self.max_inventory: int = 64
@@ -152,11 +157,18 @@ class Player(StateMachine, PlayerConfig):
                 # Si no es ninguna de las otras teclas retorna el estado actual
                 return self.actual_state_id
 
-    def hurt_state_handler(self, event: int):
+    def hurt_state(self, event: int):
         """Manejador de estado para cuando el jugador esta herido.
         Ignora los eventos y mantiene al jugador en el estado HURT.
         La transición para salir de este estado se maneja en `update_animation`."""
         return Player.HURT
+
+    def attack_state(self, event):
+        self.sprite.color = arcade.color.WHITE
+        if self.attack_time <= 0:
+            self.attack_time = PlayerConfig.SELF_ATTACK_COOLDOWN
+            return self.state_before
+        return Player.ATTACK
 
     def setup(
         self,
@@ -173,7 +185,8 @@ class Player(StateMachine, PlayerConfig):
         self.add_state(Player.RIGHT, self.genericStateHandler)
         self.add_state(Player.DOWN, self.genericStateHandler)
         self.add_state(Player.UP, self.genericStateHandler)
-        self.add_state(self.HURT, self.hurt_state_handler)
+        self.add_state(Player.HURT, self.hurt_state)
+        self.add_state(Player.ATTACK, self.attack_state)
         antique_data = game_data["player"]
         self.sprite.center_x = (
             position[0] if position else antique_data["position"]["center_x"]
@@ -191,6 +204,7 @@ class Player(StateMachine, PlayerConfig):
         self.lifes = 5
         self.healt = 100
         self.setup_lifes()
+        self.set_state(Player.IDLE_FRONT)
 
     def setup_sprites(self) -> None:
         # Cargo las texturas en el diccionario
@@ -290,14 +304,27 @@ class Player(StateMachine, PlayerConfig):
                 self.texture_index = new_index
                 self.sprite.texture = new_texture
                 self.play_step_sound()
+
+        if self.actual_state_id == Player.ATTACK:
+            self.attack_time -= deltaTime
+
         if self.actual_state_id == Player.HURT:
             self.hurt_time -= deltaTime
             if self.hurt_time <= 0:
                 self.sprite.color = arcade.color.WHITE
                 self.hurt_time = 1
-                self.set_state(self.state_before_hurt)
+                self.set_state(self.state_before)
+                self.sprite.change_x = 0
+                self.sprite.change_y = 0
             else:
                 self.sprite.color = arcade.color.RED
+                self.sprite.change_x *= 0.5
+                self.sprite.change_y *= 0.5
+
+            # Si la velocidad e s muy baja lo dejo de mover
+            if abs(self.sprite.change_x) < 0.1 and abs(self.sprite.change_y) < 0.1:
+                self.sprite.change_x = 0
+                self.sprite.change_y = 0
 
     def add_to_inventory(self, item: str, cant: int) -> None:
         if (
@@ -335,6 +362,13 @@ class Player(StateMachine, PlayerConfig):
         self.coins += coins
 
     def attack(self, enemy):
+        self.state_before = (
+            self.actual_state_id
+            if self.actual_state_id != Player.ATTACK
+            and self.actual_state_id != Player.HURT
+            else self.last_state_id
+        )
+        self.set_state(Player.ATTACK)
         enemy.hurt(damage=10, knockback=PlayerConfig.KNOCKBACK)
 
     def change_hearts(self) -> None:
@@ -346,10 +380,11 @@ class Player(StateMachine, PlayerConfig):
         texture = texture_manager.load_or_get_texture(get_path(texture_name))
         self.lifes_sprite_list[-diff].texture = texture
 
-    def hurt(self, damage: int):
-        self.state_before_hurt = (
+    def hurt(self, damage: int, enemy, knockback: int = 0):
+        self.state_before = (
             self.actual_state_id
             if self.actual_state_id != Player.HURT
+            and self.actual_state_id != Player.ATTACK
             else self.last_state_id
         )
         self.healt -= damage
@@ -360,6 +395,20 @@ class Player(StateMachine, PlayerConfig):
         self.change_hearts()
         if self.lifes <= 0:
             return True
+
+        if knockback <= 0:
+            return False
+            # Enviar para atrás si tiene knockback
+        knockback_speed = knockback * 2.5
+
+        dx = self.sprite.center_x - enemy.center_x
+        dy = self.sprite.center_y - enemy.center_y
+        dist = (dx**2 + dy**2) ** (1 / 2)
+
+        if dist > 0:
+            # Aplicar velocidad de knockback
+            self.sprite.change_x = (dx / dist) * knockback_speed
+            self.sprite.change_y = (dy / dist) * knockback_speed
         return False
 
     def throw_item(self, item: str):

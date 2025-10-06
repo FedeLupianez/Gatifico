@@ -26,6 +26,8 @@ class StateMachine:
         Args :
             newState (str) : Id del nuevo estado
         """
+        if new_state == self.actual_state_id:
+            return
         self.last_state_id = self.actual_state_id
         self.actual_state_id = new_state
         # Aplico los cambios del estado con 0 como neutro
@@ -36,9 +38,6 @@ class StateMachine:
         # este debe retornar el estado al que debe cambiar o el mismo
         function = self.states[self.actual_state_id]
         new_state: str = function(event)
-        # Si el estado es el mismo no hace ningún cambio
-        if new_state == self.actual_state_id:
-            return
         if new_state not in self.states:
             raise ValueError(f"Estado {new_state} no encontrado en la maquina")
         # Cambia al nuevo estado

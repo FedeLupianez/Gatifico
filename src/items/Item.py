@@ -15,6 +15,7 @@ class Item(arcade.Sprite):
         self.quantity = quantity
         self.container_id: int = -1
         self.price: int = int(Item._resources[name]["item"].get("price", 0))
+        self.chunk_key = None
 
     def change_position(self, center_x: float, center_y: float) -> None:
         self.center_x = center_x

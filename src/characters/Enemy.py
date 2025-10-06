@@ -39,7 +39,7 @@ class Enemy(arcade.Sprite):
         self.persecute_radius = 140
 
         self.attack_radius = 35
-        self.attack_coldown = 0.8
+        self.attack_coldown = 1.3
         self.attack_time = self.attack_coldown
 
         # Referencia al player
@@ -191,4 +191,4 @@ class Enemy(arcade.Sprite):
             self.change_y = (dy / dist) * knockback_speed
 
     def attack(self) -> None:
-        self.player.hurt(self.damage)
+        self.player.hurt(self.damage, enemy=self, knockback=10)

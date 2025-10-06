@@ -22,11 +22,13 @@ class PlayerConfig:
     SCALE = 0.5
     SPEED = 0.5
     KNOCKBACK = 15
+    HURT_COLDOWN = 0.2
     MAX_ITEMS_IN_INVENTORY = 5
     MAX_ITEMS_CANT = 64
     INVENTORY_POSITION = (523, 100)
     HITBOX_WIDTH = 27
     HITBOX_HEIGHT = 30
+    SELF_ATTACK_COOLDOWN = 0.1
 
 
 class SignalCodes:

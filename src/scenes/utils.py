@@ -52,3 +52,25 @@ def is_in_box(
     x: float, y: float, top: float, bottom: float, right: float, left: float
 ) -> bool:
     return x > left and x < right and y > top and y < bottom
+
+
+def _find_element(list_to_find, attr: str, target):
+    """
+    Función para buscar un elemento de una lista que cumpla con un requisito
+    Args:
+        func (Callable): Función que devuelve True si el elemento cumple con el requisito
+        list_to_find (list): Lista de elementos donde buscar
+    """
+
+    def item_contains_attr(attr: str, target):
+        def is_item(sprite):
+            if hasattr(sprite, attr):
+                return getattr(sprite, attr) == target
+            else:
+                return False
+
+        return is_item
+
+    result = list(filter(item_contains_attr(attr=attr, target=target), list_to_find))
+    if result:
+        return result[0]
