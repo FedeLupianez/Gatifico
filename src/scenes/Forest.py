@@ -27,6 +27,8 @@ class Forest(View):
         # Le pongo el zoom a la cámara
         self.camera.zoom = Constants.Game.FOREST_ZOOM_CAMERA
         self.camera.position = self.player.sprite.position
+        self._half_w = (self.camera.viewport.width / self.camera.zoom) * 0.5
+        self._half_h = (self.camera.viewport.height / self.camera.zoom) * 0.5
         self.is_first_load: bool = True
 
         self.chunk_manager = Chunk_Manager(
@@ -58,6 +60,9 @@ class Forest(View):
             "items": arcade.SpriteList(use_spatial_hash=True),
             "enemy": arcade.SpriteList(use_spatial_hash=True),
         }
+        # Variable para precomputar las listas de colisiones
+        self._collision_list = arcade.SpriteList(use_spatial_hash=True, lazy=True)
+        self.update_actual_chunk()
         self._setup_scene()
 
     def _setup_scene(self) -> None:
@@ -524,8 +529,6 @@ class Forest(View):
             abs(player.center_x - lastPosition[0]) > 0
             or abs(player.center_y - lastPosition[1]) > 0
         )
-        if player_moved or self.camera.position != self.player.sprite.position:
-            self.update_camera(player_moved)
 
         self.update_inventory()
 
@@ -537,6 +540,7 @@ class Forest(View):
             self.update_actual_chunk()
 
         if player_moved:
+            self.update_camera(player_moved)
             # Detección de colisiones
             if self.player_collides():
                 self.player.sprite.center_x, self.player.sprite.center_y = lastPosition
