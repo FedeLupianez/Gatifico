@@ -1,12 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="100" height="100" tilewidth="20" tileheight="20" infinite="0" nextlayerid="16" nextobjectid="9">
- <tileset firstgid="1" source="C:/Users/Santiago/pasto2.tsx"/>
- <tileset firstgid="5" source="C:/Users/Santiago/pasto1.tsx"/>
- <tileset firstgid="9" source="C:/Users/Santiago/tronco.tsx"/>
- <tileset firstgid="13" source="C:/Users/Santiago/copa2.tsx"/>
- <tileset firstgid="17" source="C:/Users/Santiago/copa1.tsx"/>
- <tileset firstgid="21" source="C:/Users/Santiago/copa3.tsx"/>
- <layer id="6" name="pasto" width="100" height="100">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" compressionlevel="8" width="100" height="100" tilewidth="18" tileheight="18" infinite="0" nextlayerid="16" nextobjectid="9">
+ <editorsettings>
+  <chunksize width="20" height="20"/>
+ </editorsettings>
+ <tileset firstgid="1" source="tilesets/pasto2.tsx"/>
+ <tileset firstgid="5" source="tilesets/pasto1.tsx"/>
+ <tileset firstgid="9" source="tilesets/tronco.tsx"/>
+ <tileset firstgid="13" source="tilesets/copa_2.tsx"/>
+ <tileset firstgid="17" source="copa_1.tsx"/>
+ <tileset firstgid="21" source="tilesets/copa_3.tsx"/>
+ <layer id="6" name="Floor" width="100" height="100">
   <data encoding="csv">
 3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,1,1,1,1,1,1,1,3,3,1,1,1,3,3,3,3,1,1,1,3,3,4,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,1,3,3,1,3,3,3,3,3,3,3,3,1,3,2,3,3,3,
 3,3,3,3,3,3,3,3,3,3,3,3,3,3,1,1,1,3,1,1,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,1,1,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,1,1,3,1,1,1,1,1,1,3,3,3,3,3,1,3,3,3,3,3,3,3,3,3,3,3,3,3,3,2,3,3,3,
@@ -110,7 +113,7 @@
 2,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,1,1,1,1,1,1,3,1,1,1,3,3,3,3,3,3,3,3,3,3,3,3,1,3,1,1,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,1,3,3,3,3,3,2,2,2,3,3,3,3,3,3,3,3,3,3,1,2,1,1,3,1,1,3,3,3,3,3,3,3,3,1,3,1,3,1,1
 </data>
  </layer>
- <layer id="13" name="tronco" width="100" height="100">
+ <layer id="13" name="Objects" width="100" height="100">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,12,0,0,0,0,0,0,0,0,0,0,0,0,12,0,0,0,0,0,0,0,0,0,12,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,11,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,2147483658,9,10,0,0,11,0,0,0,0,11,0,0,2147483658,9,10,0,0,0,0,0,0,0,2147483658,9,10,0,0,11,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,12,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,11,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,11,0,0,0,0,0,0,
@@ -214,7 +217,7 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2147483658,9,10,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2147483658,9,10,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,11,0,0,0,0,0,0,0,0,0,0,0,2147483658,9,10,0,0,0,0,0,0,0,0,0,0,0
 </data>
  </layer>
- <layer id="14" name="copa" width="100" height="100">
+ <layer id="14" name="Sky" width="100" height="100">
   <data encoding="csv">
 23,21,22,0,23,21,22,0,0,0,0,0,0,0,0,0,13,14,18,0,0,13,14,18,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,13,14,18,0,0,0,0,0,0,0,0,0,0,0,0,0,0,15,15,16,0,0,0,0,0,0,0,0,0,0,0,0,0,0,13,14,18,0,0,0,0,0,0,0,0,0,0,23,21,22,0,0,0,13,14,18,0,0,0,0,0,
 13,14,18,0,13,14,18,0,0,0,23,21,22,0,0,0,15,15,16,0,0,15,15,16,0,0,0,0,0,23,21,22,0,23,21,22,0,0,0,15,15,16,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,15,15,16,0,0,0,0,0,0,0,0,0,0,13,14,18,0,0,0,15,15,16,0,0,0,0,0,

@@ -16,7 +16,7 @@ from Managers.ChunkManager import Chunk_Manager
 
 class Forest(View):
     def __init__(self, callback: Callable) -> None:
-        tileMapUrl = Dm.get_path("Forest.tmx")
+        tileMapUrl = Dm.get_path("Mapa.tmx")
         super().__init__(background_url=None, tilemap_url=tileMapUrl)
         self.window.set_mouse_visible(True)
 
