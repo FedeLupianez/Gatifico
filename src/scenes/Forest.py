@@ -272,6 +272,7 @@ class Forest(View):
         self.fps_text.draw()
         self.inventory_sprites.draw(pixelated=True)
         self.items_inventory.draw(pixelated=True)
+        self.ui_sprites.draw(pixelated=True)
         for text in self.inventory_texts:
             text.draw()
         self.player.lifes_sprite_list.draw(pixelated=True)
@@ -487,11 +488,6 @@ class Forest(View):
                     )
             case arcade.key.F:
                 self.process_enemy_interaction()
-            case arcade.key.G:
-                is_died = self.player.hurt(10)
-                if is_died:
-                    self.callback(Constants.SignalCodes.CHANGE_VIEW, "MENU")
-                return
 
         self.keys_pressed.add(symbol)
         return None
@@ -559,10 +555,10 @@ class Forest(View):
         self, x: int, y: int, button: int, modifiers: int
     ) -> bool | None:
         if button == arcade.MOUSE_BUTTON_LEFT:
-            # Tiro el item al suelo
-            item = arcade.get_sprites_at_point((x, y), self.items_inventory)
-            if item:
-                item = item[0]
+            items_hit = arcade.get_sprites_at_point((x, y), self.items_inventory)
+            if items_hit:
+                item = items_hit[-1]
+                # Tiro el item al suelo
                 assert isinstance(item, Item), "No se encontró el item"
                 item.position = (
                     self.player.sprite.position[0] + 20,
@@ -574,6 +570,12 @@ class Forest(View):
                 self.player.throw_item(item.name)
                 self.update_actual_chunk()
                 return True
+            # Manejo del estado del sonido por si tocan el boton de silencio
+            signal = self.change_bg_sound_state((x, y))
+            self.callback(signal)
+            return True
+
+        return False
 
     def player_collides(self) -> bool:
         """Función para detectar si hay colisiones"""

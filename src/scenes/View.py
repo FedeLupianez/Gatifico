@@ -1,6 +1,7 @@
 import arcade
 import Constants
 from arcade.camera import Camera2D
+from DataManager import get_path, texture_manager
 
 
 class Object(arcade.SpriteSolidColor):
@@ -43,6 +44,31 @@ class View(arcade.View):
         self._screen_height = self.camera.viewport_height
         self._half_w = (self._screen_width / self.camera.zoom) * 0.5
         self._half_h = (self._screen_height / self.camera.zoom) * 0.5
+
+        # lista de ui
+        self.ui_sprites: arcade.SpriteList = arcade.SpriteList(lazy=False)
+        self.volume_sprite = arcade.Sprite(get_path("volume_active.png"), scale=2)
+        self.volume_sprite.center_x = self.window.width - 30
+        self.volume_sprite.center_y = self.window.height - 30
+        setattr(self.volume_sprite, "state", True)
+        self.ui_sprites.append(self.volume_sprite)
+
+        self._item_mouse_text = arcade.Text(
+            text="",
+            x=0,
+            y=0,
+            anchor_x="center",
+            anchor_y="center",
+            align="center",
+        )
+        self._item_text_background = arcade.SpriteSolidColor(
+            width=1,
+            height=1,
+            color=arcade.color.BLACK,
+            center_x=0,
+            center_y=0,
+        )
+        self.ui_sprites.append(self._item_text_background)
 
     def CreateScene(
         self, background_url: str | None, tilemap_url: str | None = None
@@ -115,3 +141,33 @@ class View(arcade.View):
 
     def on_resize(self, width: int, height: int) -> bool | None:
         self.update_sizes(width, height)
+
+    def change_bg_sound_state(self, mouse_pos: tuple[float, float]):
+        state = getattr(self.volume_sprite, "state")
+        signal = ""
+        texture_path = "volume_inactive.png" if state else "volume_active.png"
+        if state:
+            signal = Constants.SignalCodes.SILENCE_BACKGROUND
+        else:
+            signal = Constants.SignalCodes.RESUME_BACKGROUND
+        setattr(self.volume_sprite, "state", not state)
+        self.volume_sprite.texture = texture_manager._load_or_get_texture(
+            get_path(texture_path)
+        )
+        return signal
+
+    def item_hover(self, mouse_pos: tuple[float, float], items_list: arcade.SpriteList):
+        x, y = mouse_pos
+        if item := arcade.get_sprites_at_point((x, y), items_list):
+            self._item_mouse_text.text = item[0].name or ""
+            text_width = len(item[0].name) * self._item_mouse_text.font_size
+            self._item_mouse_text.x = x
+            self._item_mouse_text.y = y + 15
+            self._item_text_background.center_x = x
+            self._item_text_background.center_y = y + 13
+            self._item_text_background.width = text_width
+            self._item_text_background.height = self._item_mouse_text.font_size + 5
+        else:
+            self._item_mouse_text.text = ""
+            self._item_text_background.width = 0
+            self._item_text_background.height = 0

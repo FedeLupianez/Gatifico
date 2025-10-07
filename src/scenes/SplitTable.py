@@ -143,7 +143,7 @@ class SplitTable(View):
         self.UIManager.add(self.mixButton)
 
     def _create_item_text(self, item: Item, fontSize: int = 11) -> arcade.Text:
-        content = f"{item.name} x {item.quantity}"
+        content = f"{item.quantity}"
         text_sprite = arcade.Text(
             text=content,
             font_size=fontSize,
@@ -191,7 +191,7 @@ class SplitTable(View):
             )
             if not item:
                 continue
-            expected = f"{item.name} x {item.quantity}"
+            expected = f"{item.quantity}"
             if text_sprite.text != expected:
                 text_sprite.text = expected
 
@@ -315,8 +315,11 @@ class SplitTable(View):
         self.draw_background()
         self.container_sprites.draw(pixelated=True)
         self.item_sprites.draw(pixelated=True)
+        self.ui_sprites.draw(pixelated=True)
         for text in self.item_texts:
             text.draw()
+        if self._item_mouse_text.text:
+            self._item_mouse_text.draw()
         self.UIManager.draw()
 
     def on_key_press(self, symbol: int, modifiers: int) -> bool | None:
@@ -389,6 +392,7 @@ class SplitTable(View):
         if self.item_to_move and self.is_mouse_active:
             # Cambio la posición del sprite a la del mouse
             self.item_to_move.change_position(x, y)
+        self.item_hover((x, y), self.item_sprites)
 
     def clean_up(self) -> None:
         del self.background_image

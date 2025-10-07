@@ -3,7 +3,6 @@ from Constants import Game, SignalCodes
 import Constants
 from scenes.View import View
 from DataManager import game_data, get_path
-from characters.Player import Player
 
 Start_button_path: str = get_path("PlayButton.png")
 Exit_button_path: str = get_path("ExitButton.png")
@@ -49,11 +48,7 @@ class Menu(View):
         data_to_send = {
             arcade.key.SPACE: "TEST",
             arcade.key.F: "FOREST",
-            arcade.key.M: "MIX_TABLE",
-            arcade.key.C: ("CHEST", "chest_1", {"rubi": 4, "piedra": 2}),
-            arcade.key.S: "SPLIT_TABLE",
             arcade.key.L: "LABORATORY",
-            arcade.key.D: "SELL",
         }
         result = data_to_send.get(symbol, None)
         if result and Constants.Game.DEBUG_MODE:

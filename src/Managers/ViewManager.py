@@ -8,6 +8,7 @@ from scenes.Test import Test
 from scenes.Pause import Pause
 from scenes.Laboratory import Laboratory
 import gc
+from DataManager import get_sound
 
 
 # Esta clase va a manejar la vista que se muestra en la pantalla
@@ -17,6 +18,9 @@ class ViewManager:
     def __init__(self, window: arcade.Window) -> None:
         self.window = window
         # Tiene su propia ventana
+        self.background_sound = arcade.play_sound(
+            get_sound("Menu_loop.mp3"), loop=True, volume=0.2
+        )
         self.current_scene = Menu(self.callback)
 
         # Diccionario con los objetos de las escenas pero sin instanciar para ahorrar recursos
@@ -44,6 +48,12 @@ class ViewManager:
         if signal == Constants.SignalCodes.PAUSE_GAME:
             # Pausa el juego pasandole un callback de la funcion para obtener una screenshot
             self.pause_game()
+        if signal == Constants.SignalCodes.SILENCE_BACKGROUND:
+            assert self.background_sound, "No hay sonido de fondo"
+            self.background_sound.pause()
+        if signal == Constants.SignalCodes.RESUME_BACKGROUND:
+            assert self.background_sound, "No hay sonido de fondo"
+            self.background_sound.play()
 
         print("Mensaje recibido : ", data)
         if signal == Constants.SignalCodes.CHANGE_VIEW:

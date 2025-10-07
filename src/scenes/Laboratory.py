@@ -32,16 +32,6 @@ class Laboratory(View):
             int(self.camera.viewport.width), int(self.camera.viewport.height)
         )
 
-        self._item_mouse_text = arcade.Text(
-            text="",
-            x=0,
-            y=0,
-            anchor_x="center",
-            anchor_y="center",
-            align="center",
-        )
-        self._item_text_background = arcade.rect.Rect(0, 0, 0, 0, 0, 0, 0, 0)
-
         # Inicializacion de funciones
         self.setup_spritelists()
         self.setup_player()
@@ -176,24 +166,14 @@ class Laboratory(View):
         return False
 
     def on_mouse_motion(self, x: int, y: int, dx: int, dy: int) -> bool | None:
-        if item := arcade.get_sprites_at_point((x, y), self.inventory_items):
-            self._item_mouse_text.text = item[0].name or ""
-            text_width = len(item[0].name) * self._item_mouse_text.font_size
-            self._item_mouse_text.x = x
-            self._item_mouse_text.y = y + 15
+        self.item_hover((x, y), self.inventory_items)
 
-            self._item_text_background = arcade.rect.Rect(
-                width=text_width,
-                height=self._item_mouse_text.font_size + 5,
-                x=x,
-                y=y + 15,
-                left=0,
-                right=0,
-                top=0,
-                bottom=0,
-            )
-        else:
-            self._item_mouse_text.text = ""
+    def on_mouse_press(
+        self, x: int, y: int, button: int, modifiers: int
+    ) -> bool | None:
+        signal = self.change_bg_sound_state((x, y))
+        self.callback(signal)
+        return True
 
     def on_key_press(self, symbol: int, modifiers: int) -> bool | None:
         if symbol == arcade.key.E:
@@ -225,10 +205,10 @@ class Laboratory(View):
         self.gui_camera.use()
         self.inventory_containers.draw(pixelated=True)
         self.inventory_items.draw(pixelated=True)
+        self.ui_sprites.draw(pixelated=True)
         for text in self.inventory_texts:
             text.draw()
         if self._item_mouse_text.text:
-            arcade.draw_rect_filled(self._item_text_background, arcade.color.BLACK)
             self._item_mouse_text.draw()
 
     def on_draw(self) -> None:

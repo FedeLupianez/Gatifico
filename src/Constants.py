@@ -35,6 +35,8 @@ class SignalCodes:
     CHANGE_VIEW = 0
     CLOSE_WINDOW = 1
     PAUSE_GAME = 2
+    SILENCE_BACKGROUND = 3
+    RESUME_BACKGROUND = 4
 
 
 class AssetsConstants:

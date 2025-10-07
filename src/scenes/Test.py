@@ -10,7 +10,7 @@ from characters.Player import Player
 from items.Mineral import Mineral
 import DataManager as Dm
 from items.Item import Item
-from .utils import add_containers_to_list, is_in_box
+from .utils import add_containers_to_list
 from .Chest import Chest
 from Managers.ChunkManager import Chunk_Manager
 
@@ -286,8 +286,11 @@ class Test(View):
         self.fps_text.draw()
         self.inventory_sprites.draw(pixelated=True)
         self.items_inventory.draw(pixelated=True)
+        self.ui_sprites.draw(pixelated=True)
         for text in self.inventory_texts:
             text.draw()
+        if self._item_mouse_text.text:
+            self._item_mouse_text.draw()
         self.player.lifes_sprite_list.draw(pixelated=True)
 
     # Funciones de actualización
@@ -561,21 +564,30 @@ class Test(View):
     ) -> bool | None:
         if button == arcade.MOUSE_BUTTON_LEFT:
             items_hit = arcade.get_sprites_at_point((x, y), self.items_inventory)
-            if not items_hit:
-                return
-            item = items_hit[-1]
-            # Tiro el item al suelo
-            assert isinstance(item, Item), "No se encontró el item"
-            item.position = (
-                self.player.sprite.position[0] + 20,
-                self.player.sprite.position[1],
-            )
-            item.scale = 1
-            self.chunk_manager.assign_sprite_chunk(item, "items")
-            self.items_inventory.remove(item)
-            self.player.throw_item(item.name)
-            self.update_actual_chunk()
+            if items_hit:
+                item = items_hit[-1]
+                # Tiro el item al suelo
+                assert isinstance(item, Item), "No se encontró el item"
+                item.position = (
+                    self.player.sprite.position[0] + 20,
+                    self.player.sprite.position[1],
+                )
+                item.scale = 1
+                self.chunk_manager.assign_sprite_chunk(item, "items")
+                self.items_inventory.remove(item)
+                self.player.throw_item(item.name)
+                self.update_actual_chunk()
+                return True
+
+            signal = self.change_bg_sound_state((x, y))
+            self.callback(signal)
+
             return True
+
+        return False
+
+    def on_mouse_motion(self, x: int, y: int, dx: int, dy: int) -> bool | None:
+        self.item_hover((x, y), self.items_inventory)
 
     def player_collides(self) -> bool:
         """Función para detectar si hay colisiones"""

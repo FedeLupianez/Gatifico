@@ -171,7 +171,7 @@ class MixTable(View):
             self.item_sprites.append(newItem)
 
     def _create_item_text(self, item: Item) -> arcade.Text:
-        content = f"{item.name} x {item.quantity}"
+        content = f"{item.quantity}"
         text_sprite = arcade.Text(
             text=content,
             font_size=11,
@@ -206,7 +206,7 @@ class MixTable(View):
             )
             if not item:
                 continue
-            expected = f"{item.name} x {item.quantity}"
+            expected = f"{item.quantity}"
             if text_sprite.text != expected:
                 text_sprite.text = expected
 
@@ -313,8 +313,11 @@ class MixTable(View):
 
         self.container_sprites.draw(pixelated=True)
         self.item_sprites.draw(pixelated=True)
+        self.ui_sprites.draw(pixelated=True)
         for text in self.item_texts:
             text.draw()
+        if self._item_mouse_text.text:
+            self._item_mouse_text.draw()
         self.UIManager.draw(pixelated=True)
 
     def on_key_press(self, symbol: int, modifiers: int) -> bool | None:
@@ -394,6 +397,7 @@ class MixTable(View):
         if self.item_to_move:
             # Cambio la posición del sprite a la del mouse
             self.item_to_move.change_position(x, y)
+        self.item_hover((x, y), self.item_sprites)
 
     def clean_up(self) -> None:
         del self.background_image
