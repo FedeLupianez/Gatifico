@@ -13,18 +13,19 @@ from .utils import add_containers_to_list, del_references_list, get_result, appl
 Combinations: Dict[str, Dict[str, str]] = DataManager.loadData("CombinationsTest.json")
 
 
-# centros de los contenedores
-MIXING_Y = 450
-MIXING_ITEMS_POSITIONS: list[tuple[int, int]] = [
-    (565, MIXING_Y),
-    (640, MIXING_Y),
-]
-CONTAINER_SIZE = 50
-
-ITEMS_INIT: tuple[int, int] = (400, 250)
-
-
 class MixTable(View):
+    # centros de los contenedores
+    MIXING_Y = 240
+    MIXING_ITEMS_POSITIONS: list[tuple[int, int]] = [
+        (475, MIXING_Y),
+        (786, MIXING_Y),
+    ]
+    RESULT_CONTAINER_POSITION = (530, 448)
+    CONTAINER_SIZE = 50
+
+    ITEMS_INIT: tuple[int, int] = (400, 145)
+    ITEM_SCALE = 2
+
     def __init__(self, background_scene: View):
         super().__init__(background_url=None, tilemap_url=None)
         background_image = background_scene.get_screenshot()
@@ -37,8 +38,10 @@ class MixTable(View):
         bg_image = arcade.Sprite(DataManager.get_path("mix_table.png"))
         bg_image.center_x = Constants.Game.SCREEN_CENTER_X
         bg_image.center_y = Constants.Game.SCREEN_CENTER_Y
-        bg_image.width = self.window.width
-        bg_image.height = self.window.height
+        bg_image.width = int(Game.SCREEN_CENTER_X + (Game.SCREEN_CENTER_X / 4))
+        bg_image.height = Game.SCREEN_HEIGHT - 200
+        self.background_sprites.append(bg_image)
+        del bg_image
 
         # Init de la clase
         self.background_scene = background_scene
@@ -53,6 +56,14 @@ class MixTable(View):
         self.item_sprites = arcade.SpriteList()
         self.container_sprites: arcade.SpriteList = arcade.SpriteList()
         self.item_texts: list[arcade.Text] = []
+
+        self.inventory_sprite = arcade.Sprite(
+            DataManager.get_path("inventory_tools.png"), scale=3
+        )
+        self.inventory_sprite.scale_y = 3.2
+        self.inventory_sprite.center_x = Game.SCREEN_CENTER_X
+        self.inventory_sprite.center_y = self.ITEMS_INIT[1]
+        self.background_sprites.append(self.inventory_sprite)
 
         self.rect_table = arcade.rect.Rect(
             left=Game.SCREEN_CENTER_X - (Game.SCREEN_CENTER_X / 3),
@@ -78,12 +89,14 @@ class MixTable(View):
         # cosas de la UI
         self.UIManager = arcade.gui.UIManager(self.window)
         self.UIManager.enable()
-        result_x, result_y = MIXING_ITEMS_POSITIONS[-1]
+        result_x, result_y = self.RESULT_CONTAINER_POSITION
         self.mix_button = arcade.gui.UIFlatButton(
             x=result_x + 50,
-            y=result_y - 100,
+            y=result_y - 160,
             text="Combinar",
         )
+        self.mix_button.style["normal"].bg = arcade.color.BLACK
+        self.mix_button.style["hover"].bg = arcade.color.GRAY
 
         @self.mix_button.event("on_click")
         def on_click(event):
@@ -119,39 +132,43 @@ class MixTable(View):
 
     def _setup_containers(self) -> None:
         positions = [
-            ((ITEMS_INIT[0] + 75 * i), ITEMS_INIT[1]) for i in range(len(self.items))
+            ((self.ITEMS_INIT[0] + 75 * i), self.ITEMS_INIT[1])
+            for i in range(len(self.items))
         ]
         # Centrar los containers con la pantalla :
         # centro de la pantalla
         cant_containers = len(positions)
         mid_container = int(cant_containers * 0.5)
-        positions[mid_container] = (int(Constants.Game.SCREEN_CENTER_X), ITEMS_INIT[1])
+        positions[mid_container] = (
+            int(Constants.Game.SCREEN_CENTER_X),
+            self.ITEMS_INIT[1] + 5,
+        )
 
         for i in range(mid_container - 1, -1, -1):
             last_pos = positions[i + 1]
-            positions[i] = (last_pos[0] - 75, ITEMS_INIT[1])
+            positions[i] = (last_pos[0] - 60, self.ITEMS_INIT[1] + 5)
 
         for i in range(mid_container + 1, cant_containers):
             last_pos = positions[i - 1]
-            positions[i] = (last_pos[0] + 75, ITEMS_INIT[1])
+            positions[i] = (last_pos[0] + 60, self.ITEMS_INIT[1] + 5)
 
         add_containers_to_list(
             point_list=positions,
             list_to_add=self.container_sprites,
-            container_size=CONTAINER_SIZE,
+            container_size=self.CONTAINER_SIZE,
         )
         add_containers_to_list(
-            point_list=MIXING_ITEMS_POSITIONS,
+            point_list=self.MIXING_ITEMS_POSITIONS,
             list_to_add=self.container_sprites,
-            container_size=CONTAINER_SIZE,
+            container_size=self.CONTAINER_SIZE,
         )
 
         # Container del resultado :
-        result_x, result_y = MIXING_ITEMS_POSITIONS[-1]
+        result_x, result_y = self.RESULT_CONTAINER_POSITION
 
         self.result_place = Container(
-            width=CONTAINER_SIZE,
-            height=CONTAINER_SIZE,
+            width=self.CONTAINER_SIZE,
+            height=self.CONTAINER_SIZE,
             center_x=result_x + 100,
             center_y=result_y,
             color=arcade.color.BABY_BLUE,
@@ -162,7 +179,7 @@ class MixTable(View):
     def _generate_item_sprites(self) -> None:
         for index, (name, quantity) in enumerate(self.items.items()):
             container: Container = self.container_sprites[index]
-            newItem = Item(name=name, quantity=quantity, scale=3)
+            newItem = Item(name=name, quantity=quantity, scale=self.ITEM_SCALE)
             newItem.id = self.next_item_id
             self.next_item_id += 1
             newItem.change_container(container.id)
@@ -179,6 +196,7 @@ class MixTable(View):
             y=item.center_y - ((item.height * 0.5) + 15),
             anchor_x="center",
             anchor_y="baseline",
+            color=arcade.color.BLACK,
         )
         setattr(text_sprite, "id", item.id)
         return text_sprite
@@ -237,7 +255,7 @@ class MixTable(View):
             list_to_find=self.item_sprites,
         )
         if not old_result:
-            sprite: Item = Item(result, quantity=1, scale=3)
+            sprite: Item = Item(result, quantity=1, scale=self.ITEM_SCALE)
             sprite.change_position(
                 self.result_place.center_x, self.result_place.center_y
             )
@@ -301,17 +319,13 @@ class MixTable(View):
                 rect=self.background_rect,
                 pixelated=True,
             )
-        arcade.draw_rect_filled(
-            rect=self.rect_table,
-            color=arcade.color.BLACK,
-        )
 
     def on_draw(self):
         self.clear()  # limpia la pantalla
         self.camera.use()
         self.draw_background()
 
-        self.container_sprites.draw(pixelated=True)
+        self.background_sprites.draw(pixelated=True)
         self.item_sprites.draw(pixelated=True)
         self.ui_sprites.draw(pixelated=True)
         for text in self.item_texts:
