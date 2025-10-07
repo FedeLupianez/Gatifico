@@ -56,12 +56,15 @@ class Player(StateMachine, PlayerConfig):
             Player.IDLE_FRONT
         ]["animation_speed"]
         self.frames: list[arcade.Texture] = []  # lista de texturas actual
+
+        hitbox_padding: int = 10
+        desp_y: int = 5
         # Acomodo la hitbox para que sea cuadrada
         self.sprite.hit_box._points = (
-            (-self.HITBOX_WIDTH, -self.HITBOX_HEIGHT),
-            (self.HITBOX_WIDTH, -self.HITBOX_HEIGHT),
-            (self.HITBOX_WIDTH, self.HITBOX_HEIGHT),
-            (-self.HITBOX_WIDTH, self.HITBOX_HEIGHT),
+            (-self.HITBOX_WIDTH + hitbox_padding, -self.HITBOX_HEIGHT + hitbox_padding - desp_y),
+            (self.HITBOX_WIDTH - hitbox_padding, -self.HITBOX_HEIGHT + hitbox_padding - desp_y),
+            (self.HITBOX_WIDTH - hitbox_padding, self.HITBOX_HEIGHT - hitbox_padding - desp_y),
+            (-self.HITBOX_WIDTH + hitbox_padding, self.HITBOX_HEIGHT - hitbox_padding - desp_y),
         )
         self.animations: dict[str, list[arcade.Texture]] = {
             Player.IDLE_SIDE_LEFT: [],

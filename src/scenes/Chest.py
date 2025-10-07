@@ -7,10 +7,11 @@ from .View import View
 from items.Container import Container
 from items.Item import Item
 from .utils import add_containers_to_list, apply_filter
-from DataManager import chests_data, get_sound
+from DataManager import chests_data, get_sound, get_path
 
 CONTAINER_SIZE = 50
 ITEMS_INIT = (550, 300)
+CONTAINER_UI_SCALE = 2.5
 
 
 class Chest(View):
@@ -30,6 +31,9 @@ class Chest(View):
         self.item_sprites: arcade.SpriteList = arcade.SpriteList()
         self.container_sprites = arcade.SpriteList()
         self.container_player_sprites = arcade.SpriteList()
+        # SpriteList de los contenedores de ui
+        self.container_ui_sprites: arcade.SpriteList = arcade.SpriteList()
+        self.player_inventory_tools: arcade.Sprite = arcade.Sprite(get_path("inventory_tools.png"), scale=3)
         self.item_texts: list[arcade.Text] = []
         self.next_item_id: int = 0
         self.id: str = chest_id
@@ -81,6 +85,24 @@ class Chest(View):
             container_type="inventory",
             last_id=len(self.container_sprites),
         )
+
+        for i in range(len(positions_1)):
+            temp = arcade.Sprite(get_path("inventory_container.png"), scale=CONTAINER_UI_SCALE)
+            temp.center_x = positions_1[i][0]
+            temp.center_y = positions_1[i][1]
+            self.container_ui_sprites.append(temp)
+
+        for i in range(len(positions_2)):
+            temp = arcade.Sprite(get_path("inventory_container.png"), scale=CONTAINER_UI_SCALE)
+            temp.center_x = positions_2[i][0]
+            temp.center_y = positions_2[i][1]
+            self.container_ui_sprites.append(temp)
+        self.player_inventory_tools.center_x = self.container_player_sprites[len(self.container_player_sprites) // 2].center_x
+        self.player_inventory_tools.center_y = self.container_player_sprites[len(self.container_player_sprites) // 2].center_y
+        self.container_ui_sprites.append(self.player_inventory_tools)
+
+
+
 
     def _find_item_with_id(
         self, id: int, list_to_find: arcade.SpriteList, sprite_index: int = 0
@@ -203,8 +225,7 @@ class Chest(View):
                 ),
                 pixelated=True,
             )
-        self.container_sprites.draw(pixelated=True)
-        self.container_player_sprites.draw(pixelated=True)
+        self.container_ui_sprites.draw(pixelated=True)
         self.item_sprites.draw(pixelated=True)
         self.ui_sprites.draw(pixelated=True)
         for text in self.item_texts:

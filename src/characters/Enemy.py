@@ -4,11 +4,14 @@ from characters.Player import Player
 from utils import random_item
 from StateMachine import StateMachine
 from DataManager import get_path, texture_manager
+from random import uniform
 
 
 class Enemy(arcade.Sprite):
     WALK = "WALK"
     IDLE = "IDLE"
+    ATTACK = "ATTACK"
+    HURT = "HURT"
     _sprites: dict[str, list[arcade.Texture]] = {WALK: []}
 
     def __init__(
@@ -20,13 +23,13 @@ class Enemy(arcade.Sprite):
     ) -> None:
         # Si el dict de clase no está cargado lo cargo
         if not self._sprites[self.WALK]:
-            for i in range(6):
-                texture = self._load_texture("Spider_walk_{}.png", i + 1)
+            for i in range(3):
+                texture = self._load_texture("sprite_secuaz_{}.png", i + 1)
                 self._sprites[self.WALK].append(texture)
-        super().__init__(center_x=center_x, center_y=center_y)
+        self.custom_scale = uniform(0.7, 1.2)
+        super().__init__(center_x=center_x, center_y=center_y, scale=self.custom_scale)
         self.texture = self._sprites[self.WALK][0]
         self.speed = 0.8
-        self.scale = 2
         self.health = 100
         self.damage = 10
         self.hurt_time = 1  # tiempo en segundos que dura la animación de daño
@@ -51,9 +54,9 @@ class Enemy(arcade.Sprite):
 
         self.state_machine = StateMachine(self.IDLE)
         self.state_machine.add_state(self.IDLE, self.idle_state)
-        self.state_machine.add_state("ATTACK", self.attack_state)
+        self.state_machine.add_state(self.ATTACK, self.attack_state)
         self.state_machine.add_state(self.WALK, self.walk_state)
-        self.state_machine.add_state("HURT", self.hurt_state)
+        self.state_machine.add_state(self.HURT, self.hurt_state)
 
     def _load_texture(self, path: str, index: int):
         route = path.replace("{}", str(index))
@@ -63,7 +66,7 @@ class Enemy(arcade.Sprite):
         if self.distance_to_player > self.persecute_radius:
             return self.IDLE
         elif self.distance_to_player < self.attack_radius:
-            return "ATTACK"
+            return self.ATTACK
         else:
             return self.WALK
 
@@ -72,7 +75,7 @@ class Enemy(arcade.Sprite):
             self.change_x = 0
             self.change_y = 0
             return
-        self.texture = self._sprites["WALK"][0]
+        self.texture = self._sprites[self.WALK][0]
         return self.get_new_state()
 
     def walk_state(self, event):
@@ -81,7 +84,7 @@ class Enemy(arcade.Sprite):
         *_, player_position = event
         diff_x = player_position[0] - self.center_x
         diff_y = player_position[1] - self.center_y
-        self.scale_x = -2 if diff_x > 0 else 2
+        self.scale_x = -self.custom_scale if diff_x > 0 else self.custom_scale
 
         if self.distance_to_player > 0:
             self.change_x = (diff_x / self.distance_to_player) * self.speed
@@ -109,7 +112,7 @@ class Enemy(arcade.Sprite):
             self.color = arcade.color.RED
             self.hurt_time = 1
             return
-        self.texture = self._sprites["WALK"][0]
+        self.texture = self._sprites[self.WALK][0]
         delta_time, *_ = event
         self.hurt_time -= delta_time
 
@@ -127,9 +130,9 @@ class Enemy(arcade.Sprite):
             self.color = arcade.color.WHITE
             self.change_y = 0
             self.change_x = 0
-            return "IDLE"
+            return self.IDLE
 
-        return "HURT"
+        return self.HURT
 
     def update(
         self,
@@ -156,7 +159,7 @@ class Enemy(arcade.Sprite):
             self.position = last_position
 
     def update_animation(self, delta_time: float) -> None:
-        if self.state_machine.actual_state_id in ["HURT", "IDLE"]:
+        if self.state_machine.actual_state_id in [self.HURT, self.IDLE]:
             return
         self.animation_timer += delta_time
         if self.animation_timer > self.animation_cooldown:
@@ -172,10 +175,10 @@ class Enemy(arcade.Sprite):
         if self.health <= 0:
             self.update_chunk(self, kill=True)
             self.remove_from_sprite_lists()
-            self.drop_item(random_item(center_x=self.center_x, center_y=self.center_y))
+            self.drop_item(random_item(center_x=self.center_x, center_y=self.center_y, quantity=1))
             return
 
-        self.state_machine.set_state("HURT")
+        self.state_machine.set_state(self.HURT)
         if knockback < 0:
             return
             # Enviar para atrás si tiene knockback
