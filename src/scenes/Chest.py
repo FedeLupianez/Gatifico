@@ -7,7 +7,7 @@ from .View import View
 from items.Container import Container
 from items.Item import Item
 from .utils import add_containers_to_list, apply_filter
-from DataManager import chests_data
+from DataManager import chests_data, get_sound
 
 CONTAINER_SIZE = 50
 ITEMS_INIT = (550, 300)
@@ -40,7 +40,16 @@ class Chest(View):
         self.content = chests_data.get(self.id, {})
 
         self.player_container_index = 0
+        self.background_rect = arcade.SpriteSolidColor(
+            width=int(
+                Constants.Game.SCREEN_CENTER_X + (Constants.Game.SCREEN_CENTER_X / 3)
+            ),
+            height=int(Constants.Game.SCREEN_CENTER_Y),
+            center_x=self.window.center_x,
+            center_y=self.window.center_y,
+        )
         self._setup()
+        arcade.play_sound(get_sound("open_chest.mp3"), volume=0.3)
 
     def _setup_containers(self) -> None:
         positions_1 = [(ITEMS_INIT[0] + 60 * i, ITEMS_INIT[1]) for i in range(4)]
@@ -48,7 +57,7 @@ class Chest(View):
         player_init_pos = Constants.PlayerConfig.INVENTORY_POSITION
         player_items = [
             (player_init_pos[0] + 60 * i, player_init_pos[1])
-            for i in range(len(self.player.get_inventory().items()))
+            for i in range(Constants.PlayerConfig.MAX_ITEMS_IN_INVENTORY)
         ]
         add_containers_to_list(
             point_list=positions_1,
@@ -104,7 +113,7 @@ class Chest(View):
             actual_text.y = item.center_y - ((item.height * 0.5) + 24)
 
     def _create_item_text(self, item: Item) -> arcade.Text:
-        content = f"{item.name} x {item.quantity}"
+        content = f"{item.quantity}"
         text_sprite = arcade.Text(
             text=content,
             font_size=9,
@@ -144,8 +153,9 @@ class Chest(View):
             item = self._find_item_with_id(text_sprite.id, self.item_sprites)
             if item is None:
                 continue
-            if text_sprite.text != f"{item.name} x {item.quantity}":
-                text_sprite.text = f"{item.name} x {item.quantity}"
+            expected = f"{item.quantity}"
+            if text_sprite.text != expected:
+                text_sprite.text = expected
             text_sprite.anchor_x = "center"
             text_sprite.anchor_y = "baseline"
         self._update_texts_position()
@@ -196,8 +206,11 @@ class Chest(View):
         self.container_sprites.draw(pixelated=True)
         self.container_player_sprites.draw(pixelated=True)
         self.item_sprites.draw(pixelated=True)
+        self.ui_sprites.draw(pixelated=True)
         for text in self.item_texts:
             text.draw()
+        if self._item_mouse_text.text:
+            self._item_mouse_text.draw()
 
     def on_mouse_press(self, x: int, y: int, button: int, modifiers: int):
         if button == arcade.MOUSE_BUTTON_LEFT:
@@ -270,6 +283,7 @@ class Chest(View):
         if self.item_to_move:
             # Cambio la posición del sprite a la del mouse
             self.item_to_move.change_position(x, y)
+        self.item_hover(mouse_pos=(x, y), items_list=self.item_sprites)
 
     def updateInventories(self):
         # Acá voy a actualizar los inventarios tanto del cofre como del personaje
