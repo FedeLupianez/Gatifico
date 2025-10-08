@@ -24,9 +24,10 @@ class Main(arcade.Window):
         self.player = Player()
 
     def on_close(self):
-        DataManager.store_actual_data(
-            self.player, actualScene=self.ViewManager.current_scene_id
-        )
+        if self.ViewManager.current_scene_id != "MENU":
+            DataManager.store_actual_data(
+                self.player, actualScene=self.ViewManager.current_scene_id
+            )
         self.close()
 
 

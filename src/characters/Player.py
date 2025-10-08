@@ -61,10 +61,22 @@ class Player(StateMachine, PlayerConfig):
         desp_y: int = 5
         # Acomodo la hitbox para que sea cuadrada
         self.sprite.hit_box._points = (
-            (-self.HITBOX_WIDTH + hitbox_padding, -self.HITBOX_HEIGHT + hitbox_padding - desp_y),
-            (self.HITBOX_WIDTH - hitbox_padding, -self.HITBOX_HEIGHT + hitbox_padding - desp_y),
-            (self.HITBOX_WIDTH - hitbox_padding, self.HITBOX_HEIGHT - hitbox_padding - desp_y),
-            (-self.HITBOX_WIDTH + hitbox_padding, self.HITBOX_HEIGHT - hitbox_padding - desp_y),
+            (
+                -self.HITBOX_WIDTH + hitbox_padding,
+                -self.HITBOX_HEIGHT + hitbox_padding - desp_y,
+            ),
+            (
+                self.HITBOX_WIDTH - hitbox_padding,
+                -self.HITBOX_HEIGHT + hitbox_padding - desp_y,
+            ),
+            (
+                self.HITBOX_WIDTH - hitbox_padding,
+                self.HITBOX_HEIGHT - hitbox_padding - desp_y,
+            ),
+            (
+                -self.HITBOX_WIDTH + hitbox_padding,
+                self.HITBOX_HEIGHT - hitbox_padding - desp_y,
+            ),
         )
         self.animations: dict[str, list[arcade.Texture]] = {
             Player.IDLE_SIDE_LEFT: [],
@@ -206,6 +218,7 @@ class Player(StateMachine, PlayerConfig):
     def reset(self) -> None:
         self.lifes = 5
         self.healt = 100
+        self.inventory.clear()
         self.setup_lifes()
         self.set_state(Player.IDLE_FRONT)
 

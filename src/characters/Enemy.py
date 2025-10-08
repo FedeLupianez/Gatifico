@@ -3,7 +3,7 @@ import arcade
 from characters.Player import Player
 from utils import random_item
 from StateMachine import StateMachine
-from DataManager import get_path, texture_manager
+from DataManager import get_path, texture_manager, get_sound
 from random import uniform
 
 
@@ -29,7 +29,7 @@ class Enemy(arcade.Sprite):
         self.custom_scale = uniform(0.7, 1.2)
         super().__init__(center_x=center_x, center_y=center_y, scale=self.custom_scale)
         self.texture = self._sprites[self.WALK][0]
-        self.speed = 0.8
+        self.speed = 1
         self.health = 100
         self.damage = 10
         self.hurt_time = 1  # tiempo en segundos que dura la animación de daño
@@ -42,8 +42,11 @@ class Enemy(arcade.Sprite):
         self.persecute_radius = 140
 
         self.attack_radius = 35
-        self.attack_coldown = 1.3
+        self.attack_coldown = 1.1
         self.attack_time = self.attack_coldown
+
+        self.bark_sound = get_sound("enemy_bark.mp3")
+        self.dead_sound = get_sound("enemy_dead.mp3")
 
         # Referencia al player
         self.player = Player()
@@ -163,19 +166,22 @@ class Enemy(arcade.Sprite):
             return
         self.animation_timer += delta_time
         if self.animation_timer > self.animation_cooldown:
+            self.bark_sound.play()
             self.animation_timer = 0
             new_index = (self.frame_index + 1) % len(self._sprites[self.WALK])
             new_texture = self._sprites[self.WALK][new_index]
-            if self.texture != new_texture:
-                self.frame_index = new_index
-                self.texture = new_texture
+            self.frame_index = new_index
+            self.texture = new_texture
 
     def hurt(self, damage: int, knockback: int = 0):
         self.health -= damage
         if self.health <= 0:
             self.update_chunk(self, kill=True)
+            self.drop_item(
+                random_item(center_x=self.center_x, center_y=self.center_y, quantity=1)
+            )
+            self.dead_sound.play()
             self.remove_from_sprite_lists()
-            self.drop_item(random_item(center_x=self.center_x, center_y=self.center_y, quantity=1))
             return
 
         self.state_machine.set_state(self.HURT)

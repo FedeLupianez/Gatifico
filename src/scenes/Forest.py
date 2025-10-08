@@ -13,8 +13,9 @@ from .utils import add_containers_to_list
 from .Chest import Chest
 from Managers.ChunkManager import Chunk_Manager
 
-MAX_MINERALS_IN_MAP = 50
-MIN_MINERALS_IN_MAP = 8
+MAX_MINERALS_IN_MAP = 40
+MIN_MINERALS_IN_MAP = 10
+ENEMIES = 8
 
 
 class Forest(View):
@@ -101,17 +102,13 @@ class Forest(View):
             self.fps_text = arcade.Text("0", 10, 10, arcade.color.WHITE, 12)
 
     def setup_enemies(self) -> None:
-        for _ in range(5):
+        for _ in range(ENEMIES):
             enemy = Enemy(
                 randint(0, int(self._map_width)),
                 randint(0, int(self._map_height)),
                 self.chunk_manager.update_enemy_key,
                 self.chunk_manager.drop_item,
             )
-            while enemy.collides_with_list(self._collision_list):
-                enemy.center_x = randint(0, int(self._map_width))
-                enemy.center_y = randint(0, int(self._map_height))
-
             self.chunk_manager.assign_sprite_chunk(enemy, "enemy")
 
     def setup_inventory_containers(self) -> None:
@@ -136,9 +133,12 @@ class Forest(View):
         # Cargo el inventario anterior del jugador, si no tiene le pongo uno vacío
         player_data = Dm.game_data["player"]
         self.player.inventory = player_data.get("inventory", {})
-        self.player.setup(
-            position=(160, int(self._map_height - 90))
-        )  # Setup del personaje
+        position = (
+            (player_data["position"]["center_x"], player_data["position"]["center_y"])
+            if self.is_first_load
+            else (160, self._map_height - 90)
+        )
+        self.player.setup(position=position)  # Setup del personaje
         # Le asigno la chunk_key al jugador
         self.player.chunk_key = self.chunk_manager.get_chunk_key(
             self.player.sprite.center_x, self.player.sprite.center_y
@@ -174,7 +174,7 @@ class Forest(View):
             mineral.touches = int(touches)
             minerals_to_create.append(mineral)
 
-        if len(minerals_to_create) < MIN_MINERALS_IN_MAP:
+        if len(minerals_to_create) <= MIN_MINERALS_IN_MAP:
             new_minerals = self.load_random_minerals()
             minerals_to_create.extend(new_minerals)
 
@@ -272,7 +272,8 @@ class Forest(View):
         if not self.inventory_dirty:
             return
         self.gui_camera.use()
-        self.fps_text.draw()
+        if Constants.Game.DEBUG_MODE:
+            self.fps_text.draw()
         self.inventory_sprites.draw(pixelated=True)
         self.items_inventory.draw(pixelated=True)
         self.ui_sprites.draw(pixelated=True)
@@ -503,7 +504,6 @@ class Forest(View):
 
     def on_show_view(self) -> None:
         if self.is_first_load:
-            print("primera carga")
             self.camera.position = self.player.sprite.position
 
     def on_fixed_update(self, delta_time: float):
@@ -515,6 +515,7 @@ class Forest(View):
         self.fps_text.text = f"{int(1 / delta_time)}"
         if self.player.lifes == 0:
             self.player.reset()
+            Dm.store_actual_data(self.player, "LABORATORY")
             self.callback(Constants.SignalCodes.CHANGE_VIEW, "MENU")
             return
         player = self.player.sprite

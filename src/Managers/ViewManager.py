@@ -1,5 +1,6 @@
 import arcade
 import Constants
+from scenes.Keys import Keys
 from scenes.Forest import Forest
 from scenes.Sell import Sell
 from scenes.Load_screen import Load_screen
@@ -30,6 +31,7 @@ class ViewManager:
             "LABORATORY": Laboratory,
             "SELL": Sell,
             "FOREST": Forest,
+            "KEYS": Keys,
         }
         self.window.show_view(
             self.current_scene
@@ -56,7 +58,6 @@ class ViewManager:
             assert self.background_sound, "No hay sonido de fondo"
             self.background_sound.play()
 
-        print("Mensaje recibido : ", data)
         if signal == Constants.SignalCodes.CHANGE_VIEW:
             self.current_scene_id = data
 

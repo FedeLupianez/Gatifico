@@ -16,7 +16,7 @@ class Pause(View):
         self.background_image.image = apply_filter(background_image, Filter.DARK)
         self.window.set_mouse_visible(True)
         self.previus_scene = previus_scene
-        self.buttons_scale = 3
+        self.buttons_scale = 2
         self.callback = callback
         self.setup()
 
@@ -28,15 +28,21 @@ class Pause(View):
         self.resume_button = arcade.Sprite(
             get_path("PlayButton.png"), scale=self.buttons_scale
         )
+        self.keys_button = arcade.Sprite(
+            get_path("Keys_button.png"), scale=self.buttons_scale
+        )
         self.exit_button = arcade.Sprite(
             get_path("ExitButton.png"), scale=self.buttons_scale
         )
         self.resume_button.center_x = Game.SCREEN_CENTER_X
         self.exit_button.center_x = Game.SCREEN_CENTER_X
+        self.keys_button.center_x = Game.SCREEN_CENTER_X
         self.resume_button.center_y = Game.SCREEN_CENTER_Y + 100
-        self.exit_button.center_y = Game.SCREEN_CENTER_Y - 100
+        self.exit_button.center_y = self.resume_button.center_y - 100
+        self.keys_button.center_y = self.exit_button.center_y - 100
         self.sprite_list.append(self.resume_button)
         self.sprite_list.append(self.exit_button)
+        self.sprite_list.append(self.keys_button)
 
     def on_draw(self):
         self.camera.use()
@@ -73,6 +79,11 @@ class Pause(View):
 
         if self.exit_button.collides_with_point((x, y)):
             self.callback(SignalCodes.CLOSE_WINDOW, data="Close window")
+            return
+
+        if self.keys_button.collides_with_point((x, y)):
+            self.callback(SignalCodes.CHANGE_VIEW, "KEYS")
+            return
 
     def on_key_press(self, symbol: int, modifiers: int) -> bool | None:
         if symbol == arcade.key.ESCAPE:
