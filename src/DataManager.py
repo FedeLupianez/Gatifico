@@ -77,7 +77,7 @@ def store_actual_data(player, actualScene) -> None:
 def store_chest_data(new_data: ChestsData, chest_id: str):
     global chests_data
     chests_data[chest_id] = new_data
-    with open(DATAFILES_DIR + "Chests_Data.json", "w") as file:
+    with open(DATAFILES_DIR + "Saved/Chests_Data.json", "w") as file:
         json.dump(chests_data, file)
 
 
@@ -90,6 +90,7 @@ def get_path(file_name: str) -> str:
     return ""
 
 
+@lru_cache(maxsize=5)
 def get_sound(file_name: str) -> Sound:
     global sounds_loader
     if file_name not in sounds_loader:

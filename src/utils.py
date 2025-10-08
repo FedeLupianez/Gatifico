@@ -3,7 +3,7 @@ import random
 from Constants import PlayerConfig
 
 
-def random_item(center_x: float = 0, center_y: float = 0, quantity = None) -> Item:
+def random_item(center_x: float = 0, center_y: float = 0, quantity=None) -> Item:
     if not quantity:
         quantity = random.randint(0, PlayerConfig.MAX_ITEMS_CANT)
     item = Item(

@@ -134,7 +134,7 @@ class MixTable(View):
     def _setup_containers(self) -> None:
         positions = [
             ((self.ITEMS_INIT[0] + 75 * i), self.ITEMS_INIT[1])
-            for i in range(len(self.items))
+            for i in range(Constants.PlayerConfig.MAX_ITEMS_IN_INVENTORY)
         ]
         # Centrar los containers con la pantalla :
         # centro de la pantalla

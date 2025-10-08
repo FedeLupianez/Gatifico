@@ -166,7 +166,7 @@ class Test(View):
             for mineral in chunk.sprites["mineral"]:
                 counter += 1
                 result_file += f"{mineral.mineral},{mineral.size_type},{mineral.center_x},{mineral.center_y:},{mineral.touches}\n"
-        Dm.write_file("minerals_in_map.txt", result_file, "w")
+        Dm.write_file("Saved/minerals_in_map.txt", result_file, "w")
 
     def load_mineral_layer(self) -> None:
         if "Minerales" not in self.tilemap.object_lists:

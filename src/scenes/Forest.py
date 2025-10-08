@@ -13,7 +13,7 @@ from .utils import add_containers_to_list
 from .Chest import Chest
 from Managers.ChunkManager import Chunk_Manager
 
-MAX_MINERALS_IN_MAP = 30
+MAX_MINERALS_IN_MAP = 50
 MIN_MINERALS_IN_MAP = 8
 
 
@@ -29,7 +29,6 @@ class Forest(View):
 
         # Le pongo el zoom a la cámara
         self.camera.zoom = Constants.Game.FOREST_ZOOM_CAMERA
-        self.camera.position = self.player.sprite.position
         self._half_w = (self.camera.viewport.width / self.camera.zoom) * 0.5
         self._half_h = (self.camera.viewport.height / self.camera.zoom) * 0.5
         self.is_first_load: bool = True
@@ -166,7 +165,7 @@ class Forest(View):
 
     def load_antique_minerals(self) -> None:
         minerals_to_create = []
-        lines = Dm.read_file("minerals_in_map.txt")
+        lines = Dm.read_file("Saved/minerals_in_map.txt")
         for line in lines:
             name, size, x, y, touches = line.split(",")
             mineral = Mineral(
@@ -190,7 +189,7 @@ class Forest(View):
             for mineral in chunk.sprites["mineral"]:
                 counter += 1
                 result_file += f"{mineral.mineral},{mineral.size_type},{mineral.center_x},{mineral.center_y:},{mineral.touches}\n"
-        Dm.write_file("minerals_in_map.txt", result_file, "w")
+        Dm.write_file("Saved/minerals_in_map.txt", result_file, "w")
 
     def create_mineral_from_object(self, obj: Any) -> Mineral:
         """Función para crear un minerl a partir de un objeto de Tilemap"""
@@ -210,7 +209,6 @@ class Forest(View):
     def load_random_minerals(self) -> list[Mineral]:
         names = list(list(Mineral._resources.keys()))
         sizes = ["big", "mid", "small"]
-        max_collision_attemps = 10
         mineral_count = randint(1, MAX_MINERALS_IN_MAP)
         random_data = [
             {
@@ -225,23 +223,14 @@ class Forest(View):
         created_minerals = []
         for i in range(mineral_count):
             data = random_data[i]
-            collision_attemps = 0
             mineral = Mineral(
                 mineral=data["name"],
                 size_type=data["size"],
                 center_x=data["x"],
                 center_y=data["y"],
             )
+            created_minerals.append(mineral)
 
-            while collision_attemps < max_collision_attemps:
-                collisions = mineral.collides_with_list(self._collision_list)
-                if not collisions:
-                    created_minerals.append(mineral)
-                    break
-                else:
-                    mineral.center_x = randint(50, Constants.Game.SCREEN_WIDTH - 50)
-                    mineral.center_y = randint(50, Constants.Game.SCREEN_HEIGHT - 50)
-                    collision_attemps += 1
         return created_minerals
 
     def world_draw(self):
@@ -477,6 +466,7 @@ class Forest(View):
                 return self.handleInteractions()
 
             case arcade.key.ESCAPE:
+                self.is_first_load = False
                 Dm.store_actual_data(self.player, "FOREST")
                 self.keys_pressed.clear()
                 self.player.stop_state()
@@ -513,6 +503,7 @@ class Forest(View):
 
     def on_show_view(self) -> None:
         if self.is_first_load:
+            print("primera carga")
             self.camera.position = self.player.sprite.position
 
     def on_fixed_update(self, delta_time: float):

@@ -48,6 +48,7 @@ class ViewManager:
         if signal == Constants.SignalCodes.PAUSE_GAME:
             # Pausa el juego pasandole un callback de la funcion para obtener una screenshot
             self.pause_game()
+            return
         if signal == Constants.SignalCodes.SILENCE_BACKGROUND:
             assert self.background_sound, "No hay sonido de fondo"
             self.background_sound.pause()

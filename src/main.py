@@ -17,6 +17,7 @@ class Main(arcade.Window):
             update_rate=Constants.Game.FPS,
             draw_rate=Constants.Game.FPS,
             center_window=True,
+            resizable=False,
         )
         self.set_icon(icon)
         self.ViewManager = ViewManager(self)

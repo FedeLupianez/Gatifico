@@ -6,7 +6,7 @@ from scenes.View import View
 import DataManager
 from characters.Player import Player
 from scenes.utils import add_containers_to_list, del_references_list, apply_filter
-from Constants import Game, Filter
+from Constants import Game, Filter, PlayerConfig
 
 
 class SplitTable(View):
@@ -14,9 +14,11 @@ class SplitTable(View):
     # Centros de los contenedores
     INPUT_POSITION: tuple[int, int] = (350, 450)
     RESULT_INIT_POSITION: tuple[int, int] = (450, 450)
-    CONTAINER_SIZE = 50
+    CONTAINER_SIZE = 35
+    ITEM_SCALE = 2
 
-    ITEMS_INIT: tuple[int, int] = (100, 250)
+    ITEMS_INIT: tuple[int, int] = (100, 255)
+    DISTANCE_BETWEEN_CONTAINERS = 57.5
 
     def __init__(
         self,
@@ -55,12 +57,15 @@ class SplitTable(View):
         )
 
         self.player = Player()
-        self.items: dict = self.player.get_inventory() or {
-            "rubi": 4,
-            "piedra": 3,
-            "azufre": 5,
-        }
+        self.items: dict = self.player.get_inventory()
         self.next_item_id: int = 0
+        self.inventory_sprite: arcade.Sprite = arcade.Sprite(
+            DataManager.get_path("inventory_tools.png"), scale=3
+        )
+        self.inventory_sprite.scale_y = 3.2
+        self.inventory_sprite.center_x = Game.SCREEN_CENTER_X
+        self.inventory_sprite.center_y = self.ITEMS_INIT[1] - 5
+        self.background_sprites.append(self.inventory_sprite)
         self.camera.zoom = 1
         self.is_mouse_active: bool = False
         self.item_to_move: Item | None = None
@@ -76,15 +81,18 @@ class SplitTable(View):
 
     def _setup_lists(self) -> None:
         self.item_sprites = arcade.SpriteList()
-        self.container_sprites = arcade.SpriteList()
+        self.containers = arcade.SpriteList()
         self.item_texts: list[arcade.Text] = []
         self.input_container: Container
         self.result_containers: list[Container] = []
 
     def _setup_containers(self) -> None:
         positions = [
-            (SplitTable.ITEMS_INIT[0] + 75 * i, SplitTable.ITEMS_INIT[1])
-            for i in range(len(self.items))
+            (
+                SplitTable.ITEMS_INIT[0] + SplitTable.DISTANCE_BETWEEN_CONTAINERS * i,
+                SplitTable.ITEMS_INIT[1],
+            )
+            for i in range(PlayerConfig.MAX_ITEMS_IN_INVENTORY)
         ]
 
         # Centrar los containers con la pantalla :
@@ -96,15 +104,21 @@ class SplitTable(View):
 
         for i in range(mid_container - 1, -1, -1):
             last_pos = positions[i + 1]
-            positions[i] = (last_pos[0] - 75, SplitTable.ITEMS_INIT[1])
+            positions[i] = (
+                last_pos[0] - SplitTable.DISTANCE_BETWEEN_CONTAINERS,
+                SplitTable.ITEMS_INIT[1],
+            )
 
         for i in range(mid_container + 1, cant_containers):
             last_pos = positions[i - 1]
-            positions[i] = (last_pos[0] + 75, SplitTable.ITEMS_INIT[1])
+            positions[i] = (
+                last_pos[0] + SplitTable.DISTANCE_BETWEEN_CONTAINERS,
+                SplitTable.ITEMS_INIT[1],
+            )
 
         add_containers_to_list(
             point_list=positions,
-            list_to_add=self.container_sprites,
+            list_to_add=self.containers,
             container_size=SplitTable.CONTAINER_SIZE,
         )
         self.input_container = Container(
@@ -113,14 +127,20 @@ class SplitTable(View):
             center_x=SplitTable.INPUT_POSITION[0],
             center_y=SplitTable.INPUT_POSITION[1],
         )
-        self.input_container.id = len(self.container_sprites)
-        self.container_sprites.append(self.input_container)
+        self.input_container.id = len(self.containers)
+        self.containers.append(self.input_container)
+        container_sprite = arcade.Sprite(
+            DataManager.get_path("inventory_container.png"), scale=3
+        )
+        container_sprite.center_x = self.input_container.center_x
+        container_sprite.center_y = self.input_container.center_y
+        self.background_sprites.append(container_sprite)
 
     def _setup_items(self) -> None:
         for index, (name, quantity) in enumerate(self.items.items()):
-            container: Container = self.container_sprites[index]
+            container: Container = self.containers[index]
             container.item_placed = True
-            new_item = Item(name=name, quantity=quantity, scale=3)
+            new_item = Item(name=name, quantity=quantity, scale=SplitTable.ITEM_SCALE)
             new_item.id = self.next_item_id
             self.next_item_id += 1
             new_item.change_container(container.id)
@@ -131,10 +151,14 @@ class SplitTable(View):
     def setup_ui(self) -> None:
         input_x, input_y = SplitTable.INPUT_POSITION
         self.mixButton = arcade.gui.UIFlatButton(
-            x=input_x + SplitTable.CONTAINER_SIZE,
-            y=input_y - SplitTable.CONTAINER_SIZE * 2,
+            x=input_x + SplitTable.CONTAINER_SIZE + 15,
+            y=input_y - SplitTable.CONTAINER_SIZE * 2 - 20,
             text="Separar",
         )
+        self.mixButton.style["normal"].border = arcade.color.WHITE
+        self.mixButton.style["normal"].border_width = 2
+        self.mixButton.style["normal"].bg = arcade.color.BLACK
+        self.mixButton.style["hover"].bg = arcade.color.GRAY
 
         @self.mixButton.event("on_click")
         def on_click(event):
@@ -151,12 +175,13 @@ class SplitTable(View):
             y=item.center_y - ((item.height * 0.5) + 15),
             anchor_x="center",
             anchor_y="baseline",
+            color=arcade.color.BLACK,
         )
         text_sprite.id = item.id
         return text_sprite
 
     def _reset_sprite_position(self, sprite: Item) -> None:
-        original_container = self.container_sprites[sprite.container_id]
+        original_container = self.containers[sprite.container_id]
         sprite.change_position(original_container.center_x, original_container.center_y)
 
     def _move_sprite_to_container(self, sprite: Item, container: Container) -> None:
@@ -201,7 +226,7 @@ class SplitTable(View):
             if not (actual_text):
                 return
             actual_text.x = item.center_x
-            actual_text.y = item.center_y - (item.height * 0.5 + 15)
+            actual_text.y = item.center_y - (item.height * 0.5 + 10)
 
     def create_result_containers(self, containers_cant: int) -> None:
         # Creo los contenedores faltantes :
@@ -212,10 +237,16 @@ class SplitTable(View):
                     last_container = self.result_containers[-1]
                 center_x = 0
                 if last_container:
-                    center_x = last_container.center_x + SplitTable.CONTAINER_SIZE + 25
+                    center_x = (
+                        last_container.center_x
+                        + SplitTable.CONTAINER_SIZE
+                        + SplitTable.DISTANCE_BETWEEN_CONTAINERS
+                    )
                 else:
                     center_x = (
-                        SplitTable.INPUT_POSITION[0] + SplitTable.CONTAINER_SIZE + 25
+                        SplitTable.INPUT_POSITION[0]
+                        + SplitTable.CONTAINER_SIZE
+                        + SplitTable.DISTANCE_BETWEEN_CONTAINERS
                     )
 
                 new_container = Container(
@@ -224,10 +255,22 @@ class SplitTable(View):
                     center_x=center_x,
                     center_y=SplitTable.INPUT_POSITION[1],
                 )
-                new_container.id = len(self.container_sprites)
+                new_container.id = len(self.containers)
 
                 self.result_containers.append(new_container)
-                self.container_sprites.append(self.result_containers[-1])
+                self.containers.append(self.result_containers[-1])
+                sprite = arcade.Sprite(
+                    DataManager.get_path("inventory_container.png"), scale=3
+                )
+                sprite.center_x = new_container.center_x
+                sprite.center_y = new_container.center_y
+                self.background_sprites.append(sprite)
+
+        # Elimino los contenedores sobrantes :
+        if len(self.result_containers) > containers_cant:
+            for _ in range(len(self.result_containers) - containers_cant):
+                self.containers.pop()
+                self.result_containers.pop()
 
     def load_result(self) -> None:
         input_item: Item | None = self._find_element(
@@ -256,7 +299,9 @@ class SplitTable(View):
                     old_item.quantity += quantity
             else:
                 container: Container = self.result_containers[index]
-                new_item = Item(name=name, quantity=quantity, scale=3)
+                new_item = Item(
+                    name=name, quantity=quantity, scale=SplitTable.ITEM_SCALE
+                )
                 new_item.id = self.next_item_id
                 new_item.container_id = container.id
                 self.next_item_id += 1
@@ -278,7 +323,7 @@ class SplitTable(View):
         # Veo si hay items en las casillas de resultados
         new_inventory: dict[str, int] = {}
 
-        for container in self.container_sprites:
+        for container in self.containers:
             item = self._find_element(
                 self.item_sprites, attr="container_id", target=container.id
             )
@@ -305,12 +350,12 @@ class SplitTable(View):
             rect=self.rect_table,
             color=arcade.color.BLACK,
         )
+        self.background_sprites.draw(pixelated=True)
 
     def on_draw(self) -> None:
         self.clear()
         self.camera.use()
         self.draw_background()
-        self.container_sprites.draw(pixelated=True)
         self.item_sprites.draw(pixelated=True)
         self.ui_sprites.draw(pixelated=True)
         for text in self.item_texts:
@@ -343,7 +388,7 @@ class SplitTable(View):
         if not self.item_to_move:
             return
         collisions: list[Container] = arcade.check_for_collision_with_list(
-            self.item_to_move, self.container_sprites
+            self.item_to_move, self.containers
         )
         if not collisions:
             self._reset_sprite_position(self.item_to_move)
@@ -351,9 +396,7 @@ class SplitTable(View):
             return
 
         new_container: Container = collisions[0]
-        old_container: Container = self.container_sprites[
-            self.item_to_move.container_id
-        ]
+        old_container: Container = self.containers[self.item_to_move.container_id]
 
         if new_container.id == old_container.id:
             self._reset_sprite_position(self.item_to_move)
@@ -391,8 +434,8 @@ class SplitTable(View):
 
     def clean_up(self) -> None:
         del self.background_image
-        del_references_list(self.container_sprites)
-        del self.container_sprites
+        del_references_list(self.containers)
+        del self.containers
         del_references_list(self.item_sprites)
         del self.item_sprites
         del self.item_texts
