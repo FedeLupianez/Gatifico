@@ -63,6 +63,11 @@ class Forest(View):
             "items": arcade.SpriteList(use_spatial_hash=True),
             "enemy": arcade.SpriteList(use_spatial_hash=True),
         }
+        temp = arcade.Sprite(Dm.get_path("door.png"), scale=1.5)
+        setattr(temp, "name", "door")
+        temp.center_y = self._map_height - 10
+        temp.center_x = 162
+        self.chunk_manager.assign_sprite_chunk(temp, "interact")
         # Variable para precomputar las listas de colisiones
         self._collision_list = arcade.SpriteList(use_spatial_hash=True, lazy=True)
         self.update_actual_chunk()
@@ -132,7 +137,9 @@ class Forest(View):
         # Cargo el inventario anterior del jugador, si no tiene le pongo uno vacío
         player_data = Dm.game_data["player"]
         self.player.inventory = player_data.get("inventory", {})
-        self.player.setup(position=(1000, 500))  # Setup del personaje
+        self.player.setup(
+            position=(160, int(self._map_height - 90))
+        )  # Setup del personaje
         # Le asigno la chunk_key al jugador
         self.player.chunk_key = self.chunk_manager.get_chunk_key(
             self.player.sprite.center_x, self.player.sprite.center_y
@@ -243,6 +250,7 @@ class Forest(View):
             "items",
             "objects",
             "mineral",
+            "interact",
             "characters",
             "sky",
         ]
@@ -425,7 +433,7 @@ class Forest(View):
         match object_name:
             case "door":
                 # Cambio de escena y guardo los datos actuales
-                Dm.store_actual_data(self.player, "FOREST")
+                Dm.store_actual_data(self.player, "LABORATORY")
                 self.save_minerals()
                 arcade.play_sound(Dm.get_sound("door.mp3"))
                 self.callback(Constants.SignalCodes.CHANGE_VIEW, "LABORATORY")
