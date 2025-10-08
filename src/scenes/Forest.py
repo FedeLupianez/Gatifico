@@ -13,6 +13,9 @@ from .utils import add_containers_to_list
 from .Chest import Chest
 from Managers.ChunkManager import Chunk_Manager
 
+MAX_MINERALS_IN_MAP = 30
+MIN_MINERALS_IN_MAP = 8
+
 
 class Forest(View):
     def __init__(self, callback: Callable) -> None:
@@ -165,7 +168,7 @@ class Forest(View):
             mineral.touches = int(touches)
             minerals_to_create.append(mineral)
 
-        if len(minerals_to_create) < 5:
+        if len(minerals_to_create) < MIN_MINERALS_IN_MAP:
             new_minerals = self.load_random_minerals()
             minerals_to_create.extend(new_minerals)
 
@@ -180,7 +183,6 @@ class Forest(View):
             for mineral in chunk.sprites["mineral"]:
                 counter += 1
                 result_file += f"{mineral.mineral},{mineral.size_type},{mineral.center_x},{mineral.center_y:},{mineral.touches}\n"
-        print(f"Guardando {counter} minerales")
         Dm.write_file("minerals_in_map.txt", result_file, "w")
 
     def create_mineral_from_object(self, obj: Any) -> Mineral:
@@ -202,7 +204,7 @@ class Forest(View):
         names = list(list(Mineral._resources.keys()))
         sizes = ["big", "mid", "small"]
         max_collision_attemps = 10
-        mineral_count = randint(1, 15)
+        mineral_count = randint(1, MAX_MINERALS_IN_MAP)
         random_data = [
             {
                 "name": choice(names),
@@ -230,10 +232,9 @@ class Forest(View):
                     created_minerals.append(mineral)
                     break
                 else:
-                    mineral.center_x = randint(0, Constants.Game.SCREEN_WIDTH - 50)
+                    mineral.center_x = randint(50, Constants.Game.SCREEN_WIDTH - 50)
                     mineral.center_y = randint(50, Constants.Game.SCREEN_HEIGHT - 50)
                     collision_attemps += 1
-        print("Minerales creados aleatoriamente : ", len(created_minerals))
         return created_minerals
 
     def world_draw(self):
@@ -424,7 +425,7 @@ class Forest(View):
         match object_name:
             case "door":
                 # Cambio de escena y guardo los datos actuales
-                Dm.store_actual_data(self.player, "TEST")
+                Dm.store_actual_data(self.player, "FOREST")
                 self.save_minerals()
                 arcade.play_sound(Dm.get_sound("door.mp3"))
                 self.callback(Constants.SignalCodes.CHANGE_VIEW, "LABORATORY")
@@ -468,7 +469,7 @@ class Forest(View):
                 return self.handleInteractions()
 
             case arcade.key.ESCAPE:
-                Dm.store_actual_data(self.player, "TEST")
+                Dm.store_actual_data(self.player, "FOREST")
                 self.keys_pressed.clear()
                 self.player.stop_state()
                 self.callback(Constants.SignalCodes.PAUSE_GAME, "Pause Game")
@@ -483,7 +484,8 @@ class Forest(View):
                     self._view_hitboxes = not self._view_hitboxes
                     return True
             case arcade.key.T:
-                arcade.print_timings()
+                if Constants.Game.DEBUG_MODE:
+                    arcade.print_timings()
             case arcade.key.Z:
                 if Constants.Game.DEBUG_MODE:
                     self.camera.zoom = (

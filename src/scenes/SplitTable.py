@@ -235,12 +235,10 @@ class SplitTable(View):
         )
         if not input_item:
             return
-        print("nombre del item de input : ", input_item.name)
 
         result = SplitTable.RESOURCE.get(input_item.name, {})
         if not (result):
             return
-        print("Resultados : ", result)
         self.create_result_containers(len(result))
 
         actual_items: list[Item | None] = [
@@ -255,7 +253,6 @@ class SplitTable(View):
             if name in actual_names:
                 old_item = actual_items[actual_names.index(name)]
                 if old_item:
-                    print(f"Cambiando {name} a {old_item.quantity + quantity}")
                     old_item.quantity += quantity
             else:
                 container: Container = self.result_containers[index]
@@ -336,8 +333,6 @@ class SplitTable(View):
             self.is_mouse_active = True
             sprites = arcade.get_sprites_at_point((x, y), self.item_sprites)
             self.item_to_move = sprites[-1] if sprites else None
-            if self.item_to_move:
-                print(self.item_to_move.id)
 
     def on_mouse_release(
         self, x: int, y: int, button: int, modifiers: int

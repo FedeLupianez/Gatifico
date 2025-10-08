@@ -50,6 +50,8 @@ class Laboratory(View):
         self.player.setup((330, 45))
         self.player_sprites.append(self.player.sprite)
         self.player.actual_floor = "wood"
+        for sprite in self.player.lifes_sprite_list:
+            sprite.center_y = self.window.height - 30
 
     def setup_layers(self):
         if not self.tilemap:
@@ -145,7 +147,7 @@ class Laboratory(View):
         if obj_name == "door":
             Dm.store_actual_data(self.player, "LABORATORY")
             arcade.play_sound(Dm.get_sound("door.mp3"))
-            self.callback(Constants.SignalCodes.CHANGE_VIEW, "TEST")
+            self.callback(Constants.SignalCodes.CHANGE_VIEW, "FOREST")
             return True
         if "chest" in obj_name:
             self.open_chest(chest_id=obj_name)
@@ -206,6 +208,7 @@ class Laboratory(View):
         self.inventory_containers.draw(pixelated=True)
         self.inventory_items.draw(pixelated=True)
         self.ui_sprites.draw(pixelated=True)
+        self.player.lifes_sprite_list.draw(pixelated=True)
         for text in self.inventory_texts:
             text.draw()
         if self._item_mouse_text.text:

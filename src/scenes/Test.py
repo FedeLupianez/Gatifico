@@ -166,7 +166,6 @@ class Test(View):
             for mineral in chunk.sprites["mineral"]:
                 counter += 1
                 result_file += f"{mineral.mineral},{mineral.size_type},{mineral.center_x},{mineral.center_y:},{mineral.touches}\n"
-        print(f"Guardando {counter} minerales")
         Dm.write_file("minerals_in_map.txt", result_file, "w")
 
     def load_mineral_layer(self) -> None:
@@ -239,7 +238,6 @@ class Test(View):
                     mineral.center_x = randint(0, Constants.Game.SCREEN_WIDTH - 50)
                     mineral.center_y = randint(50, Constants.Game.SCREEN_HEIGHT - 50)
                     collision_attemps += 1
-        print("Minerales creados aleatoriamente : ", len(created_minerals))
         return created_minerals
 
     def world_draw(self):

@@ -1,6 +1,5 @@
 import arcade
 from items.Container import Container
-from items.Item import Item
 from PIL import Image
 
 
@@ -23,17 +22,19 @@ def add_containers_to_list(
         )
         tempSprite.item_placed = False
         if last_id > -1:
-            tempSprite.id = id
+            setattr(tempSprite, "id", id)
             id += 1
         else:
-            tempSprite.id = len(list_to_add)
+            setattr(tempSprite, "id", len(list_to_add))
         if container_type:
             tempSprite.type = container_type
         list_to_add.append(tempSprite)
 
 
-def get_result(item_1: Item, item_2: Item, dict_to_find: dict) -> str | None:
-    result = dict_to_find.get(item_1.name, {}).get(item_2.name, None)
+def get_result(item_1: str, dict_to_find: dict, item_2=None) -> str | None:
+    result = dict_to_find.get(item_1, {})
+    if item_2:
+        result = result.get(item_2, None)
     return result
 
 

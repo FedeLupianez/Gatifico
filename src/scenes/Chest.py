@@ -12,6 +12,8 @@ from DataManager import chests_data, get_sound, get_path
 CONTAINER_SIZE = 50
 ITEMS_INIT = (550, 300)
 CONTAINER_UI_SCALE = 2.5
+DISTANCE_BETWEEN_CONTAINERS = 57.5
+GAP_ITEM_TEXT = 12
 
 
 class Chest(View):
@@ -33,7 +35,10 @@ class Chest(View):
         self.container_player_sprites = arcade.SpriteList()
         # SpriteList de los contenedores de ui
         self.container_ui_sprites: arcade.SpriteList = arcade.SpriteList()
-        self.player_inventory_tools: arcade.Sprite = arcade.Sprite(get_path("inventory_tools.png"), scale=3)
+        self.player_inventory_sprite: arcade.Sprite = arcade.Sprite(
+            get_path("inventory_tools.png"), scale=3
+        )
+        self.player_inventory_sprite.scale_y = 3.2
         self.item_texts: list[arcade.Text] = []
         self.next_item_id: int = 0
         self.id: str = chest_id
@@ -56,11 +61,23 @@ class Chest(View):
         arcade.play_sound(get_sound("open_chest.mp3"), volume=0.3)
 
     def _setup_containers(self) -> None:
-        positions_1 = [(ITEMS_INIT[0] + 60 * i, ITEMS_INIT[1]) for i in range(4)]
-        positions_2 = [(ITEMS_INIT[0] + 60 * i, ITEMS_INIT[1] + 60) for i in range(4)]
+        positions_1 = [
+            (ITEMS_INIT[0] + DISTANCE_BETWEEN_CONTAINERS * i, ITEMS_INIT[1])
+            for i in range(4)
+        ]
+        positions_2 = [
+            (
+                ITEMS_INIT[0] + DISTANCE_BETWEEN_CONTAINERS * i,
+                ITEMS_INIT[1] + DISTANCE_BETWEEN_CONTAINERS,
+            )
+            for i in range(4)
+        ]
         player_init_pos = Constants.PlayerConfig.INVENTORY_POSITION
         player_items = [
-            (player_init_pos[0] + 60 * i, player_init_pos[1])
+            (
+                player_init_pos[0] + DISTANCE_BETWEEN_CONTAINERS * i,
+                player_init_pos[1] + 5,
+            )
             for i in range(Constants.PlayerConfig.MAX_ITEMS_IN_INVENTORY)
         ]
         add_containers_to_list(
@@ -87,25 +104,26 @@ class Chest(View):
         )
 
         for i in range(len(positions_1)):
-            temp = arcade.Sprite(get_path("inventory_container.png"), scale=CONTAINER_UI_SCALE)
+            temp = arcade.Sprite(
+                get_path("inventory_container.png"), scale=CONTAINER_UI_SCALE
+            )
             temp.center_x = positions_1[i][0]
             temp.center_y = positions_1[i][1]
             self.container_ui_sprites.append(temp)
 
         for i in range(len(positions_2)):
-            temp = arcade.Sprite(get_path("inventory_container.png"), scale=CONTAINER_UI_SCALE)
+            temp = arcade.Sprite(
+                get_path("inventory_container.png"), scale=CONTAINER_UI_SCALE
+            )
             temp.center_x = positions_2[i][0]
             temp.center_y = positions_2[i][1]
             self.container_ui_sprites.append(temp)
-        self.player_inventory_tools.center_x = self.container_player_sprites[len(self.container_player_sprites) // 2].center_x
-        self.player_inventory_tools.center_y = self.container_player_sprites[len(self.container_player_sprites) // 2].center_y
-        self.container_ui_sprites.append(self.player_inventory_tools)
-
-
-
+        self.player_inventory_sprite.center_x = self.window.width * 0.5
+        self.player_inventory_sprite.center_y = player_init_pos[1]
+        self.container_ui_sprites.append(self.player_inventory_sprite)
 
     def _find_item_with_id(
-        self, id: int, list_to_find: arcade.SpriteList, sprite_index: int = 0
+        self, id: int, list_to_find: arcade.SpriteList | list, sprite_index: int = 0
     ):
         if sprite_index == len(list_to_find):
             return None
@@ -132,7 +150,7 @@ class Chest(View):
             if not (actual_text):
                 continue
             actual_text.x = item.center_x
-            actual_text.y = item.center_y - ((item.height * 0.5) + 24)
+            actual_text.y = item.center_y - ((item.height * 0.5) + GAP_ITEM_TEXT)
 
     def _create_item_text(self, item: Item) -> arcade.Text:
         content = f"{item.quantity}"
@@ -140,9 +158,10 @@ class Chest(View):
             text=content,
             font_size=9,
             x=item.center_x,
-            y=item.center_y - ((item.height * 0.5) + 24),
+            y=item.center_y - ((item.height * 0.5) + GAP_ITEM_TEXT),
             anchor_x="center",
             anchor_y="baseline",
+            color=arcade.color.BLACK,
         )
         text_sprite.id = item.id
         return text_sprite
@@ -323,7 +342,6 @@ class Chest(View):
             if item:
                 new_player_inventory[item.name] = item.quantity
         self.player.inventory = new_player_inventory
-        print(self.player.inventory)
         DataManager.store_chest_data(self.content, self.id)
 
     def clean_up(self):

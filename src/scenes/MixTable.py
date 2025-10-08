@@ -22,6 +22,7 @@ class MixTable(View):
     ]
     RESULT_CONTAINER_POSITION = (530, 448)
     CONTAINER_SIZE = 50
+    DISTANCE_BETWEEN_CONTAINERS = 57
 
     ITEMS_INIT: tuple[int, int] = (400, 145)
     ITEM_SCALE = 2
@@ -146,11 +147,17 @@ class MixTable(View):
 
         for i in range(mid_container - 1, -1, -1):
             last_pos = positions[i + 1]
-            positions[i] = (last_pos[0] - 60, self.ITEMS_INIT[1] + 5)
+            positions[i] = (
+                last_pos[0] - self.DISTANCE_BETWEEN_CONTAINERS,
+                self.ITEMS_INIT[1] + 5,
+            )
 
         for i in range(mid_container + 1, cant_containers):
             last_pos = positions[i - 1]
-            positions[i] = (last_pos[0] + 60, self.ITEMS_INIT[1] + 5)
+            positions[i] = (
+                last_pos[0] + self.DISTANCE_BETWEEN_CONTAINERS,
+                self.ITEMS_INIT[1] + 5,
+            )
 
         add_containers_to_list(
             point_list=positions,
@@ -245,7 +252,11 @@ class MixTable(View):
         if not (item_1 and item_2):
             return
 
-        result = get_result(item_1, item_2, Combinations)
+        result = get_result(
+            item_1=item_1.name, item_2=item_2.name, dict_to_find=Combinations
+        ) or get_result(
+            item_1=item_2.name, item_2=item_1.name, dict_to_find=Combinations
+        )
         if not result:
             return
 
@@ -270,7 +281,7 @@ class MixTable(View):
         for item, container in zip((item_1, item_2), (input_1, input_2)):
             item.quantity -= 1
             if item.quantity != 0:
-                return
+                continue
             if item_text := self._find_element(
                 list_to_find=self.item_texts, attr="id", target=item.id
             ):
