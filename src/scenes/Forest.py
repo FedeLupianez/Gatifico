@@ -28,7 +28,6 @@ class Forest(View):
         self.player = Player()
         self.callback = callback  # Callback al ViewManager
         self.is_from_lab: bool = kwargs.get("is_from_lab", False)
-        print(f"{self.is_from_lab=}")
 
         # Le pongo el zoom a la cámara
         self.camera.zoom = Constants.Game.FOREST_ZOOM_CAMERA

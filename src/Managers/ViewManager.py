@@ -8,13 +8,14 @@ from scenes.Menu import Menu
 from scenes.Test import Test
 from scenes.Pause import Pause
 from scenes.Laboratory import Laboratory
+from scenes.Vignets import Vignets
 import gc
-from DataManager import get_sound
+from DataManager import get_path, get_sound
 
 
 # Esta clase va a manejar la vista que se muestra en la pantalla
 class ViewManager:
-    current_scene_id = "MENU"
+    current_scene_id = "VIGNETS"
 
     def __init__(self, window: arcade.Window) -> None:
         self.window = window
@@ -22,7 +23,10 @@ class ViewManager:
         self.background_sound = arcade.play_sound(
             get_sound("Menu_loop.mp3"), loop=True, volume=0.2
         )
-        self.current_scene = Menu(self.callback)
+        if not get_path("Chests_Data.json"):
+            self.current_scene = Vignets(self.callback)
+        else:
+            self.current_scene = Menu(self.callback)
 
         # Diccionario con los objetos de las escenas pero sin instanciar para ahorrar recursos
         self.scenes = {
@@ -32,6 +36,7 @@ class ViewManager:
             "SELL": Sell,
             "FOREST": Forest,
             "KEYS": Keys,
+            "VIGNETS": Vignets,
         }
         self.window.show_view(
             self.current_scene
