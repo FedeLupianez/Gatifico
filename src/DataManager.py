@@ -30,7 +30,8 @@ def loadData(filename: str) -> dict:
 
 def read_file(filename: str):
     with open(DATAFILES_DIR + filename, "r") as file:
-        return file.readlines()
+        for line in file:
+            yield line.strip()
 
 
 def write_file(filename: str, data: str, mode: Literal["a", "w"]) -> None:

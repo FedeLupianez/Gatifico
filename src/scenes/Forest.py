@@ -11,7 +11,7 @@ import DataManager as Dm
 from items.Item import Item
 from .utils import add_containers_to_list
 from .Chest import Chest
-from Managers.ChunkManager import Chunk_Manager
+from Managers.ChunkManager import Chunk_Manager, Chunk_lists
 
 MAX_MINERALS_IN_MAP = 40
 MIN_MINERALS_IN_MAP = 10
@@ -25,7 +25,6 @@ class Forest(View):
         self.window.set_mouse_visible(True)
 
         # Constantes de clase
-        self.player = Player()
         self.callback = callback  # Callback al ViewManager
         self.is_from_lab: bool = kwargs.get("is_from_lab", False)
 
@@ -54,25 +53,25 @@ class Forest(View):
         self._view_hitboxes: bool = False  # Flag para mostrar las hitboxes
 
         self.areas: dict[tuple, dict[str, list]] = {}
-        self._actual_area: dict[str, arcade.SpriteList] = {
-            "collisions": arcade.SpriteList(use_spatial_hash=True, lazy=True),
-            "interact": arcade.SpriteList(use_spatial_hash=True, lazy=True),
-            "mineral": arcade.SpriteList(use_spatial_hash=True, lazy=True),
-            "floor": arcade.SpriteList(use_spatial_hash=True, lazy=True),
-            "sky": arcade.SpriteList(use_spatial_hash=True, lazy=True),
-            "objects": arcade.SpriteList(use_spatial_hash=True, lazy=True),
-            "items": arcade.SpriteList(use_spatial_hash=True),
-            "enemy": arcade.SpriteList(use_spatial_hash=True),
-        }
+        self._actual_area = Chunk_lists(
+            interact=arcade.SpriteList(use_spatial_hash=True),
+            mineral=arcade.SpriteList(use_spatial_hash=True),
+            floor=arcade.SpriteList(use_spatial_hash=True),
+            sky=arcade.SpriteList(use_spatial_hash=True),
+            items=arcade.SpriteList(use_spatial_hash=True),
+            enemy=arcade.SpriteList(use_spatial_hash=True),
+            collisions=arcade.SpriteList(use_spatial_hash=True),
+            objects=arcade.SpriteList(use_spatial_hash=True),
+        )
+        self.nearby_chunks_keys = []
+
         temp = arcade.Sprite(Dm.get_path("door.png"), scale=1.5)
         setattr(temp, "name", "door")
         temp.center_y = self._map_height - 10
         temp.center_x = 162
         self.chunk_manager.assign_sprite_chunk(temp, "interact")
-        # Variable para precomputar las listas de colisiones
-        self._collision_list = arcade.SpriteList(use_spatial_hash=True, lazy=True)
-        self.update_actual_chunk()
         self._setup_scene()
+        self.update_actual_chunk()
 
     def _setup_scene(self) -> None:
         """Configuración principal"""
@@ -107,8 +106,6 @@ class Forest(View):
             enemy = Enemy(
                 randint(0, int(self._map_width)),
                 randint(0, int(self._map_height)),
-                self.chunk_manager.update_enemy_key,
-                self.chunk_manager.drop_item,
             )
             self.chunk_manager.assign_sprite_chunk(enemy, "enemy")
 
@@ -133,13 +130,13 @@ class Forest(View):
     def setup_player(self) -> None:
         # Cargo el inventario anterior del jugador, si no tiene le pongo uno vacío
         player_data = Dm.game_data["player"]
-        self.player.inventory = player_data.get("inventory", {})
         position = (
             (player_data["position"]["center_x"], player_data["position"]["center_y"])
             if not self.is_from_lab
             else (160, self._map_height - 90)
         )
-        self.player.setup(position=position)  # Setup del personaje
+        self.player = Player(position=position)
+        self.player.inventory = player_data.get("inventory", {})
         # Le asigno la chunk_key al jugador
         self.player.chunk_key = self.chunk_manager.get_chunk_key(
             self.player.sprite.center_x, self.player.sprite.center_y
@@ -151,23 +148,16 @@ class Forest(View):
     def setup_scene_layer(self) -> None:
         if not self.tilemap:
             raise ValueError("TileMap no puede set None")
-
-        # Capas de vista :
-        # self.walls = self.scene["Paredes"]
-        # Capas de colisiones :
-        self.collision_objects = self.scene["Objects"]
-        # self.interact_objects = self.load_object_layers("Interactuables", self.tilemap)
-        # self.chunk_manager.batch_assign_sprites(self.interact_objects, "interact")
         self.load_antique_minerals()
-        # Variable para precomputar las listas de colisiones
-        self._collision_list = arcade.SpriteList(use_spatial_hash=True, lazy=True)
-        for object in self.collision_objects:
-            self._collision_list.append(object)
 
     def load_antique_minerals(self) -> None:
         minerals_to_create = []
         lines = Dm.read_file("Saved/minerals_in_map.txt")
-        for line in lines:
+        while True:
+            try:
+                line = next(lines)
+            except StopIteration:
+                break
             name, size, x, y, touches = line.split(",")
             mineral = Mineral(
                 mineral=name, size_type=size, center_x=float(x), center_y=float(y)
@@ -246,26 +236,23 @@ class Forest(View):
         ]
         self.camera.use()
         for layer in draw_order:
-            if layer in self._actual_area:
-                self._actual_area[layer].draw(pixelated=True)
+            if layer in self._actual_area.__dict__.keys():
+                self._actual_area.__dict__[layer].draw(pixelated=True)
             elif layer == "characters":
                 self.characters_sprites.draw(pixelated=True)
-                self._actual_area["enemy"].draw(pixelated=True)
+                self._actual_area.enemy.draw(pixelated=True)
         if self._view_hitboxes:
             self.draw_hit_boxes()
 
     def draw_hit_boxes(self):
-        self._actual_area["interact"].draw_hit_boxes(
+        self._actual_area.interact.draw_hit_boxes(
             color=arcade.color.BLUE, line_thickness=2
         )
-        self._actual_area["mineral"].draw_hit_boxes(
+        self._actual_area.mineral.draw_hit_boxes(
             color=arcade.color.GREEN, line_thickness=2
         )
         self.player.sprite.draw_hit_box(color=arcade.color.RED, line_thickness=2)
-        self._actual_area["interact"].draw_hit_boxes(
-            color=arcade.color.AFRICAN_VIOLET, line_thickness=2
-        )
-        self._actual_area["objects"].draw_hit_boxes(
+        self._actual_area.collisions.draw_hit_boxes(
             color=arcade.color.ANTIQUE_BRONZE, line_thickness=2
         )
 
@@ -322,28 +309,12 @@ class Forest(View):
             self.inventory_texts.append(new_text)
 
     def update_actual_chunk(self):
-        active_chunk_lists = {
-            "mineral": arcade.SpriteList(use_spatial_hash=True),
-            "interact": arcade.SpriteList(use_spatial_hash=True),
-            "floor": arcade.SpriteList(use_spatial_hash=True),
-            "sky": arcade.SpriteList(use_spatial_hash=True),
-            "objects": arcade.SpriteList(use_spatial_hash=True),
-            "items": arcade.SpriteList(use_spatial_hash=True),
-            "enemy": arcade.SpriteList(use_spatial_hash=True),
-        }
-        nearby_chunks = self.chunk_manager.get_nearby_chunks(
-            center_key=self.player.chunk_key
+        self.nearby_chunks_keys = self.chunk_manager.get_nearby_chunks(
+            self.player.chunk_key
         )
-        self._collision_list.clear()
-        for key in nearby_chunks:
-            chunk = self.chunk_manager.get_chunk(key)
-            for list_name, sprite_list in active_chunk_lists.items():
-                sprites = chunk.sprites.get(list_name, [])
-                sprite_list.extend(sprites)
-                if list_name.lower() in ["floor", "sky"]:
-                    continue
-                self._collision_list.extend(sprites)
-        self._actual_area = active_chunk_lists
+        self._actual_area = self.chunk_manager.get_nearby_chunks_lists(
+            self.player.chunk_key
+        )
 
     def update_camera(self, player_moved: bool) -> None:
         cam_lerp = (
@@ -380,22 +351,22 @@ class Forest(View):
     # Funciones de Interacción con objetos
     def handleInteractions(self):
         closest_obj = arcade.get_closest_sprite(
-            self.player.sprite, self._actual_area["interact"]
+            self.player.sprite, self._actual_area.interact
         )
         if closest_obj and closest_obj[1] <= 50:
             return self.process_object_interaction(closest_obj[0])
 
         closest_obj = arcade.get_closest_sprite(
-            self.player.sprite, self._actual_area["mineral"]
+            self.player.sprite, self._actual_area.mineral
         )
         if closest_obj and closest_obj[1] <= 50:
             return self.process_mineral_interaction(closest_obj[0])
         closest_obj = arcade.get_closest_sprite(
-            self.player.sprite, self._actual_area["items"]
+            self.player.sprite, self._actual_area.items
         )
         if closest_obj and closest_obj[1] <= 50:
             item = closest_obj[0]
-            self._actual_area["items"].remove(item)
+            self._actual_area.items.remove(item)
             self.player.add_to_inventory(item.name, item.quantity)
             self.chunk_manager.chunks[self.player.chunk_key].sprites["items"].remove(
                 item
@@ -406,7 +377,7 @@ class Forest(View):
 
     def process_enemy_interaction(self) -> None:
         closest_obj = arcade.get_closest_sprite(
-            self.player.sprite, self._actual_area["enemy"]
+            self.player.sprite, self._actual_area.enemy
         )
         if closest_obj and closest_obj[1] <= 50:
             self.player.attack(closest_obj[0])
@@ -509,8 +480,12 @@ class Forest(View):
 
     def on_fixed_update(self, delta_time: float):
         self.player.update_animation(delta_time)
-        for enemy in self._actual_area["enemy"]:
-            enemy.update(delta_time, self.player.sprite.position, self._collision_list)
+        self.chunk_manager.update_enemies(
+            chunk_keys=self.nearby_chunks_keys,
+            delta=delta_time,
+            player_position=(self.player.sprite.center_x, self.player.sprite.center_y),
+            actual_collisions=self._actual_area.collisions,
+        )
 
     def on_update(self, delta_time: float) -> bool | None:
         if Constants.Game.DEBUG_MODE:
@@ -587,25 +562,21 @@ class Forest(View):
 
     def player_collides(self) -> bool:
         """Función para detectar si hay colisiones"""
-        if not self._collision_list:
+        if not self._actual_area.collisions:
             return False
         return any(
             arcade.check_for_collision_with_list(
-                self.player.sprite, self._collision_list
+                self.player.sprite, self._actual_area.collisions
             )
         )
 
     def clean_up(self) -> None:
-        for chunk_list in self._actual_area.values():
-            chunk_list.clear()
-
+        del self._actual_area
         self.chunk_manager.get_chunk_key.cache_clear()
         del self.chunk_manager
         del self.player
         del self.camera
         # del self.interact_objects
-        del self._collision_list
-        del self.collision_objects
         del self.last_inventory_hash
         del self.keys_pressed
         del self.inventory_dirty
@@ -614,8 +585,6 @@ class Forest(View):
         del self.inventory_sprites
         del self.items_inventory
         del self.inventory_texts
-
-        self._actual_area.clear()
 
     def get_screenshot(self, draw_ui: bool = False):
         self.clear()

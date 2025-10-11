@@ -1,7 +1,5 @@
-from typing import Callable
 import arcade
 from characters.Player import Player
-from utils import random_item
 from StateMachine import StateMachine
 from DataManager import get_path, texture_manager, get_sound
 from random import uniform
@@ -19,8 +17,6 @@ class Enemy(arcade.Sprite):
         self,
         center_x: float,
         center_y: float,
-        callback_update_chunk: Callable,
-        callback_drop_item: Callable,
     ) -> None:
         # Si el dict de clase no está cargado lo cargo
         if not self._sprites[self.WALK]:
@@ -52,8 +48,6 @@ class Enemy(arcade.Sprite):
         # Referencia al player
         self.player = Player()
         # Esta función se va a ejecutar cuando el enemy se quede quieto para actualizar su chunk_key
-        self.update_chunk = callback_update_chunk
-        self.drop_item = callback_drop_item
         self.chunk_key: tuple[int, int] = (0, 0)
 
         self.state_machine = StateMachine(self.IDLE)
@@ -143,10 +137,6 @@ class Enemy(arcade.Sprite):
         if event == 0:  # on_enter
             self.change_x = 0
             self.change_y = 0
-            self.update_chunk(self, kill=True)
-            self.drop_item(
-                random_item(center_x=self.center_x, center_y=self.center_y, quantity=1)
-            )
             self.dead_sound.play()
             # En un futuro, acá se podría controlar una animación de muerte
             self.remove_from_sprite_lists()
@@ -166,7 +156,6 @@ class Enemy(arcade.Sprite):
         self.state_machine.process_state((delta_time, player_position))
 
         self.update_position(objects=objects_collisions)
-        self.update_chunk(self)
         self.update_animation(delta_time)
 
     def update_position(self, objects: arcade.SpriteList) -> None:
@@ -215,3 +204,6 @@ class Enemy(arcade.Sprite):
 
     def attack(self) -> None:
         self.player.hurt(self.damage, enemy=self, knockback=10)
+
+    def get_state(self) -> str:
+        return self.state_machine.actual_state_id

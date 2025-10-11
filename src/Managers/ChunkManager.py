@@ -4,6 +4,7 @@ from typing import Dict
 from characters.Enemy import Enemy
 from arcade import TileMap, Sprite, SpriteList
 from items.Item import Item
+from utils import random_item
 
 
 @dataclass
@@ -19,6 +20,18 @@ class Chunk:
             "enemy": [],
         }
     )
+
+
+@dataclass
+class Chunk_lists:
+    collisions: SpriteList
+    interact: SpriteList
+    mineral: SpriteList
+    floor: SpriteList
+    sky: SpriteList
+    items: SpriteList
+    enemy: SpriteList
+    objects: SpriteList
 
 
 class Chunk_Manager:
@@ -47,12 +60,29 @@ class Chunk_Manager:
             if (col + dx, row + dy) in self.chunks
         ]
 
-    def update_enemy_key(self, enemy: Enemy, kill: bool = False):
-        if kill:
-            if enemy in self.chunks[enemy.chunk_key].sprites["enemy"]:
-                self.chunks[enemy.chunk_key].sprites["enemy"].remove(enemy)
-            return
+    def get_nearby_chunks_lists(self, chunk_key: tuple[int, int]) -> Chunk_lists:
+        nearby_chunks = self.get_nearby_chunks(chunk_key)
+        lists = Chunk_lists(
+            collisions=SpriteList(use_spatial_hash=True),
+            interact=SpriteList(use_spatial_hash=True),
+            mineral=SpriteList(use_spatial_hash=True),
+            floor=SpriteList(use_spatial_hash=True),
+            sky=SpriteList(use_spatial_hash=True),
+            items=SpriteList(use_spatial_hash=True),
+            enemy=SpriteList(use_spatial_hash=True),
+            objects=SpriteList(use_spatial_hash=True),
+        )
+        for key in nearby_chunks:
+            chunk = self.get_chunk(key)
+            for list_name, sprite_list in lists.__dict__.items():
+                sprites = chunk.sprites.get(list_name, [])
+                sprite_list.extend(sprites)
+                if list_name in ["floor", "sky"]:
+                    continue
+                lists.collisions.extend(sprites)
+        return lists
 
+    def update_enemy_key(self, enemy: Enemy):
         chunk_key = self.get_chunk_key(enemy.center_x, enemy.center_y)
         if enemy.chunk_key == chunk_key:
             return
@@ -61,6 +91,23 @@ class Chunk_Manager:
         chunk = self.get_chunk(chunk_key)
         chunk.sprites["enemy"].append(enemy)
         enemy.chunk_key = chunk_key
+
+    def update_enemies(
+        self,
+        chunk_keys: list[tuple[int, int]],
+        delta: float,
+        player_position: tuple[float, float],
+        actual_collisions: SpriteList,
+    ) -> None:
+        for key in chunk_keys:
+            for enemy in self.chunks[key].sprites["enemy"]:
+                if enemy.get_state() == Enemy.DEAD:
+                    if enemy in self.chunks[enemy.chunk_key].sprites["enemy"]:
+                        self.chunks[enemy.chunk_key].sprites["enemy"].remove(enemy)
+                    self.drop_item(random_item(enemy.center_x, enemy.center_y))
+                    continue
+                enemy.update(delta, player_position, actual_collisions)
+                self.update_enemy_key(enemy)
 
     def drop_item(self, item: Item):
         self.assign_sprite_chunk(item, "items")

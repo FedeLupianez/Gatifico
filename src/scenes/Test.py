@@ -143,7 +143,12 @@ class Test(View):
     def load_antique_minerals(self) -> None:
         minerals_to_create = []
         lines = Dm.read_file("Saved/minerals_in_map.txt")
-        for line in lines:
+        line = next(lines)
+        while True:
+            try:
+                line = next(lines)
+            except StopIteration:
+                break
             name, size, x, y, touches = line.split(",")
             mineral = Mineral(
                 mineral=name, size_type=size, center_x=float(x), center_y=float(y)
@@ -343,8 +348,6 @@ class Test(View):
         nearby_chunks = self.chunk_manager.get_nearby_chunks(
             center_key=self.player.chunk_key
         )
-        self._collision_list.clear()
-        self._collision_list.extend(self.walls)
         for key in nearby_chunks:
             chunk = self.chunk_manager.get_chunk(key)
             for list_name, sprite_list in active_chunk_lists.items():
@@ -606,7 +609,6 @@ class Test(View):
         del self.player
         del self.camera
         del self.interact_objects
-        del self._collision_list
         del self.walls
         del self.collision_objects
         del self.last_inventory_hash
