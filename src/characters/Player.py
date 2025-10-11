@@ -336,6 +336,12 @@ class Player(StateMachine, PlayerConfig):
             self.sprite.texture = new_texture
             self.play_step_sound()
 
+        if (
+            self.actual_state_id != Player.HURT
+            and self.sprite.color != arcade.color.WHITE
+        ):
+            self.sprite.color = arcade.color.WHITE
+
         if self.actual_state_id == Player.ATTACK:
             self.attack_time -= deltaTime
 
@@ -350,9 +356,6 @@ class Player(StateMachine, PlayerConfig):
                 self.sprite.change_y = 0
 
             if self.hurt_time <= 0:
-                print("salir de hurt")
-                # Volver al color normal de la texture
-                self.sprite.color = arcade.color.WHITE
                 self.change_y = 0
                 self.change_x = 0
                 self.set_state(self.last_state_id)
@@ -422,7 +425,7 @@ class Player(StateMachine, PlayerConfig):
 
         dx = self.sprite.center_x - enemy.center_x
         dy = self.sprite.center_y - enemy.center_y
-        dist = (dx**2 + dy**2) ** (1 / 2)
+        dist = (dx**2 + dy**2) ** 0.5
 
         if dist > 0:
             # Aplicar velocidad de knockback

@@ -3,6 +3,7 @@ from typing import Any, Callable
 from random import randint, choice
 
 from characters.Enemy import Enemy
+from scenes.Sell import Sell
 from scenes.View import View, Object
 import Constants
 from characters.Player import Player
@@ -79,6 +80,9 @@ class Forest(View):
         self.setup_scene_layer()
         self.setup_player()
         self.setup_enemies()
+        temp_interact = self.load_object_layers("Interact", self.tilemap)
+        self.chunk_manager.batch_assign_sprites(temp_interact, "interact")
+        del temp_interact
         # Hago que la vida siempre esté en el top de la ventana
         for i in range(len(self.player.lifes_sprite_list)):
             self.player.lifes_sprite_list[i].center_y = self.window.height - 44
@@ -315,6 +319,7 @@ class Forest(View):
         self._actual_area = self.chunk_manager.get_nearby_chunks_lists(
             self.player.chunk_key
         )
+        print(len(self._actual_area.interact))
 
     def update_camera(self, player_moved: bool) -> None:
         cam_lerp = (
@@ -345,6 +350,11 @@ class Forest(View):
             chest_id=chest_id,
             previusScene=self,
         )
+        self.is_first_load = False
+        self.window.show_view(new_scene)
+
+    def open_seller(self) -> None:
+        new_scene = Sell(self)
         self.is_first_load = False
         self.window.show_view(new_scene)
 
@@ -400,8 +410,8 @@ class Forest(View):
                 arcade.play_sound(Dm.get_sound("door.mp3"))
                 self.callback(Constants.SignalCodes.CHANGE_VIEW, "LABORATORY")
                 return True
-            case "comerce":
-                # Cambiar a la escena de compra
+            case "seller":
+                self.open_seller()
                 return True
         return False
 
