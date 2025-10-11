@@ -19,7 +19,7 @@ ENEMIES = 8
 
 
 class Forest(View):
-    def __init__(self, callback: Callable) -> None:
+    def __init__(self, callback: Callable, **kwargs) -> None:
         tileMapUrl = Dm.get_path("Mapa.tmx")
         super().__init__(background_url=None, tilemap_url=tileMapUrl)
         self.window.set_mouse_visible(True)
@@ -27,6 +27,8 @@ class Forest(View):
         # Constantes de clase
         self.player = Player()
         self.callback = callback  # Callback al ViewManager
+        self.is_from_lab: bool = kwargs.get("is_from_lab", False)
+        print(f"{self.is_from_lab=}")
 
         # Le pongo el zoom a la cámara
         self.camera.zoom = Constants.Game.FOREST_ZOOM_CAMERA
@@ -135,7 +137,7 @@ class Forest(View):
         self.player.inventory = player_data.get("inventory", {})
         position = (
             (player_data["position"]["center_x"], player_data["position"]["center_y"])
-            if self.is_first_load
+            if not self.is_from_lab
             else (160, self._map_height - 90)
         )
         self.player.setup(position=position)  # Setup del personaje
@@ -512,7 +514,8 @@ class Forest(View):
             enemy.update(delta_time, self.player.sprite.position, self._collision_list)
 
     def on_update(self, delta_time: float) -> bool | None:
-        self.fps_text.text = f"{int(1 / delta_time)}"
+        if Constants.Game.DEBUG_MODE:
+            self.fps_text.text = f"{int(1 / delta_time)}"
         if self.player.lifes == 0:
             self.player.reset()
             Dm.store_actual_data(self.player, "LABORATORY")

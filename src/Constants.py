@@ -14,7 +14,7 @@ class Game:
     FOREST_ZOOM_CAMERA = 4  # Zoom de la camara en el bosque
     CAMERA_LERP_FAST = 0.25
     CAMERA_LERP_SLOW = 0.06
-    DEBUG_MODE = False
+    DEBUG_MODE = True
 
 
 class PlayerConfig:

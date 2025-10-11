@@ -69,7 +69,7 @@ class ViewManager:
             if not data:
                 raise ValueError("Data no está disponible")
             # Creo una nueva escena
-            self.current_scene = self.scenes[data](self.callback)
+            self.current_scene = self.scenes[data](self.callback, **kwargs)
 
             if "load_screen" in kwargs:
                 load_scene = Load_screen(self.current_scene)

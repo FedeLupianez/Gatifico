@@ -13,7 +13,7 @@ from .utils import add_containers_to_list
 
 
 class Laboratory(View):
-    def __init__(self, callback: Callable):
+    def __init__(self, callback: Callable, **kwargs):
         tileMapUrl = Dm.get_path("Laboratory.tmx")
         super().__init__(background_url=None, tilemap_url=tileMapUrl)
         self.player = Player()
@@ -147,7 +147,7 @@ class Laboratory(View):
         if obj_name == "door":
             Dm.store_actual_data(self.player, "LABORATORY")
             arcade.play_sound(Dm.get_sound("door.mp3"))
-            self.callback(Constants.SignalCodes.CHANGE_VIEW, "FOREST")
+            self.callback(Constants.SignalCodes.CHANGE_VIEW, "FOREST", is_from_lab=True)
             return True
         if "chest" in obj_name:
             self.open_chest(chest_id=obj_name)
