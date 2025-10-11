@@ -4,14 +4,15 @@ from typing import Callable
 # Clase de maquina de estados reutilizable
 class StateMachine:
     # Mejora de manejo de memoria para tener varias instancias
-    __slots__ = ["states", "actual_state_id", "last_state_id"]
+    __slots__ = ["states", "actual_state_id", "last_state_id", "unregistered_states"]
 
-    def __init__(self, initial_id: str):
+    def __init__(self, initial_id: str, unregistered_states: list[str] = []):
         # Diccionario con los estados
         # Estos son funciones
         self.states: dict[str | int, Callable[..., str]] = {}
         self.actual_state_id: str = initial_id  # Id del estado actual
-        self.last_state_id: str = ""
+        self.last_state_id: str = self.actual_state_id
+        self.unregistered_states: list[str] = unregistered_states
 
     def add_state(self, id: str, state: Callable):
         """Agrega un estado a la maquina
@@ -28,7 +29,8 @@ class StateMachine:
         """
         if new_state == self.actual_state_id:
             return
-        self.last_state_id = self.actual_state_id
+        if new_state not in self.unregistered_states:
+            self.last_state_id = self.actual_state_id
         self.actual_state_id = new_state
         # Aplico los cambios del estado con 0 como neutro
         self.states[self.actual_state_id](0)

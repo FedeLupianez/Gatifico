@@ -37,7 +37,10 @@ class Player(StateMachine, PlayerConfig):
     def __init__(self):
         if self._initialized:
             return
-        super().__init__(Player.IDLE_FRONT)
+        super().__init__(
+            initial_id=Player.IDLE_FRONT,
+            unregistered_states=[Player.ATTACK, Player.HURT],
+        )
         # Todos los path tienen llaves {} donde iría el numero de sprite
         self.actual_animation_path: str = Player.ANIMATIONS_CONFIG["IDLE_FRONT"][
             "path"
@@ -94,7 +97,6 @@ class Player(StateMachine, PlayerConfig):
         self.hurt_time: float = PlayerConfig.HURT_COLDOWN
         self.attack_time: float = PlayerConfig.SELF_ATTACK_COOLDOWN
 
-        self.state_before = self.actual_state_id
         # Diccionario para el inventario
         self.inventory: dict[str, int] = {}
         self.max_inventory: int = 64
@@ -176,13 +178,23 @@ class Player(StateMachine, PlayerConfig):
         """Manejador de estado para cuando el jugador esta herido.
         Ignora los eventos y mantiene al jugador en el estado HURT.
         La transición para salir de este estado se maneja en `update_animation`."""
+        if event == 0:  # on enter
+            self.sprite.color = arcade.color.RED
+            self.hurt_time = 1
+        if self.hurt_time <= 0:
+            # Volver al color normal de la texture
+            self.sprite.color = arcade.color.WHITE
+            self.change_y = 0
+            self.change_x = 0
+            return self.last_state_id
+
         return Player.HURT
 
     def attack_state(self, event):
         self.sprite.color = arcade.color.WHITE
         if self.attack_time <= 0:
             self.attack_time = PlayerConfig.SELF_ATTACK_COOLDOWN
-            return self.state_before
+            return self.last_state_id
         return Player.ATTACK
 
     def setup(
@@ -271,6 +283,7 @@ class Player(StateMachine, PlayerConfig):
         ]
 
     def stop_state(self) -> None:
+        # estados según la scale
         states_keys = {
             Player.LEFT: arcade.key.A,
             Player.RIGHT: arcade.key.D,
@@ -316,26 +329,17 @@ class Player(StateMachine, PlayerConfig):
             self.animation_timer = 0
             new_index = (self.texture_index + 1) % self.actual_animation_frames
             new_texture = self.frames[new_index]
-            if self.sprite.texture != new_texture:
-                self.texture_index = new_index
-                self.sprite.texture = new_texture
-                self.play_step_sound()
+            self.texture_index = new_index
+            self.sprite.texture = new_texture
+            self.play_step_sound()
 
         if self.actual_state_id == Player.ATTACK:
             self.attack_time -= deltaTime
 
         if self.actual_state_id == Player.HURT:
             self.hurt_time -= deltaTime
-            if self.hurt_time <= 0:
-                self.sprite.color = arcade.color.WHITE
-                self.hurt_time = 1
-                self.set_state(self.state_before)
-                self.sprite.change_x = 0
-                self.sprite.change_y = 0
-            else:
-                self.sprite.color = arcade.color.RED
-                self.sprite.change_x *= 0.5
-                self.sprite.change_y *= 0.5
+            self.sprite.change_x *= 0.5
+            self.sprite.change_y *= 0.5
 
             # Si la velocidad e s muy baja lo dejo de mover
             if abs(self.sprite.change_x) < 0.1 and abs(self.sprite.change_y) < 0.1:
@@ -378,12 +382,6 @@ class Player(StateMachine, PlayerConfig):
         self.coins += coins
 
     def attack(self, enemy):
-        self.state_before = (
-            self.actual_state_id
-            if self.actual_state_id != Player.ATTACK
-            and self.actual_state_id != Player.HURT
-            else self.last_state_id
-        )
         self.set_state(Player.ATTACK)
         enemy.hurt(damage=10, knockback=PlayerConfig.KNOCKBACK)
 
@@ -397,12 +395,6 @@ class Player(StateMachine, PlayerConfig):
         self.lifes_sprite_list[-diff].texture = texture
 
     def hurt(self, damage: int, enemy, knockback: int = 0):
-        self.state_before = (
-            self.actual_state_id
-            if self.actual_state_id != Player.HURT
-            and self.actual_state_id != Player.ATTACK
-            else self.last_state_id
-        )
         self.healt -= damage
         self.set_state(Player.HURT)
         if self.healt <= 0:

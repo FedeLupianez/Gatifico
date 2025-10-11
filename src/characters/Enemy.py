@@ -12,6 +12,7 @@ class Enemy(arcade.Sprite):
     IDLE = "IDLE"
     ATTACK = "ATTACK"
     HURT = "HURT"
+    DEAD = "DEAD"
     _sprites: dict[str, list[arcade.Texture]] = {WALK: []}
 
     def __init__(
@@ -60,6 +61,7 @@ class Enemy(arcade.Sprite):
         self.state_machine.add_state(self.ATTACK, self.attack_state)
         self.state_machine.add_state(self.WALK, self.walk_state)
         self.state_machine.add_state(self.HURT, self.hurt_state)
+        self.state_machine.add_state(self.DEAD, self.dead_state)
 
     def _load_texture(self, path: str, index: int):
         route = path.replace("{}", str(index))
@@ -137,6 +139,19 @@ class Enemy(arcade.Sprite):
 
         return self.HURT
 
+    def dead_state(self, event):
+        if event == 0:  # on_enter
+            self.change_x = 0
+            self.change_y = 0
+            self.update_chunk(self, kill=True)
+            self.drop_item(
+                random_item(center_x=self.center_x, center_y=self.center_y, quantity=1)
+            )
+            self.dead_sound.play()
+            # En un futuro, acá se podría controlar una animación de muerte
+            self.remove_from_sprite_lists()
+        return self.DEAD  # Permanecer en el estado de muerto
+
     def update(
         self,
         delta_time: float,
@@ -162,7 +177,7 @@ class Enemy(arcade.Sprite):
             self.position = last_position
 
     def update_animation(self, delta_time: float) -> None:
-        if self.state_machine.actual_state_id in [self.HURT, self.IDLE]:
+        if self.state_machine.actual_state_id in [self.HURT, self.IDLE, self.DEAD]:
             return
         self.animation_timer += delta_time
         if self.animation_timer > self.animation_cooldown:
@@ -174,14 +189,13 @@ class Enemy(arcade.Sprite):
             self.texture = new_texture
 
     def hurt(self, damage: int, knockback: int = 0):
+        # Si ya está en estado de herido o muerto, no hacer nada
+        if self.state_machine.actual_state_id in [self.HURT, self.DEAD]:
+            return
+
         self.health -= damage
         if self.health <= 0:
-            self.update_chunk(self, kill=True)
-            self.drop_item(
-                random_item(center_x=self.center_x, center_y=self.center_y, quantity=1)
-            )
-            self.dead_sound.play()
-            self.remove_from_sprite_lists()
+            self.state_machine.set_state(self.DEAD)
             return
 
         self.state_machine.set_state(self.HURT)
