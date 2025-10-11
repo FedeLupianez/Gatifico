@@ -29,8 +29,9 @@ class StateMachine:
         """
         if new_state == self.actual_state_id:
             return
-        if new_state not in self.unregistered_states:
+        if self.actual_state_id not in self.unregistered_states:
             self.last_state_id = self.actual_state_id
+
         self.actual_state_id = new_state
         # Aplico los cambios del estado con 0 como neutro
         self.states[self.actual_state_id](0)

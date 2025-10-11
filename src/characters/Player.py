@@ -29,17 +29,27 @@ class Player(StateMachine, PlayerConfig):
     _initialized = False
 
     # Config para que solo haya una instancia del jugador
-    def __new__(cls) -> "Player":
+    def __new__(cls, **kwargs) -> "Player":
         if not cls._instace:
             cls._instace = super().__new__(cls)
+        if "position" in kwargs:
+            cls._instace.sprite.center_x = kwargs["position"][0]
+            cls._instace.sprite.center_y = kwargs["position"][1]
         return cls._instace
 
-    def __init__(self):
+    def __init__(self, **kwargs):
         if self._initialized:
             return
         super().__init__(
             initial_id=Player.IDLE_FRONT,
-            unregistered_states=[Player.ATTACK, Player.HURT],
+            unregistered_states=[
+                Player.ATTACK,
+                Player.HURT,
+                Player.LEFT,
+                Player.RIGHT,
+                Player.UP,
+                Player.DOWN,
+            ],
         )
         # Todos los path tienen llaves {} donde iría el numero de sprite
         self.actual_animation_path: str = Player.ANIMATIONS_CONFIG["IDLE_FRONT"][
@@ -181,17 +191,10 @@ class Player(StateMachine, PlayerConfig):
         if event == 0:  # on enter
             self.sprite.color = arcade.color.RED
             self.hurt_time = 1
-        if self.hurt_time <= 0:
-            # Volver al color normal de la texture
-            self.sprite.color = arcade.color.WHITE
-            self.change_y = 0
-            self.change_x = 0
-            return self.last_state_id
 
         return Player.HURT
 
     def attack_state(self, event):
-        self.sprite.color = arcade.color.WHITE
         if self.attack_time <= 0:
             self.attack_time = PlayerConfig.SELF_ATTACK_COOLDOWN
             return self.last_state_id
@@ -345,6 +348,14 @@ class Player(StateMachine, PlayerConfig):
             if abs(self.sprite.change_x) < 0.1 and abs(self.sprite.change_y) < 0.1:
                 self.sprite.change_x = 0
                 self.sprite.change_y = 0
+
+            if self.hurt_time <= 0:
+                print("salir de hurt")
+                # Volver al color normal de la texture
+                self.sprite.color = arcade.color.WHITE
+                self.change_y = 0
+                self.change_x = 0
+                self.set_state(self.last_state_id)
 
     def add_to_inventory(self, item: str, cant: int) -> None:
         if (
