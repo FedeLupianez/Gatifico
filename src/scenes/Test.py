@@ -88,7 +88,6 @@ class Test(View):
 
     def setup_spritelists(self):
         # Listas de Sprites
-        self.characters_sprites: arcade.SpriteList = arcade.SpriteList()
         self.inventory_sprites: arcade.SpriteList = arcade.SpriteList()
         self.items_inventory: arcade.SpriteList = arcade.SpriteList()
         self.inventory_texts: list[arcade.Text] = []
@@ -260,7 +259,7 @@ class Test(View):
             if layer in self._actual_area:
                 self._actual_area[layer].draw(pixelated=True)
             elif layer == "characters":
-                self.player.sprite_list.draw(pixelated=True)
+                self.player.draw()
                 self._actual_area["enemy"].draw(pixelated=True)
             elif layer == "walls":
                 self.walls.draw(pixelated=True)
@@ -295,6 +294,7 @@ class Test(View):
         if self._item_mouse_text.text:
             self._item_mouse_text.draw()
         self.player.lifes_sprite_list.draw(pixelated=True)
+        self.player.coins_sprites.draw(pixelated=True)
 
     # Funciones de actualización
 
@@ -615,7 +615,6 @@ class Test(View):
         del self.keys_pressed
         del self.inventory_dirty
 
-        del self.characters_sprites
         del self.inventory_sprites
         del self.items_inventory
         del self.inventory_texts

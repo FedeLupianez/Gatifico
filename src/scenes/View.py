@@ -144,6 +144,8 @@ class View(arcade.View):
         self.update_sizes(width, height)
 
     def change_bg_sound_state(self, mouse_pos: tuple[float, float]):
+        if not self.volume_sprite.collides_with_point(mouse_pos):
+            return
         state = getattr(self.volume_sprite, "state")
         signal = ""
         texture_path = "volume_inactive.png" if state else "volume_active.png"
@@ -160,6 +162,7 @@ class View(arcade.View):
     def item_hover(self, mouse_pos: tuple[float, float], items_list: arcade.SpriteList):
         x, y = mouse_pos
         if item := arcade.get_sprites_at_point((x, y), items_list):
+            print(item)
             self._item_mouse_text.text = item[0].name or ""
             text_width = len(item[0].name) * self._item_mouse_text.font_size
             self._item_mouse_text.x = x

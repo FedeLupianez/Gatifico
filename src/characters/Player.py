@@ -60,6 +60,10 @@ class Player(StateMachine, PlayerConfig):
         )  # objeto sprite del personaje
         self.sprite_list = arcade.SpriteList()
         self.sprite_list.append(self.sprite)
+        # self.ui_coins: dict = {
+        #     "coin": arcade.Sprite(get_path("coin.png"), scale=3),
+        #     "text": arcade.Text(str(self.coins), 10, 10, arcade.color.WHITE, 12),
+        # }
 
         self.speed = self.SPEED
         self.actual_animation_frames: int = Player.ANIMATIONS_CONFIG[Player.IDLE_FRONT][
@@ -111,7 +115,7 @@ class Player(StateMachine, PlayerConfig):
         self.inventory: dict[str, int] = {}
         self.max_inventory: int = 64
         # Monedas del jugador
-        self.coins: int = 100
+        self.coins: int = game_data["player"].get("coins", None) or 100
         self.chunk_key: tuple[int, int] = (0, 0)
 
         self.healt = game_data["player"]["healt"] or 100
@@ -305,6 +309,9 @@ class Player(StateMachine, PlayerConfig):
     def _load_texture(self, path: str, index: int):
         route = path.replace("{}", str(index))
         return texture_manager.load_or_get_texture(route)
+
+    def draw(self) -> None:
+        self.sprite_list.draw(pixelated=True)
 
     def update_spritelist(self):
         """

@@ -41,14 +41,12 @@ class Laboratory(View):
         self.update_inventory_texts()
 
     def setup_spritelists(self):
-        self.player_sprites = arcade.SpriteList()
         self.inventory_containers = arcade.SpriteList()
         self.inventory_items = arcade.SpriteList()
         self.inventory_texts: list[arcade.Text] = []
 
     def setup_player(self):
         self.player.setup((330, 45))
-        self.player_sprites.append(self.player.sprite)
         self.player.actual_floor = "wood"
         for sprite in self.player.lifes_sprite_list:
             sprite.center_y = self.window.height - 30
@@ -201,7 +199,7 @@ class Laboratory(View):
     def world_draw(self):
         self.camera.use()
         self.scene.draw(pixelated=True)  # Dibuja la escena con el fondo y los objetos
-        self.player_sprites.draw(pixelated=True)  # Dibuja el personaje
+        self.player.draw()
 
     def gui_draw(self):
         self.gui_camera.use()

@@ -40,6 +40,17 @@ def write_file(filename: str, data: str, mode: Literal["a", "w"]) -> None:
 
 
 game_data: dict = loadData("Saved/saved.json")
+if not game_data:
+    game_data = {
+        "player": {
+            "position": {"center_x": 677.9216478540386, "center_y": 1244.99966327372},
+            "inventory": {},
+            "lifes": 5,
+            "healt": 100,
+        },
+        "scene": "LABORATORY",
+        "time_stamp": 0,
+    }
 chests_data: dict = loadData("Saved/Chests_Data.json")
 sounds_loader: dict[str, Sound] = {}
 mineral_resources: Dict[
@@ -52,7 +63,9 @@ mineral_resources: Dict[
 seconds_to_save: int = 3
 
 
-def store_actual_data(player, actualScene) -> None:
+def store_actual_data(player, actualScene: Literal["FOREST", "LABORATORY"]) -> None:
+    if actualScene not in ["FOREST", "LABORATORY"]:
+        return
     global game_data, seconds_to_save
     actual_time = time()
     if actual_time - game_data["time_stamp"] < seconds_to_save:
@@ -70,8 +83,9 @@ def store_actual_data(player, actualScene) -> None:
         "scene": actualScene,
         "time_stamp": actual_time,
     }
+    print(player.inventory)
     game_data = data
-    with open(DATAFILES_DIR + "Saved/Actual_Scene_Data.json", "w") as file:
+    with open(DATAFILES_DIR + "Saved/saved.json", "w") as file:
         json.dump(data, file)
 
 
