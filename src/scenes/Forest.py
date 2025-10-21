@@ -2,6 +2,8 @@ import arcade
 from typing import Any, Callable
 from random import randint, choice
 
+from pyglet import window
+
 from characters.Enemy import Enemy
 from scenes.Sell import Sell
 from scenes.View import View, Object
@@ -83,9 +85,6 @@ class Forest(View):
         temp_interact = self.load_object_layers("Interact", self.tilemap)
         self.chunk_manager.batch_assign_sprites(temp_interact, "interact")
         del temp_interact
-        # Hago que la vida siempre esté en el top de la ventana
-        for i in range(len(self.player.lifes_sprite_list)):
-            self.player.lifes_sprite_list[i].center_y = self.window.height - 44
         self.update_inventory_sprites()
         self.update_inventory_texts()
         # El chunk_manager carga todo el mundo
@@ -147,6 +146,9 @@ class Forest(View):
         )
         self.player.actual_floor = "grass"
         self.characters_sprites.append(self.player.sprite)
+        self.player.setup_ui_position(
+            window_width=self.window.width, window_height=self.window.height
+        )
         del player_data
 
     def setup_scene_layer(self) -> None:
@@ -271,7 +273,7 @@ class Forest(View):
         self.ui_sprites.draw(pixelated=True)
         for text in self.inventory_texts:
             text.draw()
-        self.player.lifes_sprite_list.draw(pixelated=True)
+        self.player.ui_sprite_list.draw(pixelated=True)
 
     # Funciones de actualización
 

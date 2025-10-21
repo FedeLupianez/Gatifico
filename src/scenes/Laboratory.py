@@ -47,9 +47,8 @@ class Laboratory(View):
 
     def setup_player(self):
         self.player.setup((330, 45))
+        self.player.setup_ui_position(self.window.width, self.window.height)
         self.player.actual_floor = "wood"
-        for sprite in self.player.lifes_sprite_list:
-            sprite.center_y = self.window.height - 30
 
     def setup_layers(self):
         if not self.tilemap:
@@ -206,7 +205,7 @@ class Laboratory(View):
         self.inventory_containers.draw(pixelated=True)
         self.inventory_items.draw(pixelated=True)
         self.ui_sprites.draw(pixelated=True)
-        self.player.lifes_sprite_list.draw(pixelated=True)
+        self.player.ui_sprite_list.draw(pixelated=True)
         for text in self.inventory_texts:
             text.draw()
         if self._item_mouse_text.text:

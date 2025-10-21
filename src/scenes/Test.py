@@ -73,8 +73,8 @@ class Test(View):
         self.setup_scene_layer()
         self.setup_player()
         # Hago que la vida siempre esté en el top de la ventana
-        for i in range(len(self.player.lifes_sprite_list)):
-            self.player.lifes_sprite_list[i].center_y = self.window.height - 44
+        for i in range(len(self.player.ui_sprite_list)):
+            self.player.ui_sprite_list[i].center_y = self.window.height - 44
         self.update_inventory_sprites()
         self.update_inventory_texts()
         # El chunk_manager carga todo el mundo
@@ -293,7 +293,7 @@ class Test(View):
             text.draw()
         if self._item_mouse_text.text:
             self._item_mouse_text.draw()
-        self.player.lifes_sprite_list.draw(pixelated=True)
+        self.player.ui_sprite_list.draw(pixelated=True)
         self.player.coins_sprites.draw(pixelated=True)
 
     # Funciones de actualización

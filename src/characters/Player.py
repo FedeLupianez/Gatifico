@@ -118,9 +118,15 @@ class Player(StateMachine, PlayerConfig):
         self.coins: int = game_data["player"].get("coins", None) or 100
         self.chunk_key: tuple[int, int] = (0, 0)
 
-        self.healt = game_data["player"]["healt"] or 100
-        self.lifes = game_data["player"]["lifes"] or 5
-        self.lifes_sprite_list = arcade.SpriteList()
+        self.healt = game_data["player"].get("healt", None) or 100
+        self.lifes = game_data["player"].get("lifes", None) or 5
+        self.attack_level_sprite = arcade.SpriteSolidColor(
+            width=10, height=10, color=arcade.color.RED
+        )
+        self.defence_level_sprite = arcade.SpriteSolidColor(
+            width=10, height=10, color=arcade.color.BLUE
+        )
+        self.ui_sprite_list = arcade.SpriteList()
 
         self.actual_floor: Literal["grass", "wood"] = "grass"
         self.step_sounds: dict[Literal["grass", "wood"], list[arcade.Sound]] = {}
@@ -210,6 +216,8 @@ class Player(StateMachine, PlayerConfig):
     ):
         self.setup_sprites()
         self.setup_sounds()
+        self.setup_lifes()
+        self.setup_stats()
         """Función para configurar la maquina de estados del personaje"""
         self.add_state(Player.IDLE_FRONT, self.genericStateHandler)
         self.add_state(Player.IDLE_BACK, self.genericStateHandler)
@@ -231,7 +239,6 @@ class Player(StateMachine, PlayerConfig):
         self.inventory = antique_data["inventory"]
         self.update_spritelist()
         del antique_data
-        self.setup_lifes()
         self._initialized = True
 
     def reset(self) -> None:
@@ -255,7 +262,7 @@ class Player(StateMachine, PlayerConfig):
 
     def setup_lifes(self):
         texture = texture_manager.load_or_get_texture(get_path("full_heart.png"))
-        self.lifes_sprite_list.clear()
+        self.ui_sprite_list.clear()
         hearts = self.healt / 20
         mid_heart = hearts - int(hearts)
         center_x = 0
@@ -263,21 +270,29 @@ class Player(StateMachine, PlayerConfig):
             temp = arcade.Sprite(texture, scale=3)
             center_x += temp.width + 10
             temp.center_x = center_x
-            self.lifes_sprite_list.append(temp)
+            self.ui_sprite_list.append(temp)
 
         if mid_heart:
             texture = texture_manager.load_or_get_texture(get_path("half_heart.png"))
             temp = arcade.Sprite(texture, scale=3)
             center_x += temp.width + 10
             temp.center_x = center_x
-            self.lifes_sprite_list.append(temp)
+            self.ui_sprite_list.append(temp)
 
         for _ in range(int(5 - hearts)):
             texture = texture_manager.load_or_get_texture(get_path("empty_heart.png"))
             temp = arcade.Sprite(texture, scale=3)
             center_x += temp.width + 10
             temp.center_x = center_x
-            self.lifes_sprite_list.append(temp)
+            self.ui_sprite_list.append(temp)
+
+    def setup_stats(self) -> None:
+        temp_attack = game_data["player"].get("attack", None) or 1
+        temp_defence = game_data["player"].get("defence", None) or 1
+        self.attack_level_sprite.width = temp_attack * 25
+        self.defence_level_sprite.width = temp_defence * 25
+        self.ui_sprite_list.append(self.attack_level_sprite)
+        self.ui_sprite_list.append(self.defence_level_sprite)
 
     def setup_sounds(self) -> None:
         self.step_sounds["grass"] = [
@@ -288,6 +303,20 @@ class Player(StateMachine, PlayerConfig):
             arcade.Sound(get_path("Step_wood_1.mp3")),
             arcade.Sound(get_path("Step_wood_2.mp3")),
         ]
+
+    def setup_ui_position(self, window_width: int, window_height: int):
+        # Primer configuro el center_y de los stats
+        lenght = len(self.ui_sprite_list)
+        left = self.ui_sprite_list[0].center_x - (self.ui_sprite_list[0].width * 0.5)
+        self.attack_level_sprite.center_y = window_height - 60
+        self.attack_level_sprite.left = left
+        self.defence_level_sprite.center_y = window_height - 80
+        self.defence_level_sprite.left = left
+
+        # Configuro el center_y de los corazones
+        for i in range(lenght):
+            if i < lenght - 2:
+                self.ui_sprite_list[i].center_y = window_height - 30
 
     def stop_state(self) -> None:
         # estados según la scale
@@ -408,12 +437,12 @@ class Player(StateMachine, PlayerConfig):
 
     def change_hearts(self) -> None:
         # Remuevo los corazones sobrantes
-        diff = len(self.lifes_sprite_list) - self.lifes
+        diff = len(self.ui_sprite_list) - self.lifes
         # Si la parte decimal de la vida es impar significa que debe tener medio corazón
         is_half_heart = (self.healt / 10) % 2 != 0
         texture_name = "empty_heart.png" if not is_half_heart else "half_heart.png"
         texture = texture_manager.load_or_get_texture(get_path(texture_name))
-        self.lifes_sprite_list[-diff].texture = texture
+        self.ui_sprite_list[-diff].texture = texture
 
     def hurt(self, damage: int, enemy, knockback: int = 0):
         self.healt -= damage
@@ -442,3 +471,9 @@ class Player(StateMachine, PlayerConfig):
 
     def throw_item(self, item: str):
         self.inventory.pop(item)
+
+    def update_stats(self, **kwargs):
+        if "attack" in kwargs:
+            self.attack_level_sprite.width = kwargs["attack"] * 10
+        if "defence" in kwargs:
+            self.defence_level_sprite.width = kwargs["defence"] * 10
