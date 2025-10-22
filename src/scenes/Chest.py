@@ -118,7 +118,7 @@ class Chest(View):
             temp.center_x = positions_2[i][0]
             temp.center_y = positions_2[i][1]
             self.container_ui_sprites.append(temp)
-        self.player_inventory_sprite.center_x = self.window.width * 0.5
+        self.player_inventory_sprite.center_x = self._half_w
         self.player_inventory_sprite.center_y = player_init_pos[1]
         self.container_ui_sprites.append(self.player_inventory_sprite)
 

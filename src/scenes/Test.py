@@ -74,7 +74,7 @@ class Test(View):
         self.setup_player()
         # Hago que la vida siempre esté en el top de la ventana
         for i in range(len(self.player.ui_sprite_list)):
-            self.player.ui_sprite_list[i].center_y = self.window.height - 44
+            self.player.ui_sprite_list[i].center_y = self._half_h - 44
         self.update_inventory_sprites()
         self.update_inventory_texts()
         # El chunk_manager carga todo el mundo
@@ -109,7 +109,7 @@ class Test(View):
         )
         inventory_sprite = arcade.Sprite(Dm.get_path("inventory_tools.png"), scale=3)
         inventory_sprite.scale_y = 3.2
-        inventory_sprite.center_x = self.window.width * 0.5
+        inventory_sprite.center_x = self._half_w
         inventory_sprite.center_y = ITEMS_INIT[1]
         self.inventory_sprites.append(inventory_sprite)
 

@@ -2,9 +2,8 @@ import arcade
 from typing import Any, Callable
 from random import randint, choice
 
-from pyglet import window
-
 from characters.Enemy import Enemy
+from scenes.StatsMenu import StatsMenu
 from scenes.Sell import Sell
 from scenes.View import View, Object
 import Constants
@@ -128,6 +127,15 @@ class Forest(View):
         inventory_sprite.scale_y = 3.2
         inventory_sprite.center_x = self.window.width * 0.5
         inventory_sprite.center_y = ITEMS_INIT[1]
+        # Boton para abrir el menu de stats
+        self.stats_menu = arcade.SpriteSolidColor(
+            width=50,
+            height=50,
+            center_x=inventory_sprite.right + 30,
+            center_y=inventory_sprite.center_y,
+            color=arcade.color.WHITE,
+        )
+        self.ui_sprites.append(self.stats_menu)
         self.inventory_sprites.append(inventory_sprite)
 
     def setup_player(self) -> None:
@@ -342,11 +350,6 @@ class Forest(View):
         )
 
     # Funciones de cambio de escena
-
-    def change_to_menu(self) -> None:
-        Dm.store_actual_data(self.player, "TEST")
-        self.callback(Constants.SignalCodes.CHANGE_VIEW, "MENU")
-
     def open_chest(self, chest_id: str) -> None:
         new_scene = Chest(
             chest_id=chest_id,
@@ -357,6 +360,11 @@ class Forest(View):
 
     def open_seller(self) -> None:
         new_scene = Sell(self)
+        self.is_first_load = False
+        self.window.show_view(new_scene)
+
+    def open_stats(self) -> None:
+        new_scene = StatsMenu(self)
         self.is_first_load = False
         self.window.show_view(new_scene)
 
@@ -489,6 +497,7 @@ class Forest(View):
     def on_show_view(self) -> None:
         if self.is_first_load:
             self.camera.position = self.player.sprite.position
+        self.window.set_mouse_visible(True)
 
     def on_fixed_update(self, delta_time: float):
         self.player.update_animation(delta_time)
@@ -549,28 +558,33 @@ class Forest(View):
     def on_mouse_press(
         self, x: int, y: int, button: int, modifiers: int
     ) -> bool | None:
-        if button == arcade.MOUSE_BUTTON_LEFT:
-            items_hit = arcade.get_sprites_at_point((x, y), self.items_inventory)
-            if items_hit:
-                item = items_hit[-1]
-                # Tiro el item al suelo
-                assert isinstance(item, Item), "No se encontró el item"
-                item.position = (
-                    self.player.sprite.position[0] + 20,
-                    self.player.sprite.position[1],
-                )
-                item.scale = 1
-                self.chunk_manager.assign_sprite_chunk(item, "items")
-                self.items_inventory.remove(item)
-                self.player.throw_item(item.name)
-                self.update_actual_chunk()
-                return True
-            # Manejo del estado del sonido por si tocan el boton de silencio
-            signal = self.change_bg_sound_state((x, y))
-            self.callback(signal)
+        if button != arcade.MOUSE_BUTTON_LEFT:
+            return False
+
+        if self.stats_menu.collides_with_point((x, y)):
+            self.open_stats()
             return True
 
-        return False
+        items_hit = arcade.get_sprites_at_point((x, y), self.items_inventory)
+        if items_hit:
+            item = items_hit[-1]
+            # Tiro el item al suelo
+            assert isinstance(item, Item), "No se encontró el item"
+            item.position = (
+                self.player.sprite.position[0] + 20,
+                self.player.sprite.position[1],
+            )
+            item.scale = 1
+            self.chunk_manager.assign_sprite_chunk(item, "items")
+            self.items_inventory.remove(item)
+            self.player.throw_item(item.name)
+            self.update_actual_chunk()
+            return True
+
+        # Manejo del estado del sonido por si tocan el boton de silencio
+        signal = self.change_bg_sound_state((x, y))
+        self.callback(signal)
+        return True
 
     def player_collides(self) -> bool:
         """Función para detectar si hay colisiones"""

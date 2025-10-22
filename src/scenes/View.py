@@ -49,8 +49,8 @@ class View(arcade.View):
         self.ui_sprites: arcade.SpriteList = arcade.SpriteList(lazy=False)
         self.background_sprites = arcade.SpriteList(lazy=False)
         self.volume_sprite = arcade.Sprite(get_path("volume_active.png"), scale=2)
-        self.volume_sprite.center_x = self.window.width - 30
-        self.volume_sprite.center_y = self.window.height - 30
+        self.volume_sprite.center_x = self._screen_width - 30
+        self.volume_sprite.center_y = self._screen_height - 30
         setattr(self.volume_sprite, "state", True)
         self.ui_sprites.append(self.volume_sprite)
 

@@ -104,7 +104,9 @@ class Chunk_Manager:
                 if enemy.get_state() == Enemy.DEAD:
                     if enemy in self.chunks[enemy.chunk_key].sprites["enemy"]:
                         self.chunks[enemy.chunk_key].sprites["enemy"].remove(enemy)
-                    self.drop_item(random_item(enemy.center_x, enemy.center_y))
+                    self.drop_item(
+                        random_item(enemy.center_x, enemy.center_y, quantity=1)
+                    )
                     continue
                 enemy.update(delta, player_position, actual_collisions)
                 self.update_enemy_key(enemy)

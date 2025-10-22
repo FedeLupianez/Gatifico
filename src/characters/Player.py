@@ -1,4 +1,5 @@
 import arcade
+from arcade.color import ANTIQUE_WHITE
 from Constants import AssetsConstants, PlayerConfig
 from StateMachine import StateMachine
 from DataManager import loadData, texture_manager, game_data, get_path
@@ -24,6 +25,7 @@ class Player(StateMachine, PlayerConfig):
     ATTACK = "ATTACK"
     ANIMATIONS_CONFIG: dict = loadData("PlayerAnimationsConfig.json")
     INITIAL_INDEX = AssetsConstants.INITIAL_INDEX
+    MAX_LEVEL = 5
 
     _instace = None
     _initialized = False
@@ -120,6 +122,8 @@ class Player(StateMachine, PlayerConfig):
 
         self.healt = game_data["player"].get("healt", None) or 100
         self.lifes = game_data["player"].get("lifes", None) or 5
+        self.attack_level = game_data["player"].get("attack", None) or 1
+        self.defence_level = game_data["player"].get("defence", None) or 1
         self.attack_level_sprite = arcade.SpriteSolidColor(
             width=10, height=10, color=arcade.color.RED
         )
@@ -287,10 +291,8 @@ class Player(StateMachine, PlayerConfig):
             self.ui_sprite_list.append(temp)
 
     def setup_stats(self) -> None:
-        temp_attack = game_data["player"].get("attack", None) or 1
-        temp_defence = game_data["player"].get("defence", None) or 1
-        self.attack_level_sprite.width = temp_attack * 25
-        self.defence_level_sprite.width = temp_defence * 25
+        self.attack_level_sprite.width = self.attack_level * 25
+        self.defence_level_sprite.width = self.defence_level * 25
         self.ui_sprite_list.append(self.attack_level_sprite)
         self.ui_sprite_list.append(self.defence_level_sprite)
 
@@ -308,9 +310,9 @@ class Player(StateMachine, PlayerConfig):
         # Primer configuro el center_y de los stats
         lenght = len(self.ui_sprite_list)
         left = self.ui_sprite_list[0].center_x - (self.ui_sprite_list[0].width * 0.5)
-        self.attack_level_sprite.center_y = window_height - 60
+        self.attack_level_sprite.center_y = window_height - 70
         self.attack_level_sprite.left = left
-        self.defence_level_sprite.center_y = window_height - 80
+        self.defence_level_sprite.center_y = window_height - 90
         self.defence_level_sprite.left = left
 
         # Configuro el center_y de los corazones
@@ -433,11 +435,13 @@ class Player(StateMachine, PlayerConfig):
 
     def attack(self, enemy):
         self.set_state(Player.ATTACK)
-        enemy.hurt(damage=10, knockback=PlayerConfig.KNOCKBACK)
+        damage = self.attack_level * 10
+        enemy.hurt(damage=damage, knockback=PlayerConfig.KNOCKBACK)
+        print(f"damage : {damage} | attack : {self.attack_level}")
 
     def change_hearts(self) -> None:
         # Remuevo los corazones sobrantes
-        diff = len(self.ui_sprite_list) - self.lifes
+        diff = int(len(self.ui_sprite_list) - self.lifes)
         # Si la parte decimal de la vida es impar significa que debe tener medio corazón
         is_half_heart = (self.healt / 10) % 2 != 0
         texture_name = "empty_heart.png" if not is_half_heart else "half_heart.png"
@@ -445,7 +449,9 @@ class Player(StateMachine, PlayerConfig):
         self.ui_sprite_list[-diff].texture = texture
 
     def hurt(self, damage: int, enemy, knockback: int = 0):
-        self.healt -= damage
+        temp = damage * (1 - self.defence_level / 10)
+        self.healt -= temp
+        print(f"damage : {temp} | defence : {self.defence_level}")
         self.set_state(Player.HURT)
         if self.healt <= 0:
             self.healt = 0
@@ -472,8 +478,17 @@ class Player(StateMachine, PlayerConfig):
     def throw_item(self, item: str):
         self.inventory.pop(item)
 
-    def update_stats(self, **kwargs):
-        if "attack" in kwargs:
-            self.attack_level_sprite.width = kwargs["attack"] * 10
-        if "defence" in kwargs:
-            self.defence_level_sprite.width = kwargs["defence"] * 10
+    def update_stats(self, stat: Literal["attack", "defence"], value: int):
+        if value > self.MAX_LEVEL:
+            return
+        if stat == "attack":
+            antique_left = self.attack_level_sprite.left
+            self.attack_level_sprite.width = value * 30
+            self.attack_level_sprite.left = antique_left
+            self.attack_level = value
+
+        elif stat == "defence":
+            antique_left = self.defence_level_sprite.left
+            self.defence_level_sprite.width = value * 30
+            self.defence_level_sprite.left = antique_left
+            self.defence_level = value

@@ -98,7 +98,7 @@ class SplitTable(View):
         # Centrar los containers con la pantalla :
         # centro de la pantalla
         cant_containers = len(positions)
-        screen_center_x = self.window.width * 0.5
+        screen_center_x = self._half_w
         mid_container = int(cant_containers * 0.5)
         positions[mid_container] = (screen_center_x, SplitTable.ITEMS_INIT[1])
 
