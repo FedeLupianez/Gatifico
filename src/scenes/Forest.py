@@ -128,13 +128,9 @@ class Forest(View):
         inventory_sprite.center_x = self.window.width * 0.5
         inventory_sprite.center_y = ITEMS_INIT[1]
         # Boton para abrir el menu de stats
-        self.stats_menu = arcade.SpriteSolidColor(
-            width=50,
-            height=50,
-            center_x=inventory_sprite.right + 30,
-            center_y=inventory_sprite.center_y,
-            color=arcade.color.WHITE,
-        )
+        self.stats_menu = arcade.Sprite(Dm.get_path("stats_button.png"), scale=3)
+        self.stats_menu.center_x = inventory_sprite.right + 30
+        self.stats_menu.center_y = inventory_sprite.center_y
         self.ui_sprites.append(self.stats_menu)
         self.inventory_sprites.append(inventory_sprite)
 

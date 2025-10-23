@@ -124,12 +124,8 @@ class Player(StateMachine, PlayerConfig):
         self.lifes = game_data["player"].get("lifes", None) or 5
         self.attack_level = game_data["player"].get("attack", None) or 1
         self.defence_level = game_data["player"].get("defence", None) or 1
-        self.attack_level_sprite = arcade.SpriteSolidColor(
-            width=10, height=10, color=arcade.color.RED
-        )
-        self.defence_level_sprite = arcade.SpriteSolidColor(
-            width=10, height=10, color=arcade.color.BLUE
-        )
+        self.attack_level_sprite = arcade.Sprite(get_path("attack_bar.png"), scale=1)
+        self.defence_level_sprite = arcade.Sprite(get_path("defence_bar.png"), scale=1)
         self.ui_sprite_list = arcade.SpriteList()
 
         self.actual_floor: Literal["grass", "wood"] = "grass"

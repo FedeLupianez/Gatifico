@@ -4,6 +4,7 @@ from scenes.View import View
 from typing import Literal
 from Constants import Filter
 from scenes.utils import apply_filter
+from DataManager import get_path
 
 
 class StatsMenu(View):
@@ -19,6 +20,10 @@ class StatsMenu(View):
             "pause_bg", size=(background_image.width, background_image.height)
         )
         self.background_image.image = apply_filter(background_image, Filter.DARK)
+        menu_background = arcade.Sprite(get_path("stats_bg.png"), scale=10)
+        menu_background.center_x = self._half_w
+        menu_background.center_y = self._half_h
+        self.ui_sprites.append(menu_background)
 
         self.antique_height = self.player.attack_level_sprite.height
         self.antique_state: dict[Literal["attack", "defence"], tuple[float, float]] = {
@@ -47,20 +52,31 @@ class StatsMenu(View):
         self.ui_sprites.append(self.attack_sprite)
         self.ui_sprites.append(self.defence_sprite)
 
-        self.upgrade_attack = arcade.SpriteSolidColor(
-            width=StatsMenu.BUTTON_SIZE,
-            height=StatsMenu.BUTTON_SIZE,
-            center_x=self.window.center_x + 100,
-            center_y=self.attack_sprite.center_y,
-            color=arcade.color.GREEN,
+        # Textos :
+        self.attack_text = arcade.Text(
+            text=f"Ataque : {self.player.attack_level}",
+            x=self.attack_sprite.left,
+            y=self.attack_sprite.center_y + 40,
+            font_size=16,
+            color=arcade.color.WHITE,
         )
-        self.upgrade_defence = arcade.SpriteSolidColor(
-            width=StatsMenu.BUTTON_SIZE,
-            height=StatsMenu.BUTTON_SIZE,
-            center_x=self.window.center_x + 100,
-            center_y=self.defence_sprite.center_y,
-            color=arcade.color.GREEN,
+
+        self.defence_text = arcade.Text(
+            text=f"Defensa : {self.player.defence_level}",
+            x=self.defence_sprite.left,
+            y=self.defence_sprite.center_y + 40,
+            font_size=16,
+            color=arcade.color.WHITE,
         )
+
+        # Botones
+        self.upgrade_attack = arcade.Sprite(get_path("upgrade_button.png"), scale=2)
+        self.upgrade_attack.center_x = self._half_w + 100
+        self.upgrade_attack.center_y = self.attack_sprite.center_y
+
+        self.upgrade_defence = arcade.Sprite(get_path("upgrade_button.png"), scale=2)
+        self.upgrade_defence.center_x = self._half_w + 100
+        self.upgrade_defence.center_y = self.defence_sprite.center_y
 
         self.ui_sprites.append(self.upgrade_attack)
         self.ui_sprites.append(self.upgrade_defence)
@@ -84,6 +100,8 @@ class StatsMenu(View):
                 pixelated=True,
             )
         self.ui_sprites.draw(pixelated=True)
+        self.attack_text.draw()
+        self.defence_text.draw()
 
     def on_key_press(self, symbol: int, modifiers: int) -> bool | None:
         if symbol == arcade.key.ESCAPE:
@@ -97,18 +115,22 @@ class StatsMenu(View):
             return False
         if self.upgrade_attack.collides_with_point((x, y)):
             self.player.update_stats(stat="attack", value=self.player.attack_level + 1)
+            self.attack_text.text = f"Ataque : {self.player.attack_level}"
             return True
 
         if self.upgrade_defence.collides_with_point((x, y)):
             self.player.update_stats(
                 stat="defence", value=self.player.defence_level + 1
             )
+            self.defence_text.text = f"Defensa : {self.player.defence_level}"
             return True
 
     def clean_up(self):
         del self.upgrade_defence
         del self.upgrade_attack
         del self.player
+        del self.attack_text
+        del self.defence_text
 
         self.attack_sprite.left, self.attack_sprite.center_y = self.antique_state[
             "attack"
