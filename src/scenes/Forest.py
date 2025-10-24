@@ -125,7 +125,7 @@ class Forest(View):
         )
         inventory_sprite = arcade.Sprite(Dm.get_path("inventory_tools.png"), scale=3)
         inventory_sprite.scale_y = 3.2
-        inventory_sprite.center_x = self.window.width * 0.5
+        inventory_sprite.center_x = self.window.center_x
         inventory_sprite.center_y = ITEMS_INIT[1]
         # Boton para abrir el menu de stats
         self.stats_menu = arcade.Sprite(Dm.get_path("stats_button.png"), scale=3)
@@ -278,6 +278,7 @@ class Forest(View):
         for text in self.inventory_texts:
             text.draw()
         self.player.ui_sprite_list.draw(pixelated=True)
+        self.player.experience_text.draw()
 
     # Funciones de actualización
 

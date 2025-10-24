@@ -72,7 +72,7 @@ class Laboratory(View):
         )
         inventory_sprite = arcade.Sprite(Dm.get_path("inventory_tools.png"), scale=3)
         inventory_sprite.scale_y = 3.2
-        inventory_sprite.center_x = self._half_w
+        inventory_sprite.center_x = self.window.center_x
         inventory_sprite.center_y = ITEMS_INIT[1]
         self.inventory_containers.append(inventory_sprite)
 

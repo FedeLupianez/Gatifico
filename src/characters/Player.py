@@ -1,5 +1,4 @@
 import arcade
-from arcade.color import ANTIQUE_WHITE
 from Constants import AssetsConstants, PlayerConfig
 from StateMachine import StateMachine
 from DataManager import loadData, texture_manager, game_data, get_path
@@ -124,8 +123,19 @@ class Player(StateMachine, PlayerConfig):
         self.lifes = game_data["player"].get("lifes", None) or 5
         self.attack_level = game_data["player"].get("attack", None) or 1
         self.defence_level = game_data["player"].get("defence", None) or 1
+        self.experience = game_data["player"].get("experience", None) or 0
+
         self.attack_level_sprite = arcade.Sprite(get_path("attack_bar.png"), scale=1)
         self.defence_level_sprite = arcade.Sprite(get_path("defence_bar.png"), scale=1)
+        self.experience_sprite = arcade.Sprite(get_path("experience.png"), scale=3)
+        self.experience_text = arcade.Text(
+            text=str(self.experience),
+            font_size=16,
+            x=0,
+            y=0,
+            color=arcade.color.WHITE,
+            font_name="BoldPixels",
+        )
         self.ui_sprite_list = arcade.SpriteList()
 
         self.actual_floor: Literal["grass", "wood"] = "grass"
@@ -289,6 +299,7 @@ class Player(StateMachine, PlayerConfig):
     def setup_stats(self) -> None:
         self.attack_level_sprite.width = self.attack_level * 25
         self.defence_level_sprite.width = self.defence_level * 25
+        self.ui_sprite_list.append(self.experience_sprite)
         self.ui_sprite_list.append(self.attack_level_sprite)
         self.ui_sprite_list.append(self.defence_level_sprite)
 
@@ -310,6 +321,11 @@ class Player(StateMachine, PlayerConfig):
         self.attack_level_sprite.left = left
         self.defence_level_sprite.center_y = window_height - 90
         self.defence_level_sprite.left = left
+
+        self.experience_sprite.center_x = window_width - 100
+        self.experience_sprite.center_y = window_height - 40
+        self.experience_text.x = self.experience_sprite.left - 30
+        self.experience_text.y = window_height - 40
 
         # Configuro el center_y de los corazones
         for i in range(lenght):
