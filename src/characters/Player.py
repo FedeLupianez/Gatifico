@@ -1,10 +1,127 @@
 import arcade
-from Constants import AssetsConstants, PlayerConfig
+from Constants import Assets, PlayerConfig
 from StateMachine import StateMachine
 from DataManager import loadData, texture_manager, game_data, get_path
 from typing import Literal
 from time import time
 from random import randint
+
+
+# Clase para controlar la ui del personaje por separado
+class PlayerUI:
+    _instance = None
+    _initialized = False
+    MAX_LEVEL = 5
+
+    def __new__(cls, *args, **kwargs) -> "PlayerUI":
+        if not cls._instance:
+            cls._instance = super().__new__(cls)
+        if "experience" in kwargs:
+            cls._instance.setup_lifes(kwargs["experience"])
+        return cls._instance
+
+    def __init__(self, experience: int, *args, **kwargs) -> None:
+        if self._initialized:
+            return
+        self.attack_sprite = arcade.Sprite(get_path("attack_bar.png"), scale=1)
+        self.defence_sprite = arcade.Sprite(get_path("defence_bar.png"), scale=1)
+        self.experience_sprite = arcade.Sprite(get_path("experience.png"), scale=3)
+        self.experience_text = arcade.Text(
+            text=str(experience),
+            font_size=24,
+            x=0,
+            y=0,
+            color=arcade.color.WHITE,
+            font_name=Assets.FONT_NAME,
+        )
+        self.sprite_list = arcade.SpriteList()
+        self.lifes_list = arcade.SpriteList()
+        self.sprite_list.append(self.attack_sprite)
+        self.sprite_list.append(self.defence_sprite)
+        self.sprite_list.append(self.experience_sprite)
+        self._initialized = True
+
+    def update_attack(self, value: int):
+        if value > self.MAX_LEVEL:
+            return
+        antique_left = self.attack_sprite.left
+        self.attack_sprite.width = value * 30
+        self.attack_sprite.left = antique_left
+
+    def update_defence(self, value: int):
+        if value > self.MAX_LEVEL:
+            return
+        antique_left = self.defence_sprite.left
+        self.defence_sprite.width = value * 30
+        self.defence_sprite.left = antique_left
+
+    def setup_lifes(self, healt: float):
+        texture = texture_manager.load_or_get_texture(get_path("full_heart.png"))
+        self.lifes_list.clear()
+        hearts = healt / 20
+        mid_heart = hearts - int(hearts)
+        center_x = 0
+        for _ in range(int(hearts)):
+            temp = arcade.Sprite(texture, scale=3)
+            center_x += temp.width + 10
+            temp.center_x = center_x
+            self.lifes_list.append(temp)
+
+        if mid_heart:
+            texture = texture_manager.load_or_get_texture(get_path("half_heart.png"))
+            temp = arcade.Sprite(texture, scale=3)
+            center_x += temp.width + 10
+            temp.center_x = center_x
+            self.lifes_list.append(temp)
+
+        for _ in range(int(5 - hearts)):
+            texture = texture_manager.load_or_get_texture(get_path("empty_heart.png"))
+            temp = arcade.Sprite(texture, scale=3)
+            center_x += temp.width + 10
+            temp.center_x = center_x
+            self.lifes_list.append(temp)
+
+    def update_lifes(self, healt: float) -> None:
+        # Remuevo los corazones sobrantes
+        total_hearts = len(self.lifes_list)
+        full_hearts = int(healt / 20)
+        remainder = healt % 20
+        for i in range(total_hearts):
+            if i < full_hearts:
+                continue
+            if i < full_hearts + int(remainder / 10):
+                texture = texture_manager.load_or_get_texture(
+                    get_path("half_heart.png")
+                )
+            else:
+                texture = texture_manager.load_or_get_texture(
+                    get_path("empty_heart.png")
+                )
+            self.lifes_list[i].texture = texture
+
+    def setup_ui_position(self, window_width: int, window_height: int):
+        # Primer configuro el center_y de los stats
+        lenght = len(self.lifes_list)
+        left = self.lifes_list[0].center_x - (self.lifes_list[0].width * 0.5)
+        self.attack_sprite.center_y = window_height - 70
+        self.attack_sprite.left = left
+        self.defence_sprite.center_y = window_height - 90
+        self.defence_sprite.left = left
+
+        self.experience_sprite.center_x = window_width - 100
+        self.experience_sprite.center_y = window_height - 40
+        self.experience_text.x = self.experience_sprite.left - 30
+        self.experience_text.y = window_height - 40
+
+        # Configuro el center_y de los corazones
+        for i in range(lenght):
+            if i < lenght:
+                self.lifes_list[i].center_y = window_height - 30
+
+    def draw(self) -> None:
+        self.sprite_list.draw(pixelated=True)
+        self.lifes_list.draw(pixelated=True)
+        self.experience_text.draw()
 
 
 class Player(StateMachine, PlayerConfig):
@@ -23,7 +140,7 @@ class Player(StateMachine, PlayerConfig):
     HURT = "HURT"
     ATTACK = "ATTACK"
     ANIMATIONS_CONFIG: dict = loadData("PlayerAnimationsConfig.json")
-    INITIAL_INDEX = AssetsConstants.INITIAL_INDEX
+    INITIAL_INDEX = Assets.INITIAL_INDEX
     MAX_LEVEL = 5
 
     _instace = None
@@ -76,7 +193,7 @@ class Player(StateMachine, PlayerConfig):
         self.frames: list[arcade.Texture] = []  # lista de texturas actual
 
         hitbox_padding: int = 10
-        desp_y: int = 5
+        desp_y: int = 10
         # Acomodo la hitbox para que sea cuadrada
         self.sprite.hit_box._points = (
             (
@@ -119,24 +236,14 @@ class Player(StateMachine, PlayerConfig):
         self.coins: int = game_data["player"].get("coins", None) or 100
         self.chunk_key: tuple[int, int] = (0, 0)
 
+        # Stats del personaje
         self.healt = game_data["player"].get("healt", None) or 100
         self.lifes = game_data["player"].get("lifes", None) or 5
         self.attack_level = game_data["player"].get("attack", None) or 1
         self.defence_level = game_data["player"].get("defence", None) or 1
         self.experience = game_data["player"].get("experience", None) or 0
 
-        self.attack_level_sprite = arcade.Sprite(get_path("attack_bar.png"), scale=1)
-        self.defence_level_sprite = arcade.Sprite(get_path("defence_bar.png"), scale=1)
-        self.experience_sprite = arcade.Sprite(get_path("experience.png"), scale=3)
-        self.experience_text = arcade.Text(
-            text=str(self.experience),
-            font_size=16,
-            x=0,
-            y=0,
-            color=arcade.color.WHITE,
-            font_name="BoldPixels",
-        )
-        self.ui_sprite_list = arcade.SpriteList()
+        self.ui = PlayerUI(self.experience)
 
         self.actual_floor: Literal["grass", "wood"] = "grass"
         self.step_sounds: dict[Literal["grass", "wood"], list[arcade.Sound]] = {}
@@ -226,8 +333,7 @@ class Player(StateMachine, PlayerConfig):
     ):
         self.setup_sprites()
         self.setup_sounds()
-        self.setup_lifes()
-        self.setup_stats()
+        self.ui.setup_lifes(self.healt)
         """Función para configurar la maquina de estados del personaje"""
         self.add_state(Player.IDLE_FRONT, self.genericStateHandler)
         self.add_state(Player.IDLE_BACK, self.genericStateHandler)
@@ -255,7 +361,7 @@ class Player(StateMachine, PlayerConfig):
         self.lifes = 5
         self.healt = 100
         self.inventory.clear()
-        self.setup_lifes()
+        self.ui.setup_lifes(self.healt)
         self.set_state(Player.IDLE_FRONT)
 
     def setup_sprites(self) -> None:
@@ -270,39 +376,6 @@ class Player(StateMachine, PlayerConfig):
                     self._load_texture(Player.ANIMATIONS_CONFIG[state]["path"], i)
                 )
 
-    def setup_lifes(self):
-        texture = texture_manager.load_or_get_texture(get_path("full_heart.png"))
-        self.ui_sprite_list.clear()
-        hearts = self.healt / 20
-        mid_heart = hearts - int(hearts)
-        center_x = 0
-        for _ in range(int(hearts)):
-            temp = arcade.Sprite(texture, scale=3)
-            center_x += temp.width + 10
-            temp.center_x = center_x
-            self.ui_sprite_list.append(temp)
-
-        if mid_heart:
-            texture = texture_manager.load_or_get_texture(get_path("half_heart.png"))
-            temp = arcade.Sprite(texture, scale=3)
-            center_x += temp.width + 10
-            temp.center_x = center_x
-            self.ui_sprite_list.append(temp)
-
-        for _ in range(int(5 - hearts)):
-            texture = texture_manager.load_or_get_texture(get_path("empty_heart.png"))
-            temp = arcade.Sprite(texture, scale=3)
-            center_x += temp.width + 10
-            temp.center_x = center_x
-            self.ui_sprite_list.append(temp)
-
-    def setup_stats(self) -> None:
-        self.attack_level_sprite.width = self.attack_level * 25
-        self.defence_level_sprite.width = self.defence_level * 25
-        self.ui_sprite_list.append(self.experience_sprite)
-        self.ui_sprite_list.append(self.attack_level_sprite)
-        self.ui_sprite_list.append(self.defence_level_sprite)
-
     def setup_sounds(self) -> None:
         self.step_sounds["grass"] = [
             arcade.Sound(get_path("Step_grass_1.mp3")),
@@ -312,25 +385,6 @@ class Player(StateMachine, PlayerConfig):
             arcade.Sound(get_path("Step_wood_1.mp3")),
             arcade.Sound(get_path("Step_wood_2.mp3")),
         ]
-
-    def setup_ui_position(self, window_width: int, window_height: int):
-        # Primer configuro el center_y de los stats
-        lenght = len(self.ui_sprite_list)
-        left = self.ui_sprite_list[0].center_x - (self.ui_sprite_list[0].width * 0.5)
-        self.attack_level_sprite.center_y = window_height - 70
-        self.attack_level_sprite.left = left
-        self.defence_level_sprite.center_y = window_height - 90
-        self.defence_level_sprite.left = left
-
-        self.experience_sprite.center_x = window_width - 100
-        self.experience_sprite.center_y = window_height - 40
-        self.experience_text.x = self.experience_sprite.left - 30
-        self.experience_text.y = window_height - 40
-
-        # Configuro el center_y de los corazones
-        for i in range(lenght):
-            if i < lenght - 2:
-                self.ui_sprite_list[i].center_y = window_height - 30
 
     def stop_state(self) -> None:
         # estados según la scale
@@ -451,24 +505,14 @@ class Player(StateMachine, PlayerConfig):
         enemy.hurt(damage=damage, knockback=PlayerConfig.KNOCKBACK)
         print(f"damage : {damage} | attack : {self.attack_level}")
 
-    def change_hearts(self) -> None:
-        # Remuevo los corazones sobrantes
-        diff = int(len(self.ui_sprite_list) - self.lifes)
-        # Si la parte decimal de la vida es impar significa que debe tener medio corazón
-        is_half_heart = (self.healt / 10) % 2 != 0
-        texture_name = "empty_heart.png" if not is_half_heart else "half_heart.png"
-        texture = texture_manager.load_or_get_texture(get_path(texture_name))
-        self.ui_sprite_list[-diff].texture = texture
-
     def hurt(self, damage: int, enemy, knockback: int = 0):
         temp = damage * (1 - self.defence_level / 10)
         self.healt -= temp
-        print(f"damage : {temp} | defence : {self.defence_level}")
         self.set_state(Player.HURT)
         if self.healt <= 0:
             self.healt = 0
         self.lifes = self.healt // 20
-        self.change_hearts()
+        self.ui.update_lifes(self.healt)
         if self.lifes <= 0:
             return True
 
@@ -493,14 +537,8 @@ class Player(StateMachine, PlayerConfig):
     def update_stats(self, stat: Literal["attack", "defence"], value: int):
         if value > self.MAX_LEVEL:
             return
-        if stat == "attack":
-            antique_left = self.attack_level_sprite.left
-            self.attack_level_sprite.width = value * 30
-            self.attack_level_sprite.left = antique_left
-            self.attack_level = value
-
-        elif stat == "defence":
-            antique_left = self.defence_level_sprite.left
-            self.defence_level_sprite.width = value * 30
-            self.defence_level_sprite.left = antique_left
-            self.defence_level = value
+        match stat:
+            case "attack":
+                self.attack_level = value
+            case "defence":
+                self.defence_level = value

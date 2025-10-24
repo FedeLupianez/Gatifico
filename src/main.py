@@ -20,7 +20,7 @@ class Main(arcade.Window):
             resizable=False,
         )
         self.set_icon(icon)
-        arcade.load_font(DataManager.get_path("BoldPixels.ttf"))
+        arcade.load_font(DataManager.get_path(Constants.Assets.FONT))
         self.ViewManager = ViewManager(self)
         self.player = Player()
 

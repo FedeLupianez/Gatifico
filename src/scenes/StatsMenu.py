@@ -13,6 +13,7 @@ class StatsMenu(View):
     def __init__(self, previus_scene: View) -> None:
         super().__init__(background_url=None, tilemap_url=None)
         self.player = Player()
+        self.player_ui = self.player.ui
         self.previus_scene = previus_scene
         background_image = previus_scene.get_screenshot()
         # Le pongo filtro oscuro al fondo
@@ -25,20 +26,20 @@ class StatsMenu(View):
         menu_background.center_y = self._half_h
         self.ui_sprites.append(menu_background)
 
-        self.antique_height = self.player.attack_level_sprite.height
+        self.antique_height = self.player_ui.attack_sprite.height
         self.antique_state: dict[Literal["attack", "defence"], tuple[float, float]] = {
             "attack": (
-                self.player.attack_level_sprite.left,
-                self.player.attack_level_sprite.center_y,
+                self.player_ui.attack_sprite.left,
+                self.player_ui.attack_sprite.center_y,
             ),
             "defence": (
-                self.player.defence_level_sprite.left,
-                self.player.defence_level_sprite.center_y,
+                self.player_ui.defence_sprite.left,
+                self.player_ui.defence_sprite.center_y,
             ),
         }
 
-        self.attack_sprite = self.player.attack_level_sprite
-        self.defence_sprite = self.player.defence_level_sprite
+        self.attack_sprite = self.player_ui.attack_sprite
+        self.defence_sprite = self.player_ui.defence_sprite
 
         left = self.window.center_x - 100
         self.attack_sprite.left = left
@@ -115,6 +116,7 @@ class StatsMenu(View):
             return False
         if self.upgrade_attack.collides_with_point((x, y)):
             self.player.update_stats(stat="attack", value=self.player.attack_level + 1)
+            self.player_ui.update_attack(self.player.attack_level)
             self.attack_text.text = f"Ataque : {self.player.attack_level}"
             return True
 
@@ -122,6 +124,7 @@ class StatsMenu(View):
             self.player.update_stats(
                 stat="defence", value=self.player.defence_level + 1
             )
+            self.player_ui.update_defence(self.player.defence_level)
             self.defence_text.text = f"Defensa : {self.player.defence_level}"
             return True
 

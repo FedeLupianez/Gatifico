@@ -47,7 +47,7 @@ class Laboratory(View):
 
     def setup_player(self):
         self.player.setup((330, 45))
-        self.player.setup_ui_position(self.window.width, self.window.height)
+        self.player.ui.setup_ui_position(self.window.width, self.window.height)
         self.player.actual_floor = "wood"
 
     def setup_layers(self):

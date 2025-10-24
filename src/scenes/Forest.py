@@ -150,7 +150,7 @@ class Forest(View):
         )
         self.player.actual_floor = "grass"
         self.characters_sprites.append(self.player.sprite)
-        self.player.setup_ui_position(
+        self.player.ui.setup_ui_position(
             window_width=self.window.width, window_height=self.window.height
         )
         del player_data
@@ -277,8 +277,7 @@ class Forest(View):
         self.ui_sprites.draw(pixelated=True)
         for text in self.inventory_texts:
             text.draw()
-        self.player.ui_sprite_list.draw(pixelated=True)
-        self.player.experience_text.draw()
+        self.player.ui.draw()
 
     # Funciones de actualización
 
@@ -310,12 +309,13 @@ class Forest(View):
             container = self.inventory_sprites[index]
             new_text = arcade.Text(
                 text=str(item.quantity),
-                font_size=9,
+                font_size=15,
                 x=container.center_x,
                 y=container.center_y - (container.height * 0.5 + 10),
                 anchor_x="center",
                 anchor_y="baseline",
                 color=arcade.color.BLACK,
+                font_name=Constants.Assets.FONT_NAME,
             )
             self.inventory_texts.append(new_text)
 

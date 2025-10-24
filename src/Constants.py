@@ -39,9 +39,11 @@ class SignalCodes:
     RESUME_BACKGROUND = 4
 
 
-class AssetsConstants:
+class Assets:
     # Indice inicial de los sprites (comienzan por 1)
     INITIAL_INDEX = 1
+    FONT = "born2bsporty-fs.regular.otf"
+    FONT_NAME = "Born2bSporty FS"
 
 
 class Filter:
