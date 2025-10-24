@@ -98,6 +98,7 @@ class Laboratory(View):
                 anchor_x="center",
                 anchor_y="baseline",
                 color=arcade.color.BLACK,
+                font_name=Constants.Assets.FONT_NAME,
             )
             self.inventory_texts.append(new_text)
 
@@ -205,7 +206,7 @@ class Laboratory(View):
         self.inventory_containers.draw(pixelated=True)
         self.inventory_items.draw(pixelated=True)
         self.ui_sprites.draw(pixelated=True)
-        self.player.ui_sprite_list.draw(pixelated=True)
+        self.player.ui.draw()
         for text in self.inventory_texts:
             text.draw()
         if self._item_mouse_text.text:

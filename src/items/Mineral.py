@@ -58,8 +58,8 @@ class Mineral(arcade.Sprite):
 
         self.should_removed: bool = False
         self.original_texture = self.texture
-        hitbox_half_x = self.width / 2
-        hitbox_half_y = self.height / 2
+        hitbox_half_x = self.width / 3
+        hitbox_half_y = self.height / 3
         self.hit_box._points = (
             (-hitbox_half_x, -hitbox_half_y),
             (hitbox_half_x, -hitbox_half_y),

@@ -326,7 +326,6 @@ class Forest(View):
         self._actual_area = self.chunk_manager.get_nearby_chunks_lists(
             self.player.chunk_key
         )
-        print(len(self._actual_area.interact))
 
     def update_camera(self, player_moved: bool) -> None:
         cam_lerp = (
@@ -510,7 +509,7 @@ class Forest(View):
             self.fps_text.text = f"{int(1 / delta_time)}"
         if self.player.lifes == 0:
             self.player.reset()
-            Dm.store_actual_data(self.player, "LABORATORY")
+            Dm.reset_data()
             self.callback(Constants.SignalCodes.CHANGE_VIEW, "MENU")
             return
         player = self.player.sprite
