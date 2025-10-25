@@ -7,7 +7,7 @@ from .View import View
 from items.Container import Container
 from items.Item import Item
 from .utils import add_containers_to_list, apply_filter
-from DataManager import chests_data, get_sound, get_path
+from DataManager import ChestsData, chests_data, get_sound, get_path
 
 CONTAINER_SIZE = 50
 ITEMS_INIT = (550, 300)
@@ -46,7 +46,7 @@ class Chest(View):
         self.is_mouse_active = False
         self.item_to_move: Item | None = None
         self.previus_scene = previusScene
-        self.content = chests_data.get(self.id, {})
+        self.content: ChestsData = chests_data.get(self.id, [])
 
         self.player_container_index = 0
         self.background_rect = arcade.SpriteSolidColor(
@@ -78,7 +78,7 @@ class Chest(View):
                 player_init_pos[0] + DISTANCE_BETWEEN_CONTAINERS * i,
                 player_init_pos[1] + 5,
             )
-            for i in range(Constants.PlayerConfig.MAX_ITEMS_IN_INVENTORY)
+            for i in range(Constants.PlayerConfig.INVENTORY_SELLS)
         ]
         add_containers_to_list(
             point_list=positions_1,
@@ -162,12 +162,13 @@ class Chest(View):
             anchor_x="center",
             anchor_y="baseline",
             color=arcade.color.BLACK,
+            font_name=Constants.Assets.FONT_NAME,
         )
         text_sprite.id = item.id
         return text_sprite
 
     def _generate_item_sprites(self):
-        for index, (item, quantity) in enumerate(self.content.items()):
+        for item, quantity, index in self.content:
             container: Container = self.container_sprites[index]
             new_item = Item(name=item, quantity=quantity, scale=2)
             new_item.id = self.next_item_id
@@ -178,7 +179,7 @@ class Chest(View):
             self.item_texts.append(self._create_item_text(new_item))
             self.item_sprites.append(new_item)
 
-        for index, (item, quantity) in enumerate(self.player.get_inventory().items()):
+        for item, quantity, index in self.player.get_inventory():
             container: Container = self.container_player_sprites[index]
             new_item = Item(name=item, quantity=quantity, scale=2)
             new_item.id = self.next_item_id
@@ -317,7 +318,7 @@ class Chest(View):
 
             self._reset_sprite_position(self.item_to_move)
 
-        self.item_to_move = None  # Pongo que no hay nngún sprite qe mover
+        self.item_to_move = None  # Pongo que no hay ningún sprite que mover
 
     def on_mouse_motion(self, x: int, y: int, dx: int, dy: int) -> bool | None:
         if self.item_to_move:
@@ -328,19 +329,22 @@ class Chest(View):
     def updateInventories(self):
         # Acá voy a actualizar los inventarios tanto del cofre como del personaje
         # Esta parte es del cofre
-        new_chest_inventory = {}
-        for container in self.container_sprites:
+        new_chest_inventory = []
+        for i in range(len(self.container_sprites)):
+            container = self.container_sprites[i]
             item: Item | None = self._find_item_with_containerId(container.id)
             if item:
-                new_chest_inventory[item.name] = item.quantity
+                # Name, quantity, index
+                new_chest_inventory.append((item.name, item.quantity, i))
 
         self.content = new_chest_inventory
         # Ahora voy a actualizar el inventario del jugador
-        new_player_inventory = {}
-        for container in self.container_player_sprites:
+        new_player_inventory = []
+        for i in range(len(self.container_player_sprites)):
+            container = self.container_player_sprites[i]
             item: Item | None = self._find_item_with_containerId(container.id)
             if item:
-                new_player_inventory[item.name] = item.quantity
+                new_player_inventory.append((item.name, item.quantity, i))
         self.player.inventory = new_player_inventory
         DataManager.store_chest_data(self.content, self.id)
 

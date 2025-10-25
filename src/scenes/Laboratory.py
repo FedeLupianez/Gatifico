@@ -37,7 +37,7 @@ class Laboratory(View):
         self.setup_player()
         self.setup_layers()
         self.setup_inventory_containers()
-        self.update_inventory_items(self.player.get_items())
+        self.update_inventory_items()
         self.update_inventory_texts()
 
     def setup_spritelists(self):
@@ -76,9 +76,12 @@ class Laboratory(View):
         inventory_sprite.center_y = ITEMS_INIT[1]
         self.inventory_containers.append(inventory_sprite)
 
-    def update_inventory_items(self, player_items: list) -> None:
+    def update_inventory_items(self) -> None:
         self.inventory_items.clear()
-        for index, (item, quantity) in enumerate(player_items):
+        inventory = self.player.get_inventory()
+        if not inventory:
+            return
+        for item, quantity, index in inventory:
             container: Container = self.inventory_containers[index]
             new_item = Item(name=item, quantity=quantity, scale=2)
             new_item.id = index
@@ -88,25 +91,26 @@ class Laboratory(View):
 
     def update_inventory_texts(self) -> None:
         self.inventory_texts.clear()
-        for index, item in enumerate(self.inventory_items):
+        inventory = self.player.get_inventory()
+        for *_, quantity, index in inventory:
             container: Container = self.inventory_containers[index]
             new_text = arcade.Text(
-                text=str(item.quantity),
-                font_size=9,
+                text=str(quantity),
+                font_size=Constants.Assets.INVENTORY_FONT_SIZE,
+                font_name=Constants.Assets.FONT_NAME,
                 x=container.center_x,
                 y=container.center_y - (container.height * 0.5 + 10),
                 anchor_x="center",
                 anchor_y="baseline",
                 color=arcade.color.BLACK,
-                font_name=Constants.Assets.FONT_NAME,
             )
             self.inventory_texts.append(new_text)
 
     def update_inventory_view(self) -> None:
-        current_hash = hash(tuple(sorted(self.player.inventory.items())))
+        items = self.player.get_items()
+        current_hash = hash(tuple(sorted(items)))
         if self.last_inventory_hash == current_hash:
-            player_items = self.player.get_items()
-            self.update_inventory_items(player_items)
+            self.update_inventory_items()
             self.update_inventory_texts()
         self.last_inventory_hash = current_hash
 

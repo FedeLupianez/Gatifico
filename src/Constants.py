@@ -24,7 +24,7 @@ class PlayerConfig:
     SPEED = 0.5
     KNOCKBACK = 15
     HURT_COLDOWN = 0.2
-    MAX_ITEMS_IN_INVENTORY = 5
+    INVENTORY_SELLS = 5
     MAX_ITEMS_CANT = 64
     INVENTORY_POSITION = (523, 100)
     HITBOX_WIDTH = 27
@@ -45,6 +45,7 @@ class Assets:
     INITIAL_INDEX = 1
     FONT = "born2bsporty-fs.regular.otf"
     FONT_NAME = "Born2bSporty FS"
+    INVENTORY_FONT_SIZE = 13
 
 
 class Filter:

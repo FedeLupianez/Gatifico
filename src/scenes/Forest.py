@@ -118,7 +118,7 @@ class Forest(View):
         ITEMS_INIT = Constants.PlayerConfig.INVENTORY_POSITION
         positions = [
             (int(ITEMS_INIT[0] + (DISTANCE_BETWEEN_CONTAINERS * i)), ITEMS_INIT[1] + 5)
-            for i in range(Constants.PlayerConfig.MAX_ITEMS_IN_INVENTORY)
+            for i in range(Constants.PlayerConfig.INVENTORY_SELLS)
         ]
         add_containers_to_list(
             positions, self.inventory_sprites, container_size=CONTAINER_SIZE
@@ -283,7 +283,7 @@ class Forest(View):
 
     def update_inventory(self):
         """Esta función se asegura de actualizar el inventario solo cuando hay cambios en este"""
-        current_hash = hash(tuple(sorted(self.player.inventory.items())))
+        current_hash = hash(tuple(sorted(self.player.get_items())))
 
         # Si los hashes son iguales no actualiza la vista
         if self.last_inventory_hash == current_hash:
@@ -295,7 +295,7 @@ class Forest(View):
 
     def update_inventory_sprites(self):
         self.items_inventory.clear()
-        for index, (item, quantity) in enumerate(self.player.inventory.items()):
+        for item, quantity, index in self.player.inventory:
             container = self.inventory_sprites[index]
             new_item: Item = Item(name=item, quantity=quantity, scale=2)
             new_item.id = index
@@ -305,17 +305,18 @@ class Forest(View):
 
     def update_inventory_texts(self):
         self.inventory_texts.clear()
-        for index, item in enumerate(self.items_inventory):
+        inventory = self.player.get_inventory()
+        for *_, quantity, index in inventory:
             container = self.inventory_sprites[index]
             new_text = arcade.Text(
-                text=str(item.quantity),
-                font_size=15,
+                text=str(quantity),
+                font_size=Constants.Assets.INVENTORY_FONT_SIZE,
+                font_name=Constants.Assets.FONT_NAME,
                 x=container.center_x,
                 y=container.center_y - (container.height * 0.5 + 10),
                 anchor_x="center",
                 anchor_y="baseline",
                 color=arcade.color.BLACK,
-                font_name=Constants.Assets.FONT_NAME,
             )
             self.inventory_texts.append(new_text)
 

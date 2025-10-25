@@ -54,7 +54,7 @@ mineral_resources: Dict[
 ] = loadData("Minerals.json")
 texture_manager = TextureCacheManager()
 
-ChestsData = Dict[str, Dict[str, int]]
+ChestsData = list[tuple[str, int, int]]
 
 
 class PlayerData(TypedDict):
@@ -75,7 +75,7 @@ def write_file(filename: str, data: str, mode: Literal["a", "w"]) -> None:
 
 def write_json(file_name: str, data: dict) -> None:
     with open(DATAFILES_DIR + file_name, "w") as file:
-        json.dump(data, file)
+        json.dump(data, file, indent=3)
 
 
 def store_actual_data(player, actualScene: Literal["FOREST", "LABORATORY"]) -> None:

@@ -8,7 +8,13 @@ from typing import Dict
 from Constants import Filter, Game
 from items.Container import Container
 from items.Item import Item
-from .utils import add_containers_to_list, del_references_list, get_result, apply_filter
+from .utils import (
+    add_containers_to_list,
+    del_references_list,
+    get_result,
+    apply_filter,
+    _find_element,
+)
 
 Combinations: Dict[str, Dict[str, str]] = DataManager.loadData("CombinationsTest.json")
 
@@ -47,7 +53,7 @@ class MixTable(View):
         # Init de la clase
         self.background_scene = background_scene
         self.player = Player()
-        self.items: dict = self.player.get_inventory()
+        self.items: list[tuple[str, int, int]] = self.player.get_inventory()
         self.next_item_id: int = 0
 
         # Configuraciones de cámara
@@ -109,32 +115,10 @@ class MixTable(View):
         self.item_to_move: Item | None = None
         self.result_place: Container
 
-    def _find_element(self, list_to_find, attr: str, target):
-        """
-        Función para buscar un elemento de una lista que cumpla con un requisito
-        Args:
-            func (Callable): Función que devuelve True si el elemento cumple con el requisito
-            list_to_find (list): Lista de elementos donde buscar
-        """
-        result = list(
-            filter(self.item_contains_attr(attr=attr, target=target), list_to_find)
-        )
-        if result:
-            return result[0]
-
-    def item_contains_attr(self, attr: str, target):
-        def is_item(sprite):
-            if hasattr(sprite, attr):
-                return getattr(sprite, attr) == target
-            else:
-                return False
-
-        return is_item
-
     def _setup_containers(self) -> None:
         positions = [
             ((self.ITEMS_INIT[0] + 75 * i), self.ITEMS_INIT[1])
-            for i in range(Constants.PlayerConfig.MAX_ITEMS_IN_INVENTORY)
+            for i in range(Constants.PlayerConfig.INVENTORY_SELLS)
         ]
         # Centrar los containers con la pantalla :
         # centro de la pantalla
@@ -184,9 +168,10 @@ class MixTable(View):
         self.container_sprites.append(self.result_place)
 
     def _generate_item_sprites(self) -> None:
-        for index, (name, quantity) in enumerate(self.items.items()):
+        for item, quantity, index in self.items:
             container: Container = self.container_sprites[index]
-            newItem = Item(name=name, quantity=quantity, scale=self.ITEM_SCALE)
+            container.item_placed = True
+            newItem = Item(name=item, quantity=quantity, scale=self.ITEM_SCALE)
             newItem.id = self.next_item_id
             self.next_item_id += 1
             newItem.change_container(container.id)
@@ -199,6 +184,7 @@ class MixTable(View):
         text_sprite = arcade.Text(
             text=content,
             font_size=11,
+            font_name=Constants.Assets.FONT_NAME,
             x=item.center_x,
             y=item.center_y - ((item.height * 0.5) + 15),
             anchor_x="center",
@@ -210,7 +196,7 @@ class MixTable(View):
 
     def _update_texts_position(self) -> None:
         for item in self.item_sprites:
-            actual_text = self._find_element(
+            actual_text = _find_element(
                 attr="id",
                 target=item.id,
                 list_to_find=self.item_texts,
@@ -224,7 +210,7 @@ class MixTable(View):
 
     def _sync_item_text(self) -> None:
         for text_sprite in self.item_texts:
-            item = self._find_element(
+            item = _find_element(
                 attr="id",
                 target=text_sprite.id,
                 list_to_find=self.item_sprites,
@@ -238,12 +224,12 @@ class MixTable(View):
     def _load_item_result(self) -> None:
         input_1, input_2 = self.container_sprites[-3:-1]
 
-        item_1 = self._find_element(
+        item_1 = _find_element(
             attr="container_id",
             target=input_1.id,
             list_to_find=self.item_sprites,
         )
-        item_2 = self._find_element(
+        item_2 = _find_element(
             attr="container_id",
             target=input_2.id,
             list_to_find=self.item_sprites,
@@ -260,7 +246,7 @@ class MixTable(View):
         if not result:
             return
 
-        old_result = self._find_element(
+        old_result = _find_element(
             attr="container_id",
             target=self.result_place.id,
             list_to_find=self.item_sprites,
@@ -282,7 +268,7 @@ class MixTable(View):
             item.quantity -= 1
             if item.quantity != 0:
                 continue
-            if item_text := self._find_element(
+            if item_text := _find_element(
                 list_to_find=self.item_texts, attr="id", target=item.id
             ):
                 self.item_texts.remove(item_text)
@@ -290,21 +276,28 @@ class MixTable(View):
                 container.item_placed = False
 
     def save_result(self) -> None:
-        # Guardo los items generados por el jugador
-        # Veo si hay items en las casillas de resultados
-        new_inventory: dict[str, int] = {}
-
-        for container in self.container_sprites:
-            item = self._find_element(
-                self.item_sprites, attr="container_id", target=container.id
+        input_1 = self.container_sprites[-3]
+        input_2 = self.container_sprites[-2]
+        if input_1.item_placed:
+            item = _find_element(
+                self.item_sprites, attr="container_id", target=input_1.id
             )
-            if not item:
-                continue
-            if not new_inventory.get(item.name):
-                new_inventory[item.name] = item.quantity
-            else:
-                new_inventory[item.name] += item.quantity
-        self.player.inventory = new_inventory
+            if item:
+                self.player.add_to_inventory(item.name, 0)
+        if input_2.item_placed:
+            item = _find_element(
+                self.item_sprites, attr="container_id", target=input_2.id
+            )
+            if item:
+                self.player.add_to_inventory(item.name, 0)
+
+        result_item = _find_element(
+            self.item_sprites, attr="container_id", target=self.result_place.id
+        )
+
+        if result_item:
+            print("hay resultado")
+            self.player.add_to_inventory(result_item.name, result_item.quantity)
 
     def _reset_sprite_position(self, sprite: Item) -> None:
         original_container = self.container_sprites[sprite.container_id]
@@ -397,7 +390,7 @@ class MixTable(View):
             self.item_to_move = None
             return
 
-        other_item = self._find_element(
+        other_item = _find_element(
             self.item_sprites, attr="container_id", target=new_container.id
         )
         if not other_item:
@@ -410,12 +403,14 @@ class MixTable(View):
 
         self.item_to_move.quantity += other_item.quantity
         other_item.__del__()
-        if text := self._find_element(
+        if text := _find_element(
             list_to_find=self.item_texts, attr="id", target=other_item.id
         ):
             self.item_texts.remove(text)
             self.item_to_move.change_container(newContainerId=other_item.container_id)
             self._move_sprite_to_container(self.item_to_move, new_container)
+            old_container.item_placed = False
+            new_container.item_placed = True
             self.item_to_move = None
 
     def on_mouse_motion(self, x: int, y: int, dx: int, dy: int) -> bool | None:

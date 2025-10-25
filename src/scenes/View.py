@@ -61,6 +61,7 @@ class View(arcade.View):
             anchor_x="center",
             anchor_y="center",
             align="center",
+            font_name=Constants.Assets.FONT_NAME,
         )
         self._item_text_background = arcade.SpriteSolidColor(
             width=1,

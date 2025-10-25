@@ -1,1 +1,39 @@
-{"player": {"position": {"center_x": 524.9216478540386, "center_y": 1433.99966327372}, "inventory": {}, "lifes": 5, "healt": 100}, "scene": "FOREST", "time_stamp": 1761346890.0973501}
+{
+   "player": {
+      "position": {
+         "center_x": 198,
+         "center_y": 93
+      },
+      "inventory": [
+         [
+            "piedra_rubi",
+            64,
+            0
+         ],
+         [
+            "cuarzo",
+            1,
+            1
+         ],
+         [
+            "azufre",
+            27,
+            2
+         ],
+         [
+            "piedra",
+            8,
+            3
+         ],
+         [
+            "piedra_cuarzo",
+            2,
+            4
+         ]
+      ],
+      "lifes": 4.0,
+      "healt": 91.0
+   },
+   "scene": "LABORATORY",
+   "time_stamp": 1761428977.6859152
+}

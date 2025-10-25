@@ -114,7 +114,7 @@ class Player(StateMachine, PlayerConfig):
         self.attack_time: float = PlayerConfig.SELF_ATTACK_COOLDOWN
 
         # Diccionario para el inventario
-        self.inventory: dict[str, int] = {}
+        self.inventory: list[tuple[str, int, int]] = []
         self.max_inventory: int = 64
         # Monedas del jugador
         self.coins: int = game_data["player"].get("coins", None) or 100
@@ -349,30 +349,39 @@ class Player(StateMachine, PlayerConfig):
                 self.set_state(self.last_state_id)
 
     def add_to_inventory(self, item: str, cant: int) -> None:
-        if (
-            item not in self.inventory
-            and len(self.inventory) >= PlayerConfig.MAX_ITEMS_CANT
-        ):
-            return
-        if item not in self.inventory:
-            self.inventory[item] = cant
-        else:
-            if self.inventory[item] >= self.max_inventory:
+        if item not in self.get_items():
+            if len(self.inventory) >= PlayerConfig.INVENTORY_SELLS:
                 return
-            self.inventory[item] += cant
+            temp = (item, cant, len(self.inventory))
+            self.inventory.append(temp)
+        else:
+            index = self.get_items().index(item)
+            if self.inventory[index][1] + cant > PlayerConfig.MAX_ITEMS_CANT:
+                self.inventory[index] = (
+                    item,
+                    PlayerConfig.MAX_ITEMS_CANT,
+                    index,
+                )
+                return
+            self.inventory[index] = (item, self.inventory[index][1] + cant, index)
 
-    def get_inventory(self) -> dict[str, int]:
+    def get_inventory(self) -> list[tuple[str, int, int]]:
         return self.inventory
 
-    def get_items(self) -> list[tuple[str, int]]:
-        return list(self.inventory.items())
+    def get_items(self) -> list[str]:
+        temp = []
+        for item in self.inventory:
+            temp.append(item[0])
+        return temp
 
     def remove_from_inventory(self, item: str, cant: int) -> bool:
-        if item not in self.inventory:
+        items = self.get_items()
+        if item not in items:
             return False
-        self.inventory[item] -= cant
-        if self.inventory[item] <= 0:
-            self.inventory.pop(item)
+        index = items.index(item)
+        self.inventory[index] = (item, self.inventory[index][1] - cant, index)
+        if self.inventory[index][1] <= 0:
+            self.inventory.pop(index)
         return True
 
     def pay(self, price: int):
@@ -416,7 +425,8 @@ class Player(StateMachine, PlayerConfig):
         return False
 
     def throw_item(self, item: str):
-        self.inventory.pop(item)
+        index = self.get_items().index(item)
+        self.inventory.pop(index)
 
     def update_stats(self, stat: Literal["attack", "defence"], value: int):
         if value > self.MAX_LEVEL:
