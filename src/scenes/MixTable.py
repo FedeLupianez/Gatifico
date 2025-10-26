@@ -274,6 +274,7 @@ class MixTable(View):
                 self.item_texts.remove(item_text)
                 self.item_sprites.remove(item)
                 container.item_placed = False
+            self.player.throw_item(item.name)
 
     def save_result(self) -> None:
         input_1 = self.container_sprites[-3]
@@ -282,22 +283,30 @@ class MixTable(View):
             item = _find_element(
                 self.item_sprites, attr="container_id", target=input_1.id
             )
-            if item:
-                self.player.add_to_inventory(item.name, 0)
+            assert isinstance(item, Item), "No es item"
+            item_index = self.player.get_items().index(item.name)
+            self.player.inventory[item_index] = (item.name, item.quantity, item_index)
         if input_2.item_placed:
             item = _find_element(
                 self.item_sprites, attr="container_id", target=input_2.id
             )
-            if item:
-                self.player.add_to_inventory(item.name, 0)
+            assert isinstance(item, Item), "No es item"
+            item_index = self.player.get_items().index(item.name)
+            self.player.inventory[item_index] = (item.name, item.quantity, item_index)
 
         result_item = _find_element(
             self.item_sprites, attr="container_id", target=self.result_place.id
         )
-
         if result_item:
-            print("hay resultado")
             self.player.add_to_inventory(result_item.name, result_item.quantity)
+
+        for i in range(len(self.player.inventory)):
+            # Actualizo los indexes del inventario del jugador
+            self.player.inventory[i] = (
+                self.player.inventory[i][0],
+                self.player.inventory[i][1],
+                i,
+            )
 
     def _reset_sprite_position(self, sprite: Item) -> None:
         original_container = self.container_sprites[sprite.container_id]

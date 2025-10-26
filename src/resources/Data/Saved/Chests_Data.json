@@ -1,16 +1,5 @@
 {
-   "chest_3": [
-      [
-         "piedra_rubi",
-         2,
-         2
-      ],
-      [
-         "piedra",
-         4,
-         4
-      ]
-   ],
+   "chest_3": [],
    "chest_2": [],
    "chest_1": {}
 }

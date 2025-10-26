@@ -1,39 +1,29 @@
 {
    "player": {
       "position": {
-         "center_x": 105,
-         "center_y": 72
+         "center_x": 324,
+         "center_y": 36
       },
       "inventory": [
          [
-            "piedra_rubi",
-            64,
+            "cuarzo",
+            14,
             0
          ],
          [
-            "cuarzo",
-            1,
+            "piedra_rubi",
+            12,
             1
          ],
          [
-            "azufre",
-            27,
+            "piedra_azufre",
+            4,
             2
-         ],
-         [
-            "piedra",
-            11,
-            3
-         ],
-         [
-            "piedra_cuarzo",
-            2,
-            4
          ]
       ],
       "lifes": 4.0,
       "healt": 91.0
    },
    "scene": "LABORATORY",
-   "time_stamp": 1761495205.527779
+   "time_stamp": 1761497390.8637152
 }

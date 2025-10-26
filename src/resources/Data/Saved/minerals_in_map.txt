@@ -3,14 +3,10 @@ azufre,big,973.0,339.0,3
 piedra_rubi,mid,977.0,342.0,2
 piedra_rubi,mid,617.0,584.0,2
 piedra_rubi,small,1222.0,664.0,1
-cuarzo,big,656.0,463.0,3
-piedra_rubi,small,600.0,414.0,1
-rubi,mid,690.0,467.0,2
+cuarzo,small,656.0,463.0,3
 piedra,small,1050.0,420.0,2
 piedra,big,1169.0,577.0,3
 piedra_rubi,mid,1090.0,194.0,2
 azufre,mid,1102.0,476.0,2
-piedra,mid,626.0,137.0,2
-cuarzo,mid,436.0,422.0,3
 piedra_cuarzo,small,1101.0,356.0,1
 piedra,small,1051.0,533.0,3

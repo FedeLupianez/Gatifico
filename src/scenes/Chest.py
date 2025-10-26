@@ -1,3 +1,4 @@
+from sys import settrace
 import arcade
 import Constants
 import DataManager
@@ -156,15 +157,15 @@ class Chest(View):
         content = f"{item.quantity}"
         text_sprite = arcade.Text(
             text=content,
-            font_size=9,
+            font_size=Constants.Assets.INVENTORY_FONT_SIZE,
+            font_name=Constants.Assets.FONT_NAME,
             x=item.center_x,
             y=item.center_y - ((item.height * 0.5) + GAP_ITEM_TEXT),
             anchor_x="center",
             anchor_y="baseline",
             color=arcade.color.BLACK,
-            font_name=Constants.Assets.FONT_NAME,
         )
-        text_sprite.id = item.id
+        setattr(text_sprite, "id", item.id)
         return text_sprite
 
     def _generate_item_sprites(self):

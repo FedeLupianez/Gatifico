@@ -349,10 +349,14 @@ class Player(StateMachine, PlayerConfig):
                 self.set_state(self.last_state_id)
 
     def add_to_inventory(self, item: str, cant: int) -> None:
+        indexes = [item[2] for item in self.inventory]
+        free_indexes = list(
+            set(range(PlayerConfig.INVENTORY_SELLS)).difference(set(indexes))
+        )
         if item not in self.get_items():
             if len(self.inventory) >= PlayerConfig.INVENTORY_SELLS:
                 return
-            temp = (item, cant, len(self.inventory))
+            temp = (item, cant, free_indexes[0])
             self.inventory.append(temp)
         else:
             index = self.get_items().index(item)
