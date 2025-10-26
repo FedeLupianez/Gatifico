@@ -34,6 +34,13 @@
       "item": {"path": "src/resources/Minerals/piedra_rubi/piedra_rubi_small.png", "price": 80}
    },
 
+   "piedra_azufre": {
+      "big": {"path": "src/resources/Minerals/piedra_azufre/piedra_azufre_big.png", "touches": 3},
+      "mid": {"path": "src/resources/Minerals/piedra_azufre/piedra_azufre_mid.png", "touches": 2},
+      "small": {"path": "src/resources/Minerals/piedra_azufre/piedra_azufre_small.png", "touches": 1},
+      "item": {"path": "src/resources/Minerals/piedra_azufre/piedra_azufre_small.png", "price": 60}
+   },
+
    "cuarzo":{
       "big": {"path": "src/resources/Minerals/cuarzo/cuarzo_big.png", "touches": 3},
       "mid": {"path": "src/resources/Minerals/cuarzo/cuarzo_mid.png", "touches": 2},

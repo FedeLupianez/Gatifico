@@ -1,8 +1,8 @@
 {
    "player": {
       "position": {
-         "center_x": 198,
-         "center_y": 93
+         "center_x": 105,
+         "center_y": 72
       },
       "inventory": [
          [
@@ -22,7 +22,7 @@
          ],
          [
             "piedra",
-            8,
+            11,
             3
          ],
          [
@@ -35,5 +35,5 @@
       "healt": 91.0
    },
    "scene": "LABORATORY",
-   "time_stamp": 1761428977.6859152
+   "time_stamp": 1761495205.527779
 }

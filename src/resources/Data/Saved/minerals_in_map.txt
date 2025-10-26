@@ -12,6 +12,5 @@ piedra_rubi,mid,1090.0,194.0,2
 azufre,mid,1102.0,476.0,2
 piedra,mid,626.0,137.0,2
 cuarzo,mid,436.0,422.0,3
-piedra,small,306.0,55.0,3
 piedra_cuarzo,small,1101.0,356.0,1
 piedra,small,1051.0,533.0,3

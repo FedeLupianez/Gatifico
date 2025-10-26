@@ -1,0 +1,20 @@
+{
+    "piedra": {
+        "rubi": "piedra_rubi",
+        "azufre": "piedra_azufre",
+        "cuarzo": "piedra_cuarzo"
+    },
+    "rubi": {
+        "piedra": "piedra_rubi",
+        "azufre": "rubi_azufre",
+        "cuarzo": "cuarzo_rubi"
+    },
+    "azufre": {
+        "piedra": "piedra_azufre",
+        "rubi": "rubi_azufre"
+    },
+    "cuarzo": {
+        "piedra": "piedra_cuarzo",
+        "rubi": "cuarzo_rubi"
+    }
+}

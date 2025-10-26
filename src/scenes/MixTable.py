@@ -16,7 +16,7 @@ from .utils import (
     _find_element,
 )
 
-Combinations: Dict[str, Dict[str, str]] = DataManager.loadData("CombinationsTest.json")
+Combinations: Dict[str, Dict[str, str]] = DataManager.loadData("combinations.json")
 
 
 class MixTable(View):
