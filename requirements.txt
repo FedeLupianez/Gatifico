@@ -1,4 +1,4 @@
-arcade==3.2.0
+arcade==3.3.2
 attrs==25.3.0
 cffi==1.17.1
 pillow==11.0.0

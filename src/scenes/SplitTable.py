@@ -58,7 +58,7 @@ class SplitTable(View):
         )
 
         self.player = Player()
-        self.items: list[tuple[str, int, int]] = self.player.get_inventory()
+        self.items: list[list[str, int, int]] = self.player.get_inventory()
         self.next_item_id: int = 0
         self.inventory_sprite: arcade.Sprite = arcade.Sprite(
             DataManager.get_path("inventory_tools.png"), scale=3
@@ -304,7 +304,7 @@ class SplitTable(View):
             )
             if item:
                 index = self.player.get_items().index(item.name)
-                self.player.inventory[index] = (item.name, item.quantity, index)
+                self.player.inventory[index][1] = item.quantity
         for container in self.result_containers:
             if container.item_placed:
                 item = _find_element(

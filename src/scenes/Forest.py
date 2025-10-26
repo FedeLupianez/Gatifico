@@ -136,14 +136,19 @@ class Forest(View):
 
     def setup_player(self) -> None:
         # Cargo el inventario anterior del jugador, si no tiene le pongo uno vacío
-        player_data = Dm.game_data["player"]
-        position = (
-            (player_data["position"]["center_x"], player_data["position"]["center_y"])
-            if not self.is_from_lab
-            else (160, self._map_height - 90)
-        )
-        self.player = Player(position=position)
-        self.player.inventory = player_data.get("inventory", {})
+        if not self.is_from_lab:
+            player_data = Dm.game_data["player"]
+            position = (
+                (
+                    player_data["position"]["center_x"],
+                    player_data["position"]["center_y"],
+                )
+                if not self.is_from_lab
+                else (160, self._map_height - 90)
+            )
+            self.player = Player(position=position)
+        else:
+            self.player = Player(position=(160, self._map_height - 90))
         # Le asigno la chunk_key al jugador
         self.player.chunk_key = self.chunk_manager.get_chunk_key(
             self.player.sprite.center_x, self.player.sprite.center_y
@@ -153,7 +158,6 @@ class Forest(View):
         self.player.ui.setup_ui_position(
             window_width=self.window.width, window_height=self.window.height
         )
-        del player_data
 
     def setup_scene_layer(self) -> None:
         if not self.tilemap:

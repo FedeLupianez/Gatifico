@@ -73,7 +73,7 @@ class Sell(View):
         # Contenedores del jugador
         player_positions = [
             (100 + Sell.DISTANCE_BETWEEN_CONTAINERS * i, 100)
-            for i in range(Constants.PlayerConfig.MAX_ITEMS_IN_INVENTORY)
+            for i in range(Constants.PlayerConfig.INVENTORY_SELLS)
         ]
         cant_containers = len(player_positions)
         screen_center_x = self.window.width * 0.5
@@ -113,10 +113,10 @@ class Sell(View):
 
     def _setup_player_items(self) -> None:
         # Items del jugador
-        for index, (name, quantity) in enumerate(self.player.get_inventory().items()):
+        for item, quantity, index in self.player.get_inventory():
             container: Container = self.player_containers[index]
             container.item_placed = True
-            new_item = Item(name=name, quantity=quantity, scale=Sell.ITEM_SCALE)
+            new_item = Item(name=item, quantity=quantity, scale=Sell.ITEM_SCALE)
             new_item.id = self.next_item_id
             self.next_item_id += 1
             new_item.change_container(container.id)

@@ -114,7 +114,7 @@ class Player(StateMachine, PlayerConfig):
         self.attack_time: float = PlayerConfig.SELF_ATTACK_COOLDOWN
 
         # Diccionario para el inventario
-        self.inventory: list[tuple[str, int, int]] = []
+        self.inventory: list[list[str, int, int]] = []
         self.max_inventory: int = 64
         # Monedas del jugador
         self.coins: int = game_data["player"].get("coins", None) or 100
@@ -136,6 +136,7 @@ class Player(StateMachine, PlayerConfig):
         self.last_step_sound_time: float = 0.0
         self.step_coldown = 0.5  # Tiempo entre sonido y sonido
         self.setup()
+        self.setup_antique_data()
         self._initialized = True
 
     def genericStateHandler(self, event: int):
@@ -229,17 +230,17 @@ class Player(StateMachine, PlayerConfig):
         self.add_state(Player.UP, self.genericStateHandler)
         self.add_state(Player.HURT, self.hurt_state)
         self.add_state(Player.ATTACK, self.attack_state)
-        antique_data = game_data["player"]
-        self.sprite.center_x = (
-            position[0] if position else antique_data["position"]["center_x"]
-        )
-        self.sprite.center_y = (
-            position[1] if position else antique_data["position"]["center_y"]
-        )
-        self.inventory = antique_data["inventory"]
         self.update_spritelist()
-        del antique_data
+        if position:
+            self.sprite.center_x, self.sprite.center_y = position
+
         self._initialized = True
+
+    def setup_antique_data(self) -> None:
+        antique_data = game_data["player"]
+        self.sprite.center_x = antique_data["position"]["center_x"]
+        self.sprite.center_y = antique_data["position"]["center_y"]
+        del antique_data
 
     def reset(self) -> None:
         self.lifes = 5
@@ -356,20 +357,16 @@ class Player(StateMachine, PlayerConfig):
         if item not in self.get_items():
             if len(self.inventory) >= PlayerConfig.INVENTORY_SELLS:
                 return
-            temp = (item, cant, free_indexes[0])
+            temp = [item, cant, free_indexes[0]]
             self.inventory.append(temp)
         else:
             index = self.get_items().index(item)
             if self.inventory[index][1] + cant > PlayerConfig.MAX_ITEMS_CANT:
-                self.inventory[index] = (
-                    item,
-                    PlayerConfig.MAX_ITEMS_CANT,
-                    index,
-                )
+                self.inventory[index][1] = PlayerConfig.MAX_ITEMS_CANT
                 return
-            self.inventory[index] = (item, self.inventory[index][1] + cant, index)
+            self.inventory[index][1] += cant
 
-    def get_inventory(self) -> list[tuple[str, int, int]]:
+    def get_inventory(self) -> list[list[str, int, int]]:
         return self.inventory
 
     def get_items(self) -> list[str]:
@@ -383,7 +380,7 @@ class Player(StateMachine, PlayerConfig):
         if item not in items:
             return False
         index = items.index(item)
-        self.inventory[index] = (item, self.inventory[index][1] - cant, index)
+        self.inventory[index][1] -= cant
         if self.inventory[index][1] <= 0:
             self.inventory.pop(index)
         return True

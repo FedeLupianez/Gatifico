@@ -336,7 +336,7 @@ class Chest(View):
             item: Item | None = self._find_item_with_containerId(container.id)
             if item:
                 # Name, quantity, index
-                new_chest_inventory.append((item.name, item.quantity, i))
+                new_chest_inventory.append([item.name, item.quantity, i])
 
         self.content = new_chest_inventory
         # Ahora voy a actualizar el inventario del jugador
@@ -345,7 +345,7 @@ class Chest(View):
             container = self.container_player_sprites[i]
             item: Item | None = self._find_item_with_containerId(container.id)
             if item:
-                new_player_inventory.append((item.name, item.quantity, i))
+                new_player_inventory.append([item.name, item.quantity, i])
         self.player.inventory = new_player_inventory
         DataManager.store_chest_data(self.content, self.id)
 
