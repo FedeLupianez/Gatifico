@@ -1,31 +1,16 @@
 {
+   "chest_1": [],
+   "chest_2": [],
    "chest_3": [
       [
-         "piedra_rubi",
-         33,
+         "cuarzo",
+         18,
          0
       ],
       [
          "piedra",
-         11,
-         1
-      ],
-      [
-         "piedra_azufre",
          13,
-         2
-      ],
-      [
-         "piedra_cuarzo",
-         4,
-         3
-      ],
-      [
-         "rubi",
-         9,
-         4
+         1
       ]
-   ],
-   "chest_2": [],
-   "chest_1": []
+   ]
 }

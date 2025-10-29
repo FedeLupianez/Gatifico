@@ -171,6 +171,9 @@ class Forest(View):
         while True:
             try:
                 line = next(lines)
+                if line.strip() == "":
+                    lines.close()  # Cierro el iterador
+                    break
             except StopIteration:
                 break
             name, size, x, y, touches = line.split(",")

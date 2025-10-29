@@ -108,7 +108,7 @@ def store_chest_data(new_data: ChestsData, chest_id: str):
     write_json(CHEST_FILE, chests_data)
 
 
-@lru_cache(maxsize=100)
+@lru_cache(maxsize=10)
 def get_path(file_name: str) -> str:
     """Función que retorna el path absoluto desde la carpeta source al archivo"""
     for base_dir, dirs, files in os.walk(BASE_DIR):

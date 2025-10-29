@@ -35,7 +35,7 @@ Para evitar esto, el científico debe esconder bien sus cosas y proteger su labo
   - Los animales son antropomórficos: Caminan en dos patas, usan ropa, hablan y manejan herramientas.
   - Conservan sus necesidades felinas: Duermen muchas horas, cazan, ronronean, y odian el agua.
   - Instinto gatuno parte de su personalidad: Se distraen con luces, cajas, plumas, etc.
-  - Tienen 7 vidas: Al morir, un gato puede revivir hasta 7 veces.
+  - Tienen 5 vidas: Al morir, un gato puede revivir hasta 5 veces.
   - Hablan en español, los gatos pueden hablar y escribir en este idioma.
   - La tecnología es similar a la humana, pero adaptada: laptops con teclas grandes para sus patitas, por ejemplo.
 
