@@ -9,7 +9,7 @@ from scenes.Chest import Chest
 from scenes.MixTable import MixTable
 from scenes.SplitTable import SplitTable
 import DataManager as Dm
-from .utils import add_containers_to_list
+from .utils import add_containers_to_list, camera_position_limits
 
 
 class Laboratory(View):
@@ -46,7 +46,6 @@ class Laboratory(View):
         self.inventory_texts: list[arcade.Text] = []
 
     def setup_player(self):
-        self.player.setup((330, 45))
         self.player.ui.setup_ui_position(self.window.width, self.window.height)
         self.player.actual_floor = "wood"
 
@@ -226,9 +225,21 @@ class Laboratory(View):
 
     def on_show_view(self) -> None:
         self.window.set_mouse_visible(True)
-        if self.is_first_load:
-            self.camera.position = self.player.sprite.position
-            self.is_first_load = False
+        if not self.is_first_load:
+            return
+        self.is_first_load = False
+        self.player.setup_position((330, 45))
+
+        target_x, target_y = camera_position_limits(
+            target_x=self.player.sprite.center_x,
+            target_y=self.player.sprite.center_y,
+            map_width=self._map_width,
+            map_height=self._map_height,
+            half_h=self._half_h,
+            half_w=self._half_w,
+        )
+
+        self.camera.position = (target_x, target_y)
 
     def on_update(self, delta_time: float):
         self.player.update_animation(delta_time)
@@ -255,12 +266,14 @@ class Laboratory(View):
             else Constants.Game.CAMERA_LERP_SLOW
         )
 
-        target_x = self.player.sprite.center_x
-        target_y = self.player.sprite.center_y
-
-        # Le pongo el limite del mundo a la cámara
-        target_x = max(self._half_w, min(target_x, self._map_width - self._half_w))
-        target_y = max(self._half_h, min(target_y, self._map_height - self._half_h))
+        target_x, target_y = camera_position_limits(
+            target_x=self.player.sprite.center_x,
+            target_y=self.player.sprite.center_y,
+            map_width=self._map_width,
+            map_height=self._map_height,
+            half_h=self._half_h,
+            half_w=self._half_w,
+        )
 
         self.camera.position = arcade.math.lerp_2d(
             self.camera.position, (target_x, target_y), cam_lerp

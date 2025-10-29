@@ -2,7 +2,7 @@
    "chest_3": [
       [
          "piedra_rubi",
-         25,
+         33,
          0
       ],
       [
@@ -12,8 +12,18 @@
       ],
       [
          "piedra_azufre",
-         4,
+         13,
          2
+      ],
+      [
+         "piedra_cuarzo",
+         4,
+         3
+      ],
+      [
+         "rubi",
+         9,
+         4
       ]
    ],
    "chest_2": [],

@@ -18,6 +18,7 @@ from Managers.ChunkManager import Chunk_Manager, Chunk_lists
 MAX_MINERALS_IN_MAP = 40
 MIN_MINERALS_IN_MAP = 10
 ENEMIES = 8
+ENABLED_MINERALS_CREATE = ["piedra", "rubi", "azufre", "cuarzo"]
 
 
 class Forest(View):
@@ -212,12 +213,11 @@ class Forest(View):
         )
 
     def load_random_minerals(self) -> list[Mineral]:
-        names = list(list(Mineral._resources.keys()))
         sizes = ["big", "mid", "small"]
         mineral_count = randint(1, MAX_MINERALS_IN_MAP)
         random_data = [
             {
-                "name": choice(names),
+                "name": choice(ENABLED_MINERALS_CREATE),
                 "size": choice(sizes),
                 "x": randint(50, Constants.Game.SCREEN_WIDTH - 50),
                 "y": randint(50, Constants.Game.SCREEN_HEIGHT - 50),

@@ -1,5 +1,6 @@
 import arcade
 from DataManager import get_path
+import DataManager
 from .View import View
 from Constants import Game, Filter, SignalCodes
 from .utils import apply_filter

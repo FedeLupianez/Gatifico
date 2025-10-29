@@ -75,3 +75,16 @@ def _find_element(list_to_find, attr: str, target):
     result = list(filter(item_contains_attr(attr=attr, target=target), list_to_find))
     if result:
         return result[0]
+
+
+def camera_position_limits(
+    target_x: float,
+    target_y: float,
+    map_width: float,
+    map_height: float,
+    half_w: float,
+    half_h: float,
+) -> tuple[float, float]:
+    new_target_x = max(half_w, min(target_x, map_width - half_w))
+    new_target_y = max(half_h, min(target_y, map_height - half_h))
+    return (new_target_x, new_target_y)

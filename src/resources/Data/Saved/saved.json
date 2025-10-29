@@ -1,13 +1,19 @@
 {
    "player": {
       "position": {
-         "center_x": 330,
-         "center_y": 36
+         "center_x": 154,
+         "center_y": 1764
       },
-      "inventory": [],
-      "lifes": 4.0,
-      "healt": 82.0
+      "inventory": [
+         [
+            "rubi",
+            3,
+            0
+         ]
+      ],
+      "lifes": 3.0,
+      "healt": 73.0
    },
-   "scene": "FOREST",
-   "time_stamp": 1761770026.8763359
+   "scene": "LABORATORY",
+   "time_stamp": 1761780267.8108954
 }

@@ -84,7 +84,7 @@ class StatsMenu(View):
         self.experience_text = arcade.Text(
             text=str(self.player.experience),
             x=experience_sprite.left - 30,
-            y=experience_sprite.center_y,
+            y=experience_sprite.center_y - 5,
             font_size=24,
             font_name=Constants.Assets.FONT_NAME,
             color=arcade.color.WHITE,

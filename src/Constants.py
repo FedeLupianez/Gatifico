@@ -15,7 +15,7 @@ class Game:
     CAMERA_LERP_FAST = 0.25
     CAMERA_LERP_SLOW = 0.06
     DEBUG_MODE = True
-    SAVE_INTERVAL = 60
+    SAVE_INTERVAL = 3
 
 
 class PlayerConfig:
