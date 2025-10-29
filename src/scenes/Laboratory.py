@@ -8,6 +8,7 @@ import Constants
 from scenes.Chest import Chest
 from scenes.MixTable import MixTable
 from scenes.SplitTable import SplitTable
+from scenes.StatsMenu import StatsMenu
 import DataManager as Dm
 from .utils import add_containers_to_list, camera_position_limits
 
@@ -76,6 +77,11 @@ class Laboratory(View):
         inventory_sprite.scale_y = 3.2
         inventory_sprite.center_x = self.window.center_x
         inventory_sprite.center_y = ITEMS_INIT[1]
+        # Boton para abrir el menu de stats
+        self.stats_menu = arcade.Sprite(Dm.get_path("stats_button.png"), scale=3)
+        self.stats_menu.center_x = inventory_sprite.right + 30
+        self.stats_menu.center_y = inventory_sprite.center_y
+        self.ui_sprites.append(self.stats_menu)
         self.inventory_containers.append(inventory_sprite)
 
     def update_inventory_items(self) -> None:
@@ -144,6 +150,11 @@ class Laboratory(View):
             self.is_first_load = False
             self.window.show_view(new_scene)
 
+    def open_stats(self) -> None:
+        new_scene = StatsMenu(self)
+        self.is_first_load = False
+        self.window.show_view(new_scene)
+
     def process_object_interaction(self, obj: Object) -> bool:
         obj_name: str = obj.name.lower()
         self.keys_pressed.clear()
@@ -179,6 +190,9 @@ class Laboratory(View):
     ) -> bool | None:
         signal = self.change_bg_sound_state((x, y))
         self.callback(signal)
+        if self.stats_menu.collides_with_point((x, y)):
+            self.open_stats()
+            return True
         return True
 
     def on_key_press(self, symbol: int, modifiers: int) -> bool | None:
