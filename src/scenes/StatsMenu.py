@@ -1,4 +1,5 @@
 import arcade
+import Constants
 from characters.Player import Player
 from scenes.View import View
 from typing import Literal
@@ -50,7 +51,17 @@ class StatsMenu(View):
         self.defence_sprite.center_y = self.window.center_y - 50
         self.defence_sprite.height = 20
 
+        experience_sprite = arcade.Sprite(get_path("experience.png"), scale=3)
+        # Coloco el sprite en la esquina superior derecha
+        experience_sprite.center_x = (
+            menu_background.center_x + (menu_background.width * 0.5) - 100
+        )
+        experience_sprite.center_y = (
+            menu_background.center_y + (menu_background.height * 0.5) - 100
+        )
+
         self.ui_sprites.append(self.attack_sprite)
+        self.ui_sprites.append(experience_sprite)
         self.ui_sprites.append(self.defence_sprite)
 
         # Textos :
@@ -67,6 +78,15 @@ class StatsMenu(View):
             x=self.defence_sprite.left,
             y=self.defence_sprite.center_y + 40,
             font_size=16,
+            color=arcade.color.WHITE,
+        )
+
+        self.experience_text = arcade.Text(
+            text=str(self.player.experience),
+            x=experience_sprite.left - 30,
+            y=experience_sprite.center_y,
+            font_size=24,
+            font_name=Constants.Assets.FONT_NAME,
             color=arcade.color.WHITE,
         )
 
@@ -103,6 +123,7 @@ class StatsMenu(View):
         self.ui_sprites.draw(pixelated=True)
         self.attack_text.draw()
         self.defence_text.draw()
+        self.experience_text.draw()
 
     def on_key_press(self, symbol: int, modifiers: int) -> bool | None:
         if symbol == arcade.key.ESCAPE:
@@ -114,19 +135,26 @@ class StatsMenu(View):
     ) -> bool | None:
         if button != arcade.MOUSE_BUTTON_LEFT:
             return False
+
+        if self.player.experience <= 0:
+            return False
+
         if self.upgrade_attack.collides_with_point((x, y)):
+            if self.player.attack_level >= self.player.MAX_LEVEL:
+                return False
             self.player.update_stats(stat="attack", value=self.player.attack_level + 1)
             self.player_ui.update_attack(self.player.attack_level)
             self.attack_text.text = f"Ataque : {self.player.attack_level}"
-            return True
 
         if self.upgrade_defence.collides_with_point((x, y)):
+            if self.player.defence_level >= self.player.MAX_LEVEL:
+                return False
             self.player.update_stats(
                 stat="defence", value=self.player.defence_level + 1
             )
             self.player_ui.update_defence(self.player.defence_level)
             self.defence_text.text = f"Defensa : {self.player.defence_level}"
-            return True
+        self.experience_text.text = str(self.player.experience)
 
     def clean_up(self):
         del self.upgrade_defence
@@ -134,6 +162,7 @@ class StatsMenu(View):
         del self.player
         del self.attack_text
         del self.defence_text
+        del self.experience_text
 
         self.attack_sprite.left, self.attack_sprite.center_y = self.antique_state[
             "attack"

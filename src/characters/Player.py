@@ -437,3 +437,4 @@ class Player(StateMachine, PlayerConfig):
                 self.attack_level = value
             case "defence":
                 self.defence_level = value
+        self.experience -= 1

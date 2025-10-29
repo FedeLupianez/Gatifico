@@ -1,13 +1,13 @@
 {
    "player": {
       "position": {
-         "center_x": 165.43111767171544,
-         "center_y": 1763.1397325893963
+         "center_x": 330,
+         "center_y": 36
       },
       "inventory": [],
       "lifes": 4.0,
       "healt": 82.0
    },
-   "scene": "LABORATORY",
-   "time_stamp": 1761501094.9040918
+   "scene": "FOREST",
+   "time_stamp": 1761770026.8763359
 }
