@@ -114,7 +114,7 @@ class Player(StateMachine, PlayerConfig):
         self.attack_time: float = PlayerConfig.SELF_ATTACK_COOLDOWN
 
         # Diccionario para el inventario
-        self.inventory: list[list[str, int, int]] = []
+        self.inventory: list[list[str | int]] = []
         self.max_inventory: int = 64
         # Monedas del jugador
         self.coins: int = game_data["player"].get("coins", None) or 100
@@ -212,10 +212,7 @@ class Player(StateMachine, PlayerConfig):
             return self.last_state_id
         return Player.ATTACK
 
-    def setup(
-        self,
-        position: tuple[int, int] | None = None,
-    ):
+    def setup(self):
         self.setup_sprites()
         self.setup_sounds()
         self.ui.setup_lifes(self.healt)
@@ -231,15 +228,17 @@ class Player(StateMachine, PlayerConfig):
         self.add_state(Player.HURT, self.hurt_state)
         self.add_state(Player.ATTACK, self.attack_state)
         self.update_spritelist()
-        if position:
-            self.sprite.center_x, self.sprite.center_y = position
 
         self._initialized = True
+
+    def setup_position(self, position: tuple[int, int]) -> None:
+        self.sprite.center_x, self.sprite.center_y = position
 
     def setup_antique_data(self) -> None:
         antique_data = game_data["player"]
         self.sprite.center_x = antique_data["position"]["center_x"]
         self.sprite.center_y = antique_data["position"]["center_y"]
+        self.inventory = antique_data["inventory"]
         del antique_data
 
     def reset(self) -> None:

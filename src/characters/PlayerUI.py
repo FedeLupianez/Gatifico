@@ -37,6 +37,9 @@ class PlayerUI:
         self.sprite_list.append(self.experience_sprite)
         self._initialized = True
 
+    def update_experience(self, value: int | float) -> None:
+        self.experience_text.text = str(value)
+
     def update_attack(self, value: int):
         if value > self.MAX_LEVEL:
             return
@@ -106,7 +109,7 @@ class PlayerUI:
 
         self.experience_sprite.center_x = window_width - 100
         self.experience_sprite.center_y = window_height - 40
-        self.experience_text.x = self.experience_sprite.left - 30
+        self.experience_text.x = self.experience_sprite.left - 35
         self.experience_text.y = window_height - 50
 
         # Configuro el center_y de los corazones

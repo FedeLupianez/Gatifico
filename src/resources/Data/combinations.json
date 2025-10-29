@@ -11,10 +11,12 @@
     },
     "azufre": {
         "piedra": "piedra_azufre",
-        "rubi": "rubi_azufre"
+        "rubi": "rubi_azufre",
+        "cuarzo": "experience"
     },
     "cuarzo": {
         "piedra": "piedra_cuarzo",
-        "rubi": "cuarzo_rubi"
+        "rubi": "cuarzo_rubi",
+        "azufre": "experience"
     }
 }

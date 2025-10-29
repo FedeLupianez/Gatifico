@@ -245,6 +245,15 @@ class MixTable(View):
         )
         if not result:
             return
+        print(result)
+        if result == "experience":
+            self.player.experience += 0.5
+            item_1.quantity -= 1
+            item_2.quantity -= 1
+            self.throw_item(item_1, input_1)
+            self.throw_item(item_2, input_2)
+            self.player.ui.update_experience(self.player.experience)
+            return
 
         old_result = _find_element(
             attr="container_id",
@@ -265,9 +274,11 @@ class MixTable(View):
             old_result.quantity += 1
 
         for item, container in zip((item_1, item_2), (input_1, input_2)):
-            item.quantity -= 1
-            if item.quantity != 0:
-                continue
+            self.throw_item(item, container)
+
+    def throw_item(self, item: Item, container: Container) -> None:
+        item.quantity -= 1
+        if item.quantity <= 0:
             if item_text := _find_element(
                 list_to_find=self.item_texts, attr="id", target=item.id
             ):
