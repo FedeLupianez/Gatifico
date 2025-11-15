@@ -11,7 +11,6 @@ class Main(arcade.Window):
         # Cargas el icono
         icon = load_image(DataManager.get_path("icon.png"))
         icon = icon.get_image_data()
-        #
         super().__init__(
             Constants.Game.SCREEN_WIDTH,
             Constants.Game.SCREEN_HEIGHT,

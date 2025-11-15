@@ -41,7 +41,7 @@ class Chunk_Manager:
         self.chunks: Dict[tuple[int, int], Chunk] = {}
         self.is_world_loaded = False
 
-    @lru_cache(maxsize=100)
+    @lru_cache(maxsize=15)
     def get_chunk_key(self, x: float, y: float) -> tuple[int, int]:
         return (int(x // self.chunk_size_x), int(y // self.chunk_size_y))
 
